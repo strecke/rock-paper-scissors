@@ -36,10 +36,12 @@ function playGame() {
         const computerSelection = getComputerChoice();
         playRound(humanSelection, computerSelection);
     }
-    const message = humanScore === computerScore ? 'Tie.'
+    const winnerMessage = humanScore === computerScore ? 'Tie.'
         : humanScore > computerScore ? 'Human wins.'
         : 'Computer wins.';
-    console.log(`Final score:\nHuman: ${humanScore} Points\nComputer: ${computerScore} Points\n${message}`);
+    const humanMessage = `Human: ${humanScore} Points`;
+    const computerMessage = `Computer: ${computerScore} Points`;
+    console.log(`Final score:\n${humanMessage}\n${computerMessage}\n${winnerMessage}`);
 }
 // init start
 playGame();
