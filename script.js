@@ -17,17 +17,19 @@ function playGame() {
 
     function playRound(humanChoice, computerChoice) {
         if (humanChoice === undefined) return;
-        let message;
-        if (humanChoice === computerChoice) {
-            message = `Tie. ${NAMES[humanChoice]} equals ${NAMES[computerChoice]}`
+        const isTie = humanChoice === computerChoice;
+        const isHumanWinner = BEATS[humanChoice] === computerChoice;
+        const state = isTie ? 'Tie.' : isHumanWinner ? 'You Win!' : 'You Lose!';
+        let roundMessage = `${state} `;
+        if (isTie) {
+            roundMessage += `${NAMES[humanChoice]} equals ${NAMES[computerChoice]}`
         } else {
-            const isHumanWinner = BEATS[humanChoice] === computerChoice;
             isHumanWinner ? humanScore++ : computerScore++;
-            message = isHumanWinner
-            ? `You Win! ${NAMES[humanChoice]} beats ${NAMES[computerChoice]}`
-            : `You Lose! ${NAMES[computerChoice]} beats ${NAMES[humanChoice]}`;
+            roundMessage += isHumanWinner
+            ? `${NAMES[humanChoice]} beats ${NAMES[computerChoice]}`
+            : `${NAMES[computerChoice]} beats ${NAMES[humanChoice]}`;
         }
-        console.log(message);
+        console.log(roundMessage);
     }
 
     for (i = 0; i <= 4; i++) {
@@ -36,6 +38,7 @@ function playGame() {
         const computerSelection = getComputerChoice();
         playRound(humanSelection, computerSelection);
     }
+    
     const winnerMessage = humanScore === computerScore ? 'Tie.'
         : humanScore > computerScore ? 'Human wins.'
         : 'Computer wins.';
