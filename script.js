@@ -21,6 +21,7 @@ function playGame() {
         const isHumanWinner = BEATS[humanChoice] === computerChoice;
         const state = isTie ? 'Tie.' : isHumanWinner ? 'You Win!' : 'You Lose!';
         let roundMessage = `${state} `;
+
         if (isTie) {
             roundMessage += `${NAMES[humanChoice]} equals ${NAMES[computerChoice]}`
         } else {
@@ -29,6 +30,7 @@ function playGame() {
             ? `${NAMES[humanChoice]} beats ${NAMES[computerChoice]}`
             : `${NAMES[computerChoice]} beats ${NAMES[humanChoice]}`;
         }
+
         console.log(roundMessage);
     }
 
@@ -38,7 +40,7 @@ function playGame() {
         const computerSelection = getComputerChoice();
         playRound(humanSelection, computerSelection);
     }
-    
+
     const winnerMessage = humanScore === computerScore ? 'Tie.'
         : humanScore > computerScore ? 'Human wins.'
         : 'Computer wins.';
