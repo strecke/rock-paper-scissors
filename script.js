@@ -46,6 +46,7 @@ function playGame() {
     const humanMessage = `Human: ${humanScore} Points`;
     const computerMessage = `Computer: ${computerScore} Points`;
     console.log(`Final score:\n${humanMessage}\n${computerMessage}\n${winnerMessage}`);
+    alert(`Final score:\n${humanMessage}\n${computerMessage}\n${winnerMessage}`);
 }
 // init start
 playGame();
