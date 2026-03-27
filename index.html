@@ -1,11 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock Paper Scissors</title>
+    <title>W98 Rock, Paper, Scissors</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
 </head>
+
 <body>
-    <script src="script.js"></script>
+    <!-- <div class="header">
+        <h1 class="title">W98 Rock, Paper, Scissors</h1>
+        <ul>
+            <li><a href='#'>About this</a></li>
+            <li><a href='#'>Repo</a></li>
+        </ul>
+        <button class="theme-toggle">🌝</button>
+    </div> -->
+    <div class="content">
+        <div class="window game-window">
+            <div class="title-bar">
+                <div class="title-bar-text">Rock-Paper-Scissors</div>
+                <div class="title-bar-controls">
+                    <button aria-label="Minimize">_</button>
+                    <button aria-label="Close">x</button>
+                </div>
+            </div>
+            <div class="window-content scoreboard">
+                <p>Game Progress Indicator</p>
+                <div class="progress-indicator game-progress">
+                    <span class="progress-indicator-bar"></span>
+                </div>
+                <p>Choose your final word</p>
+                <section>
+                    <button class="rock">Rock</button>
+                    <button class="paper">Paper</button>
+                    <button class="scissors">Scissors</button>
+                </section>
+                <!-- <div class="result-progress">
+                    <p>Calculating result</p>
+                    <div class="progress-indicator">
+                        <span class="progress-indicator-bar"></span>
+                    </div>
+                </div> -->
+            </div>
+            <!-- <div class="status-container">
+                <button class="set-status plus">+</button>
+                <p class="status">5</p>
+                <button class="set-status minus">-</button>
+            </div> -->
+        </div>
+        <div class="window round-window">
+            <div class="title-bar">
+                <div class="title-bar-text">Results Round </div>
+            </div>
+            <div class="window-content round-content">
+                <p class="my-selection">You Chose: </p>
+                <p class="computer-selection">Computer Chose: </p>
+                <p class="winner-result"></p>
+                <section>
+                    <button>OK</button>
+                </section>
+            </div>
+            <div class="status-bar">
+                <p class="status-bar-field">Press ENTER to continue</p>
+                <p class="status-bar-field my-points">Your Points: </p>
+                <p class="status-bar-field computers-points">Computer’s Points: </p>
+            </div>
+
+        </div>
+        <div class="window final-window">
+            <div class="title-bar">
+                <div class="title-bar-text">Final Results</div>
+            </div>
+            <div class="window-content final-content">
+                <p class="final-result">Winner:</p>
+                <p>Game history</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>You</th>
+                            <th>Computer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>1</th>
+                            <th>Rock</th>
+                            <th>Scissors</th>
+                        </tr>
+                    </tbody>
+                </table>
+                <section>
+                    <button class="new">New Game</button>
+                    <button class="exit">Exit</button>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <button class="start-menu">Start</button>
+        <button class="taskbar-item">Rock, Paper, Scissors</button>
+        <p>Copyright c current year strecke</p>
+        <div class="clock">current time AM/PM</div>
+    </div>
 </body>
+
 </html>
