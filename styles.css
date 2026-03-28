@@ -65,6 +65,7 @@ body {
     padding: 3px 2px 3px 3px;
     cursor: move;
     user-select: none;
+    touch-action: none;
 }
 
 .title-bar-text {

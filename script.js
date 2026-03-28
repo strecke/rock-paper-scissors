@@ -41,13 +41,14 @@ function moveWindow() {
         let offsetY = 0;
         let winDimensions = { x: 0, y: 0 };
 
-        win.addEventListener('mousedown', () => {
+        win.addEventListener('pointerdown', () => {
             setWindowFocus(win);
         });
 
-        titleBar.addEventListener('mousedown', e => {
+        titleBar.addEventListener('pointerdown', e => {
             if (e.target.tagName === 'BUTTON') return;
             isDragging = true;
+            titleBar.setPointerCapture(e.pointerId);
             contentRect = content.getBoundingClientRect();
             const rect = win.getBoundingClientRect();
             winDimensions = { x: rect.width, y: rect.height };
@@ -58,13 +59,15 @@ function moveWindow() {
             win.style.top = rect.top + 'px';
         });
 
-        document.addEventListener('mousemove', e => {
+        titleBar.addEventListener('pointermove', e => {
             if (!isDragging) return;
             let newPosLeft = e.clientX - offsetX;
             let newPosTop = e.clientY - offsetY;
+
             newPosLeft = newPosLeft < 0
                 ? 0 : newPosLeft + winDimensions.x > contentRect.right
                     ? contentRect.right - winDimensions.x : newPosLeft;
+
             newPosTop = newPosTop < 0
                 ? 0 : newPosTop + winDimensions.y > contentRect.bottom
                     ? contentRect.bottom - winDimensions.y : newPosTop;
@@ -73,8 +76,9 @@ function moveWindow() {
             win.style.top = newPosTop + 'px';
         });
 
-        document.addEventListener('mouseup', () => {
+        titleBar.addEventListener('pointerup', e => {
             isDragging = false;
+            titleBar.releasePointerCapture(e.pointerId);
         });
     });
 }
@@ -211,7 +215,7 @@ function renderRound(round) {
     const userSelection = roundWindow.querySelector('.user-selection');
     const computerSelection = roundWindow.querySelector('.computer-selection');
     const resultMessage = roundWindow.querySelector('.result-message');
-    
+
 
     roundTitle.textContent = `Results Round ${round.round}`;
     userSelection.textContent = `User Chose: ${round.userLabel}`;
