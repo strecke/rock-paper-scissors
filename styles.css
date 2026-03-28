@@ -1,4 +1,12 @@
+.close {
+    display: none;
+}
 
+button:disabled {
+    text-shadow: 1px 1px 0 white;
+    color: grey;
+    pointer-events: none;
+}
 
 * {
     font-family: "VT323", monospace;
