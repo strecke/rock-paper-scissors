@@ -82,9 +82,10 @@ function initClock() {
 
 initClock();
 
+const content = document.querySelector('.content');
+const windows = document.querySelectorAll('.window');
+
 function moveWindow() {
-    const windows = document.querySelectorAll('.window');
-    const content = document.querySelector('.content');
     let contentRect = content.getBoundingClientRect();
     console.log('contentRect', contentRect);
     windows.forEach(win => {
@@ -93,6 +94,10 @@ function moveWindow() {
         let offsetX = 0;
         let offsetY = 0;
         let winDimensions = { x: 0, y: 0 };
+
+        win.addEventListener('mousedown', () => {
+            setWindowFocus(win);
+        });
 
         titleBar.addEventListener('mousedown', e => {
             if (e.target.tagName === 'BUTTON') return;
@@ -129,3 +134,17 @@ function moveWindow() {
 }
 
 moveWindow();
+
+console.log(windows.length)
+
+let windowStack = [...windows];
+
+function setWindowFocus(win) {
+    windowStack = windowStack.filter(w => w !== win);
+    windowStack.push(win);
+    windowStack.forEach((w, i) => {
+        w.style.zIndex = i + 1;
+        w.classList.remove('active');
+    });
+    win.classList.add('active');
+}

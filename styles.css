@@ -1,7 +1,4 @@
-.final-window,
-.round-window {
-    display: none;
-}
+
 
 * {
     font-family: "VT323", monospace;
@@ -38,10 +35,6 @@ body {
     box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px grey, inset 2px 2px #fff;
     z-index: 1;
     cursor: default;
-}
-
-.window.active {
-    z-index: 2;
 }
 
 .window.game-window {
