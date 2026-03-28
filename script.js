@@ -2,7 +2,7 @@ function getComputerChoice() {
     return ['r', 'p', 's'][Math.floor(Math.random() * 3)];
 }
 
-function getHumanChoice(){
+function getHumanChoice() {
     const choice = prompt('Choose rock: r, paper: p, scissors: s')?.toLowerCase();
     if (!choice || choice.length !== 1 || !/^[rps]$/.test(choice)) return;
     return choice;
@@ -26,8 +26,8 @@ function playGame() {
         } else {
             isHumanWinner ? humanScore++ : computerScore++;
             roundMessage = isHumanWinner
-            ? `You Win! ${NAMES[humanChoice]} beats ${NAMES[computerChoice]}`
-            : `You Lose! ${NAMES[computerChoice]} beats ${NAMES[humanChoice]}`;
+                ? `You Win! ${NAMES[humanChoice]} beats ${NAMES[computerChoice]}`
+                : `You Lose! ${NAMES[computerChoice]} beats ${NAMES[humanChoice]}`;
         }
 
         console.log(roundMessage);
@@ -42,7 +42,7 @@ function playGame() {
 
     const winnerMessage = humanScore === computerScore ? 'Tie.'
         : humanScore > computerScore ? 'You Win.'
-        : 'Computer wins.';
+            : 'Computer wins.';
     const humanMessage = `Human: ${humanScore} Points`;
     const computerMessage = `Computer: ${computerScore} Points`;
     console.log(`Final score:\n${humanMessage}\n${computerMessage}\n${winnerMessage}`);
@@ -52,15 +52,15 @@ function playGame() {
 //playGame();
 
 // start menu
-const startButton = document.querySelector('.start-menu-container .start-menu-button');
+const menuButton = document.querySelector('.start-menu-container .start-menu-button');
 const menu = document.querySelector('.start-menu-container .start-menu');
 
-startButton.addEventListener('click', (e) => {
+menuButton.addEventListener('click', (e) => {
     menu.classList.toggle('open');
 });
 
 document.addEventListener("click", (e) => {
-    if (!menu.contains(e.target) && !startButton.contains(e.target)) {
+    if (!menu.contains(e.target) && !menuButton.contains(e.target)) {
         menu.classList.remove('open');
     }
 });
@@ -81,3 +81,51 @@ function initClock() {
 }
 
 initClock();
+
+function moveWindow() {
+    const windows = document.querySelectorAll('.window');
+    const content = document.querySelector('.content');
+    let contentRect = content.getBoundingClientRect();
+    console.log('contentRect', contentRect);
+    windows.forEach(win => {
+        const titleBar = win.querySelector('.title-bar');
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+        let winDimensions = { x: 0, y: 0 };
+
+        titleBar.addEventListener('mousedown', e => {
+            if (e.target.tagName === 'BUTTON') return;
+            isDragging = true;
+            contentRect = content.getBoundingClientRect();
+            const rect = win.getBoundingClientRect();
+            winDimensions = { x: rect.width, y: rect.height };
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            win.style.transform = 'none';
+            win.style.left = rect.left + 'px';
+            win.style.top = rect.top + 'px';
+        });
+
+        document.addEventListener('mousemove', e => {
+            if (!isDragging) return;
+            let newPosLeft = e.clientX - offsetX;
+            let newPosTop = e.clientY - offsetY;
+            newPosLeft = newPosLeft < 0
+                ? 0 : newPosLeft + winDimensions.x > contentRect.right
+                    ? contentRect.right - winDimensions.x : newPosLeft;
+            newPosTop = newPosTop < 0
+                ? 0 : newPosTop + winDimensions.y > contentRect.bottom
+                    ? contentRect.bottom - winDimensions.y : newPosTop;
+            if (e.clientY - offsetY < contentRect.x) win.style.top = '0px';
+            win.style.left = newPosLeft + 'px';
+            win.style.top = newPosTop + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+    });
+}
+
+moveWindow();
