@@ -1,57 +1,4 @@
-function getComputerChoice() {
-    return ['r', 'p', 's'][Math.floor(Math.random() * 3)];
-}
-
-function getHumanChoice() {
-    const choice = prompt('Choose rock: r, paper: p, scissors: s')?.toLowerCase();
-    if (!choice || choice.length !== 1 || !/^[rps]$/.test(choice)) return;
-    return choice;
-}
-
-const BEATS = { r: 's', p: 'r', s: 'p', };
-const NAMES = { r: 'Rock', p: 'Paper', s: 'Scissors', };
-
-function playGame() {
-    let humanScore = 0;
-    let computerScore = 0;
-
-    function playRound(humanChoice, computerChoice) {
-        if (humanChoice === undefined) return;
-        const isTie = humanChoice === computerChoice;
-        const isHumanWinner = BEATS[humanChoice] === computerChoice;
-        let roundMessage;
-
-        if (isTie) {
-            roundMessage = `Tie. ${NAMES[humanChoice]} equals ${NAMES[computerChoice]}`
-        } else {
-            isHumanWinner ? humanScore++ : computerScore++;
-            roundMessage = isHumanWinner
-                ? `You Win! ${NAMES[humanChoice]} beats ${NAMES[computerChoice]}`
-                : `You Lose! ${NAMES[computerChoice]} beats ${NAMES[humanChoice]}`;
-        }
-
-        console.log(roundMessage);
-    }
-
-    for (i = 0; i <= 4; i++) {
-        console.log(`Round ${i + 1}`);
-        const humanSelection = getHumanChoice();
-        const computerSelection = getComputerChoice();
-        playRound(humanSelection, computerSelection);
-    }
-
-    const winnerMessage = humanScore === computerScore ? 'Tie.'
-        : humanScore > computerScore ? 'You Win.'
-            : 'Computer wins.';
-    const humanMessage = `Human: ${humanScore} Points`;
-    const computerMessage = `Computer: ${computerScore} Points`;
-    console.log(`Final score:\n${humanMessage}\n${computerMessage}\n${winnerMessage}`);
-    alert(`Final score:\n${humanMessage}\n${computerMessage}\n${winnerMessage}`);
-}
-// init start
-//playGame();
-
-// start menu
+// non-game-logic
 const menuButton = document.querySelector('.start-menu-container .start-menu-button');
 const menu = document.querySelector('.start-menu-container .start-menu');
 
@@ -87,7 +34,6 @@ const windows = document.querySelectorAll('.window');
 
 function moveWindow() {
     let contentRect = content.getBoundingClientRect();
-    console.log('contentRect', contentRect);
     windows.forEach(win => {
         const titleBar = win.querySelector('.title-bar');
         let isDragging = false;
@@ -135,11 +81,10 @@ function moveWindow() {
 
 moveWindow();
 
-console.log(windows.length)
-
 let windowStack = [...windows];
 
 function setWindowFocus(win) {
+    if (!win) return;
     windowStack = windowStack.filter(w => w !== win);
     windowStack.push(win);
     windowStack.forEach((w, i) => {
@@ -147,4 +92,193 @@ function setWindowFocus(win) {
         w.classList.remove('active');
     });
     win.classList.add('active');
+    win.focus();
+    win.classList.remove('close');
+}
+
+function closeWindow(win) {
+    win.classList.add('close');
+    const newWindowFocus = windowStack.findLast(w => !w.classList.contains('close'));
+    setWindowFocus(newWindowFocus);
+}
+
+// game-logic
+
+const WIN_SCORE = 5;
+
+function createInitialGameState() {
+    return {
+        userScore: 0,
+        computerScore: 0,
+        roundCounter: 1,
+        roundHistory: [],
+        rpsButtonsDisabled: false,
+        isLastRound: false,
+        lastRound: null,
+    };
+}
+
+let gameState = createInitialGameState();
+
+function handleUserChoice(userChoice) {
+    gameState = playRound(gameState, userChoice);
+
+    renderRound(gameState.lastRound);
+    renderGameState(gameState);
+
+    const roundWindow = document.querySelector('.round-window');
+    setWindowFocus(roundWindow);
+}
+
+function resetGame() {
+    gameState = createInitialGameState();
+    renderGameState(gameState);
+}
+
+function bindEvents() {
+    const gameWindow = document.querySelector('.game-window');
+    const gameContent = gameWindow.querySelector('.game-content');
+    const rpsButtons = gameContent.querySelectorAll('section button');
+    rpsButtons.forEach(b => {
+        b.addEventListener('click', () => {
+            handleUserChoice(b.dataset.choice);
+        });
+    });
+
+    const roundWindow = document.querySelector('.round-window');
+    roundWindow.querySelector('button').addEventListener('click', () => {
+        closeWindow(roundWindow);
+        if (gameState.isLastRound) showFinalWindow();
+    });
+
+    const finalWindow = document.querySelector('.final-window');
+    finalWindow.querySelector('button.new').addEventListener('click', () => {
+        resetGame();
+        closeWindow(finalWindow);
+        setWindowFocus(gameWindow);
+    });
+
+    finalWindow.querySelector('button.exit').addEventListener('click', () => {
+        resetGame();
+        closeWindow(finalWindow);
+        closeWindow(gameWindow);
+    })
+}
+
+bindEvents();
+
+function getComputerChoice() {
+    return ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
+}
+
+const BEATS = { rock: 'scissors', paper: 'rock', scissors: 'paper', };
+const NAMES = { rock: 'Rock', paper: 'Paper', scissors: 'Scissors', };
+
+function playRound(state, userChoice) {
+    const computerChoice = getComputerChoice();
+    const isTie = userChoice === computerChoice;
+    const isUserWinner = !isTie && BEATS[userChoice] === computerChoice;
+    const nextUserScore = state.userScore + (isUserWinner ? 1 : 0);
+    const nextComputerScore = state.computerScore + (isTie || isUserWinner ? 0 : 1);
+
+    const round = {
+        round: state.roundCounter,
+        userChoice,
+        computerChoice,
+        userLabel: NAMES[userChoice],
+        computerLabel: NAMES[computerChoice],
+        isTie,
+        isUserWinner,
+    };
+
+    const isGameOver = nextUserScore >= WIN_SCORE || nextComputerScore >= WIN_SCORE;
+
+    return {
+        ...state,
+        userScore: nextUserScore,
+        computerScore: nextComputerScore,
+        roundCounter: state.roundCounter + 1,
+        roundHistory: [...state.roundHistory, round],
+        rpsButtonsDisabled: isGameOver,
+        isLastRound: isGameOver,
+        lastRound: round,
+    };
+}
+
+function renderRound(round) {
+    const roundWindow = document.querySelector('.round-window');
+    const roundTitle = roundWindow.querySelector('.title-bar-text');
+    const userSelection = roundWindow.querySelector('.user-selection');
+    const computerSelection = roundWindow.querySelector('.computer-selection');
+    const resultMessage = roundWindow.querySelector('.result-message');
+    
+
+    roundTitle.textContent = `Results Round ${round.round}`;
+    userSelection.textContent = `User Chose: ${round.userLabel}`;
+    computerSelection.textContent = `Computer Chose: ${round.computerLabel}`;
+
+    if (round.isTie) {
+        resultMessage.textContent = `It’s a tie!`;
+    } else if (round.isUserWinner) {
+        resultMessage.textContent = `You Win! ${round.userLabel} beats ${round.computerLabel}`;
+    } else {
+        resultMessage.textContent = `You Lose! ${round.computerLabel} beats ${round.userLabel}`;
+    }
+}
+
+function renderGameState(state) {
+    const gameWindow = document.querySelector('.game-window');
+    const gameContent = gameWindow.querySelector('.game-content');
+    const rpsButtons = gameContent.querySelectorAll('section button');
+
+    const progressIndicator = gameContent.querySelector('.progress-indicator.game-progress .progress-indicator-bar');
+    const highestPoints = Math.max(state.userScore, state.computerScore);
+    const progressPercent = Math.min(highestPoints / WIN_SCORE * 100, 100);
+    progressIndicator.style.width = progressPercent + '%';
+
+    const roundWindow = document.querySelector('.round-window');
+    const usersPoints = roundWindow.querySelector('.users-points');
+    const computersPoints = roundWindow.querySelector('.computers-points');
+
+    usersPoints.textContent = `User: ${state.userScore}`;
+    computersPoints.textContent = `Computer: ${state.computerScore}`;
+
+    rpsButtons.forEach((b) => {
+        b.disabled = state.rpsButtonsDisabled;
+    });
+    // renderHistoryTable(state.roundHistory);
+}
+
+function renderHistoryTable(tBody, roundHistory) {
+    tBody.replaceChildren();
+
+    for (const round of roundHistory) {
+        const tr = document.createElement('tr');
+        if (round.isUserWinner) tr.classList.add('highlighted');
+
+        const roundTh = document.createElement('th');
+        const userTh = document.createElement('th');
+        const computerTh = document.createElement('th');
+
+        roundTh.textContent = round.round;
+        userTh.textContent = round.userLabel;
+        computerTh.textContent = round.computerLabel;
+
+        tr.append(roundTh, userTh, computerTh);
+        tBody.append(tr);
+    }
+}
+
+function showFinalWindow() {
+    const finalWindow = document.querySelector('.window.final-window');
+    const tBody = finalWindow.querySelector('.table table tbody');
+    const finalResultMessage = finalWindow.querySelector('.final-result');
+
+    const isUserWinner = gameState.userScore > gameState.computerScore;
+    
+    finalResultMessage.textContent = `Winner: ${isUserWinner ? 'User' : 'Computer'}`;
+
+    renderHistoryTable(tBody, gameState.roundHistory);
+
+    setWindowFocus(finalWindow);
 }
