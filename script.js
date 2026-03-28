@@ -64,3 +64,20 @@ document.addEventListener("click", (e) => {
         menu.classList.remove('open');
     }
 });
+
+function updateClock() {
+    const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    document.querySelector('.clock').textContent = timeStr;
+}
+
+function initClock() {
+    updateClock();
+    const currentSeconds = new Date().getSeconds();
+    const delay = (60 - currentSeconds) * 1000;
+    setTimeout(() => {
+        updateClock();
+        setInterval(updateClock, 60000);
+    }, delay);
+}
+
+initClock();
