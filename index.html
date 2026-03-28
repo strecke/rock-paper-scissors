@@ -31,16 +31,16 @@
                     <button aria-label="Close">x</button>
                 </div>
             </div>
-            <div class="window-content scoreboard">
+            <div class="window-content game-content">
                 <p>Game Progress Indicator</p>
                 <div class="progress-indicator game-progress">
                     <span class="progress-indicator-bar"></span>
                 </div>
                 <p>Choose your final word</p>
                 <section>
-                    <button class="rock">Rock</button>
-                    <button class="paper">Paper</button>
-                    <button class="scissors">Scissors</button>
+                    <button data-choice="rock">Rock</button>
+                    <button data-choice="paper">Paper</button>
+                    <button data-choice="scissors">Scissors</button>
                 </section>
                 <!-- <div class="result-progress">
                     <p>Calculating result</p>
@@ -55,26 +55,26 @@
                 <button class="set-status minus">-</button>
             </div> -->
         </div>
-        <div class="window round-window">
+        <div class="window round-window close">
             <div class="title-bar">
                 <div class="title-bar-text">Results Round </div>
             </div>
             <div class="window-content round-content">
-                <p class="my-selection">You Chose: </p>
+                <p class="user-selection">User Chose: </p>
                 <p class="computer-selection">Computer Chose: </p>
-                <p class="winner-result"></p>
+                <p class="result-message"></p>
                 <section>
                     <button>OK</button>
                 </section>
             </div>
             <div class="status-bar">
                 <p class="status-bar-field">Press ENTER to continue</p>
-                <p class="status-bar-field my-points">You: </p>
+                <p class="status-bar-field users-points">User: </p>
                 <p class="status-bar-field computers-points">Computer: </p>
             </div>
 
         </div>
-        <div class="window final-window">
+        <div class="window final-window close">
             <div class="title-bar">
                 <div class="title-bar-text">Final Results</div>
             </div>
@@ -86,7 +86,7 @@
                         <thead>
                             <tr>
                                 <th>Round</th>
-                                <th>You</th>
+                                <th>User</th>
                                 <th>Computer</th>
                             </tr>
                         </thead>
