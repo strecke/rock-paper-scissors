@@ -49,4 +49,18 @@ function playGame() {
     alert(`Final score:\n${humanMessage}\n${computerMessage}\n${winnerMessage}`);
 }
 // init start
-playGame();
+//playGame();
+
+// start menu
+const startButton = document.querySelector('.start-menu-container .start-menu-button');
+const menu = document.querySelector('.start-menu-container .start-menu');
+
+startButton.addEventListener('click', (e) => {
+    menu.classList.toggle('open');
+});
+
+document.addEventListener("click", (e) => {
+    if (!menu.contains(e.target) && !startButton.contains(e.target)) {
+        menu.classList.remove('open');
+    }
+});
