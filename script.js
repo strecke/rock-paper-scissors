@@ -89,6 +89,7 @@ let windowStack = [...windows];
 
 function setWindowFocus(win) {
     if (!win) return;
+    if (win.classList.contains('active')) return;
     windowStack = windowStack.filter(w => w !== win);
     windowStack.push(win);
     windowStack.forEach((w, i) => {
