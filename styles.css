@@ -31,6 +31,34 @@ body {
     flex: 1 0;
 }
 
+.window button,
+.footer button {
+    background: silver;
+    border: none;
+    border-radius: 0;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
+    box-sizing: border-box;
+    color: transparent;
+    text-shadow: 0 0 black;
+    min-height: 23px;
+    min-width: 75px;
+    padding: 0 12px;
+    user-select: none;
+}
+
+.window button:active,
+.footer button:active {
+    box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px grey;
+    text-shadow: 1px 1px black;
+}
+
+.window button:focus,
+.footer button:focus {
+    outline: 1px dotted black;
+    outline-offset: -4px;
+}
+
+/* window styles */
 .window {
     width: 250px;
     background-color: silver;
@@ -57,6 +85,7 @@ body {
     transform: translate(-40%, -70%);
 }
 
+/* title-bar specific */
 .title-bar {
     display: flex;
     align-items: center;
@@ -80,30 +109,6 @@ body {
     display: flex;
 }
 
-button {
-    background: silver;
-    border: none;
-    border-radius: 0;
-    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
-    box-sizing: border-box;
-    color: transparent;
-    text-shadow: 0 0 black;
-    min-height: 23px;
-    min-width: 75px;
-    padding: 0 12px;
-    user-select: none;
-}
-
-button:active {
-    box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px grey;
-    text-shadow: 1px 1px black;
-}
-
-button:focus {
-    outline: 1px dotted black;
-    outline-offset: -4px;
-}
-
 .title-bar-controls button {
     display: block;
     min-height: 14px;
@@ -124,6 +129,7 @@ button:focus {
     margin-left: 2px;
 }
 
+/* content specific */
 .window-content {
     margin: 8px;
 }
@@ -224,6 +230,7 @@ button:focus {
     color: white;
 }
 
+/* footer syles */
 .footer {
     display: flex;
     height: 28px;
@@ -340,7 +347,6 @@ button:focus {
     text-decoration: none;
     box-sizing: border-box;
     box-shadow: none;
-
     color: inherit;
     font: inherit;
     text-align: left;
@@ -399,6 +405,102 @@ button:focus {
     transform: translateY(2.5px);
 }
 
+.icon.icon-sl {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 26 26' xmlns='http://www.w3.org/2000/svg' xmlns:svg='http://www.w3.org/2000/svg' aria-label='Streamline Logo'%3E%3Cg class='layer'%3E%3Ctitle%3ELayer 1%3C/title%3E%3Cpath d='m18.74,4.06c0,2.23 -1.76,4.05 -3.93,4.05l-3.92,0l2.77,2.87l3.92,0c1.01,0 2.01,0.39 2.77,1.18c1.53,1.59 1.53,4.15 0,5.74l-6.68,6.92c-0.71,0.73 -1.69,1.18 -2.77,1.18c-2.16,0 -3.92,-1.81 -3.92,-4.06c0,-2.23 1.75,-4.05 3.92,-4.05l3.92,0l-2.78,-2.86l-3.92,0c-1.01,0 -2.01,-0.39 -2.77,-1.18c-1.53,-1.59 -1.53,-4.15 0,-5.74l6.69,-6.92c0.71,-0.74 1.69,-1.19 2.77,-1.19c2.16,0 3.93,1.81 3.93,4.06z' fill='%2365D80D' id='svg_1'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* desktop-item styles */
+button.desktop-item {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    padding: 4px 2px 2px;
+    background: transparent;
+    border: 1px solid transparent;
+    box-shadow: none;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    cursor: default;
+    text-shadow: 1px 1px 0px black;
+    box-sizing: border-box;
+}
+
+.desktop-icon-container {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    overflow: hidden;
+}
+
+.desktop-icon-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background-size: 3px 3px;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='2' height='2' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M1 0H0v1h1v1h1V1H1V0z' fill='navy'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 0H1v1H0v1h1V1h1V0z' fill='%23fff'/%3E%3C/svg%3E");
+    transform: rotate(90deg);
+}
+
+button.desktop-item:focus .desktop-icon-container::after {
+    opacity: 1;
+}
+
+.desktop-main-icon {
+    display: block;
+    width: 48px;
+    height: 48px;
+    image-rendering: pixelated;
+    background: white;
+    pointer-events: none;
+}
+
+.desktop-shortcut-icon {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 13px;
+    height: 13px;
+    padding: 1px;
+    background: white;
+    box-shadow: inset -1px -1px black, inset 1px 1px #86878e;
+    image-rendering: pixelated;
+    box-sizing: border-box;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.desktop-item-label {
+    font-size: 13px;
+    line-height: 1.05;
+    text-align: center;
+    word-break: break-word;
+    box-sizing: border-box;
+    width: 70px;
+}
+
+button.desktop-item:hover:not(:focus) .desktop-item-label,
+button.desktop-item:focus-visible .desktop-item-label {
+    outline: 1px dotted #ff0000;
+    outline-offset: -1px;
+}
+
+.desktop-item:active .desktop-item-label,
+.desktop-item:focus-visible .desktop-item-label,
+.desktop-item:focus .desktop-item-label {
+    background: navy;
+    color: white;
+    outline: 1px dotted #ffff53;
+    outline-offset: -1px;
+}
+
+/* scrollbar styles */
 ::-webkit-scrollbar {
     width: 16px;
     height: 17px;
