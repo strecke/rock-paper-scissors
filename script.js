@@ -103,6 +103,7 @@ function setWindowFocus(win) {
 
 function closeWindow(win) {
     win.classList.add('close');
+    win.classList.remove('active');
     const newWindowFocus = windowStack.findLast(w => !w.classList.contains('close'));
     setWindowFocus(newWindowFocus);
 }
@@ -153,7 +154,7 @@ function bindEvents() {
     const roundWindow = document.querySelector('.round-window');
     roundWindow.querySelector('button').addEventListener('click', () => {
         closeWindow(roundWindow);
-        if (gameState.isLastRound) showFinalWindow();
+        if (gameState.isLastRound) renderFinalWindow();
     });
 
     const finalWindow = document.querySelector('.final-window');
@@ -274,7 +275,7 @@ function renderHistoryTable(tBody, roundHistory) {
     }
 }
 
-function showFinalWindow() {
+function renderFinalWindow() {
     const finalWindow = document.querySelector('.window.final-window');
     const tBody = finalWindow.querySelector('.table table tbody');
     const finalResultMessage = finalWindow.querySelector('.final-result');
