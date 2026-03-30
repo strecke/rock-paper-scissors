@@ -427,6 +427,7 @@ button.desktop-item {
     cursor: default;
     text-shadow: 1px 1px 0px black;
     box-sizing: border-box;
+    touch-action: none;
 }
 
 .desktop-icon-container {
