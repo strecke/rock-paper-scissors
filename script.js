@@ -30,26 +30,82 @@ function initClock() {
 initClock();
 
 const content = document.querySelector('.content');
-const windows = document.querySelectorAll('.window');
+const windows = content.querySelectorAll('.window');
+const desktopItems = content.querySelectorAll('.desktop-item');
+
+function moveDesktopItem() {
+    let contentRect = content.getBoundingClientRect();
+    desktopItems.forEach(dI => {
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+        let dIDimensions = { x: 0, y: 0 };
+        let isOverWindow = false;
+        let prevPos = { x: 0, y: 0 };
+        // todo rename di
+        dI.addEventListener('pointerdown', e => {
+            isDragging = true;
+            dI.setPointerCapture(e.pointerId);
+            const rect = dI.getBoundingClientRect();
+            dIDimensions = { x: rect.width, y: rect.height };
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            prevPos = { x: rect.left, y: rect.top };
+            dI.style.zIndex = Number(windows.length + 1);
+        });
+
+        dI.addEventListener('pointermove', e => {
+            if (!isDragging) return;
+
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+            const newPos = getPosBoundaryCheck(x, y, dIDimensions);
+
+            dI.style.pointerEvents = 'none';
+            const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+            dI.style.pointerEvents = '';
+            
+            isOverWindow = !!elementBelow?.closest('.window');
+            dI.style.cursor = isOverWindow ? 'no-drop' : '';
+
+            dI.style.left = newPos.x + 'px';
+            dI.style.top = newPos.y + 'px';
+        });
+
+        dI.addEventListener('pointerup', e => {
+            isDragging = false;
+            dI.style.zIndex = '';
+            dI.releasePointerCapture(e.pointerId);
+
+            if (isOverWindow) {
+                dI.style.left = prevPos.x + 'px';
+                dI.style.top = prevPos.y + 'px';
+                e.target.style.cursor = '';
+            }
+            isOverWindow = false;
+        });
+    });
+}
+
+moveDesktopItem();
 
 function moveWindow() {
-    let contentRect = content.getBoundingClientRect();
     windows.forEach(win => {
+        win.addEventListener('pointerdown', () => {
+            setWindowFocus(win);
+        });
+        win.addEventListener('pointerenter', e => {
+        })
         const titleBar = win.querySelector('.title-bar');
         let isDragging = false;
         let offsetX = 0;
         let offsetY = 0;
         let winDimensions = { x: 0, y: 0 };
 
-        win.addEventListener('pointerdown', () => {
-            setWindowFocus(win);
-        });
-
         titleBar.addEventListener('pointerdown', e => {
             if (e.target.tagName === 'BUTTON') return;
             isDragging = true;
             titleBar.setPointerCapture(e.pointerId);
-            contentRect = content.getBoundingClientRect();
             const rect = win.getBoundingClientRect();
             winDimensions = { x: rect.width, y: rect.height };
             offsetX = e.clientX - rect.left;
@@ -61,19 +117,12 @@ function moveWindow() {
 
         titleBar.addEventListener('pointermove', e => {
             if (!isDragging) return;
-            let newPosLeft = e.clientX - offsetX;
-            let newPosTop = e.clientY - offsetY;
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+            const newPos = getPosBoundaryCheck(x, y, winDimensions);
 
-            newPosLeft = newPosLeft < 0
-                ? 0 : newPosLeft + winDimensions.x > contentRect.right
-                    ? contentRect.right - winDimensions.x : newPosLeft;
-
-            newPosTop = newPosTop < 0
-                ? 0 : newPosTop + winDimensions.y > contentRect.bottom
-                    ? contentRect.bottom - winDimensions.y : newPosTop;
-            if (e.clientY - offsetY < contentRect.x) win.style.top = '0px';
-            win.style.left = newPosLeft + 'px';
-            win.style.top = newPosTop + 'px';
+            win.style.left = newPos.x + 'px';
+            win.style.top = newPos.y + 'px';
         });
 
         titleBar.addEventListener('pointerup', e => {
@@ -84,6 +133,20 @@ function moveWindow() {
 }
 
 moveWindow();
+
+function getPosBoundaryCheck(x, y, dimensions) {
+    const contentRect = content.getBoundingClientRect();
+    let newPosLeft = x;
+    let newPosTop = y;
+    newPosLeft = newPosLeft < 0
+        ? 0 : newPosLeft + dimensions.x > contentRect.right
+            ? contentRect.right - dimensions.x : newPosLeft;
+
+    newPosTop = newPosTop < 0
+        ? 0 : newPosTop + dimensions.y > contentRect.bottom
+            ? contentRect.bottom - dimensions.y : newPosTop;
+    return { x: newPosLeft, y: newPosTop };
+}
 
 let windowStack = [...windows];
 
@@ -281,7 +344,7 @@ function renderFinalWindow() {
     const finalResultMessage = finalWindow.querySelector('.final-result');
 
     const isUserWinner = gameState.userScore > gameState.computerScore;
-    
+
     finalResultMessage.textContent = `Winner: ${isUserWinner ? 'User' : 'Computer'}`;
 
     renderHistoryTable(tBody, gameState.roundHistory);
