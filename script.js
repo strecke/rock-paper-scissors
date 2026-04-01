@@ -33,107 +33,135 @@ const content = document.querySelector('.content');
 const windows = content.querySelectorAll('.window');
 const desktopItems = content.querySelectorAll('.desktop-item');
 
-function handleDesktopItemPointer() {
-    let contentRect = content.getBoundingClientRect();
-    desktopItems.forEach(dI => {
-        let offsetX = 0;
-        let offsetY = 0;
-        let dIDimensions = { x: 0, y: 0 };
-        let prevPos = { x: 0, y: 0 };
-        let dragState = {
-            pointerId: null,
-            startX: 0,
-            startY: 0,
-            active: false,
-            moved: false,
-            isOverWindow: false,
-            firstTarget: null,
-            firstElement: null,
+function handleDesktopItemInteraction() {
+
+    function createInitialInteractionState() {
+        return {
+            pointer: {
+                id: null,
+                startX: 0,
+                startY: 0,
+            },
+            drag: {
+                active: false,
+                moved: false,
+                offsetX: 0,
+                offsetY: 0,
+                dimensions: { x: 0, y: 0 },
+                prevPos: { x: 0, y: 0 },
+            },
+            drop: {
+                isOverWindow: false,
+            },
+            click: {
+                initialTarget: null,
+                initialElement: null,
+            }
         };
+    }
 
-        const DRAG_THRESHOLD = 4;
-
-        function startInteraction(e, dI, dragState) {
-            dragState.pointerId = e.pointerId;
-            dragState.startX = e.clientX;
-            dragState.startY = e.clientY;
-
-            dragState.active = false;
-            dragState.moved = false;
-            dragState.isOverWindow = false;
-            dragState.firstTarget = e.target;
-
-            dragState.firstElement = document.activeElement;
-
-            dI.setPointerCapture(e.pointerId);
-            dI.style.zIndex = Number(windows.length + 1);
+    function updateDragState(e, interaction, threshold) {
+        const dx = e.clientX - interaction.pointer.startX;
+        const dy = e.clientY - interaction.pointer.startY;
+        const distance = Math.hypot(dx, dy);
+        if (!interaction.drag.active && distance >= threshold) {
+            interaction.drag.active = true;
+            interaction.drag.moved = true;
         }
+    }
+
+    function detectDropTargetIsWindow(e, dI) {
+        dI.style.pointerEvents = 'none';
+        const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+        dI.style.pointerEvents = '';
+        return !!elementBelow?.closest('.window');
+    }
+
+    function startInteraction(e, dI, interaction) {
+        interaction.pointer.id = e.pointerId;
+        interaction.pointer.startX = e.clientX;
+        interaction.pointer.startY = e.clientY;
+
+        const rect = dI.getBoundingClientRect();
+        interaction.drag.active = false;
+        interaction.drag.moved = false;
+        interaction.drag.offsetX = e.clientX - rect.left;
+        interaction.drag.offsetY = e.clientY - rect.top;
+        interaction.drag.startPos = { x: rect.left, y: rect.top };
+        interaction.drag.dimensions = { x: rect.width, y: rect.height };
+
+        interaction.drop.isOverWindow = false;
+
+        interaction.click.initialTarget = e.target;
+        interaction.click.initialElement = document.activeElement;
+
+        dI.setPointerCapture(e.pointerId);
+        dI.style.zIndex = Number(windows.length + 1);
+    }
+
+    function resetInteraction(interaction) {
+        interaction.pointer.id = null;
+        interaction.drag.active = false;
+        interaction.drag.moved = false;
+        interaction.drop.isOverWindow = false;
+        interaction.click.initialTarget = null;
+        interaction.click.initialElement = null;
+    }
+
+    const DRAG_THRESHOLD = 4;
+
+    desktopItems.forEach(dI => {
+        let interaction = createInitialInteractionState();
 
         dI.addEventListener('pointerdown', e => {
             if (e.target.closest('.desktop-item-label-editor')) return;
-            startInteraction(e, dI, dragState);
-
-            const rect = dI.getBoundingClientRect();
-            dIDimensions = { x: rect.width, y: rect.height };
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
-            prevPos = { x: rect.left, y: rect.top };
-            
+            startInteraction(e, dI, interaction);
         });
 
         dI.addEventListener('pointermove', e => {
-            if (dragState.pointerId !== e.pointerId) return;
-            const dx = e.clientX - dragState.startX;
-            const dy = e.clientY - dragState.startY;
-            const distance = Math.hypot(dx, dy);
+            if (interaction.pointer.id !== e.pointerId) return;
 
-            if (!dragState.active && distance >= DRAG_THRESHOLD) {
-                dragState.active = true;
-                dragState.moved = true;
-            }
+            updateDragState(e, interaction, DRAG_THRESHOLD);
 
-            if (!dragState.active) return;
+            if (!interaction.drag.active) return;
 
-            const x = e.clientX - offsetX;
-            const y = e.clientY - offsetY;
-            const newPos = getPosBoundaryCheck(x, y, dIDimensions);
+            const x = e.clientX - interaction.drag.offsetX;
+            const y = e.clientY - interaction.drag.offsetY;
+            moveElement(dI, x, y, interaction.drag)
 
-            dI.style.pointerEvents = 'none';
-            const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
-            dI.style.pointerEvents = '';
-
-            dragState.isOverWindow = !!elementBelow?.closest('.window');
-            dI.style.cursor = dragState.isOverWindow ? 'no-drop' : '';
-
-            dI.style.left = newPos.x + 'px';
-            dI.style.top = newPos.y + 'px';
+            interaction.drop.isOverWindow = detectDropTargetIsWindow(e, dI);
+            dI.style.cursor = interaction.drop.isOverWindow ? 'no-drop' : '';
         });
 
         dI.addEventListener('pointerup', e => {
-            if (dragState.pointerId !== e.pointerId) return;
+            if (interaction.pointer.id !== e.pointerId) return;
+
+            dI.releasePointerCapture(e.pointerId);
             dI.style.zIndex = '';
             dI.style.cursor = '';
-            dI.releasePointerCapture(e.pointerId);
 
-            if (dragState.active) {
-                if (dragState.isOverWindow) {
-                    dI.style.left = prevPos.x + 'px';
-                    dI.style.top = prevPos.y + 'px';
+            if (interaction.drag.active) {
+                if (interaction.drop.isOverWindow) {
+                    const pos = interaction.drag.startPos;
+                    dI.style.left = pos.x + 'px';
+                    dI.style.top = pos.y + 'px';
                 }
             } else {
-                handleRenameLabel(dI, dragState.firstTarget, dragState.firstElement);
+                handleRenameLabel(dI, interaction.click.initialTarget, interaction.click.initialElement);
             }
-            dragState.pointerId = null;
-            dragState.active = false;
-            dragState.moved = false;
-            dragState.isOverWindow = false;
-            dragState.firstTarget = null;
-            dragState.firstElement = null;
+            resetInteraction(interaction);
+
         });
     });
 }
 
-handleDesktopItemPointer();
+handleDesktopItemInteraction();
+
+function moveElement(element, x, y, drag) {
+    const newPos = getPosBoundaryCheck(x, y, drag.dimensions);
+    element.style.left = newPos.x + 'px';
+    element.style.top = newPos.y + 'px';
+}
 
 function handleRenameLabel(dI, target, element) {
     const dILabel = dI.querySelector('.desktop-item-label');
@@ -190,7 +218,7 @@ function handleRenameLabel(dI, target, element) {
     });
 }
 
-function moveWindow() {
+function handleWindowInteraction() {
     windows.forEach(win => {
         win.addEventListener('pointerdown', () => {
             setWindowFocus(win);
@@ -233,7 +261,7 @@ function moveWindow() {
     });
 }
 
-moveWindow();
+handleWindowInteraction();
 
 function getPosBoundaryCheck(x, y, dimensions) {
     const contentRect = content.getBoundingClientRect();
