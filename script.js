@@ -34,7 +34,6 @@ const windows = content.querySelectorAll('.window');
 const desktopItems = content.querySelectorAll('.desktop-item');
 
 function handleDesktopItemInteraction() {
-
     function createInitialInteractionState() {
         return {
             pointer: {
@@ -111,7 +110,7 @@ function handleDesktopItemInteraction() {
     const DRAG_THRESHOLD = 4;
 
     desktopItems.forEach(dI => {
-        let interaction = createInitialInteractionState();
+        const interaction = createInitialInteractionState();
 
         dI.addEventListener('pointerdown', e => {
             if (e.target.closest('.desktop-item-label-editor')) return;
@@ -157,18 +156,11 @@ function handleDesktopItemInteraction() {
 
 handleDesktopItemInteraction();
 
-function moveElement(element, x, y, drag) {
-    const newPos = getPosBoundaryCheck(x, y, drag.dimensions);
-    element.style.left = newPos.x + 'px';
-    element.style.top = newPos.y + 'px';
-}
-
 function handleRenameLabel(dI, target, element) {
     const dILabel = dI.querySelector('.desktop-item-label');
     if (!(target === dILabel && element === dI)) return;
 
     //dI.classList.add('is-renaming');
-
     const oldText = dILabel.textContent;
     const editor = document.createElement('textarea');
     editor.className = 'desktop-item-label-editor';
@@ -219,49 +211,73 @@ function handleRenameLabel(dI, target, element) {
 }
 
 function handleWindowInteraction() {
+    function createInitialWindowDragState() {
+        return {
+            pointerId: null,
+            active: false,
+            offsetX: 0,
+            offsetY: 0,
+            dimensions: { x: 0, y: 0 },
+        };
+    }
+
+    function startInteraction(e, win, drag) {
+        drag.pointerId = e.pointerId;
+        drag.active = true;
+        const rect = win.getBoundingClientRect();
+        drag.dimensions = { x: rect.width, y: rect.height };
+        drag.offsetX = e.clientX - rect.left;
+        drag.offsetY = e.clientY - rect.top;
+
+        win.style.transform = 'none';
+        win.style.left = rect.left + 'px';
+        win.style.top = rect.top + 'px';
+    }
+
+    function resetInteraction(drag) {
+        drag.pointerId = null;
+        drag.active = false;
+    }
+
     windows.forEach(win => {
+        const titleBar = win.querySelector('.title-bar');
+        const drag = createInitialWindowDragState();
+
         win.addEventListener('pointerdown', () => {
             setWindowFocus(win);
         });
-        win.addEventListener('pointerenter', e => {
-        })
-        const titleBar = win.querySelector('.title-bar');
-        let isDragging = false;
-        let offsetX = 0;
-        let offsetY = 0;
-        let winDimensions = { x: 0, y: 0 };
 
         titleBar.addEventListener('pointerdown', e => {
             if (e.target.tagName === 'BUTTON') return;
-            isDragging = true;
+
             titleBar.setPointerCapture(e.pointerId);
-            const rect = win.getBoundingClientRect();
-            winDimensions = { x: rect.width, y: rect.height };
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
-            win.style.transform = 'none';
-            win.style.left = rect.left + 'px';
-            win.style.top = rect.top + 'px';
+            startInteraction(e, win, drag);
         });
 
         titleBar.addEventListener('pointermove', e => {
-            if (!isDragging) return;
-            const x = e.clientX - offsetX;
-            const y = e.clientY - offsetY;
-            const newPos = getPosBoundaryCheck(x, y, winDimensions);
+            if (!drag.active || drag.pointerId !== e.pointerId) return;
 
-            win.style.left = newPos.x + 'px';
-            win.style.top = newPos.y + 'px';
+            const x = e.clientX - drag.offsetX;
+            const y = e.clientY - drag.offsetY;
+            moveElement(win, x, y, drag);
         });
 
         titleBar.addEventListener('pointerup', e => {
-            isDragging = false;
+            if (drag.pointerId !== e.pointerId) return;
+            resetInteraction(drag);
+
             titleBar.releasePointerCapture(e.pointerId);
         });
     });
 }
 
 handleWindowInteraction();
+
+function moveElement(element, x, y, drag) {
+    const newPos = getPosBoundaryCheck(x, y, drag.dimensions);
+    element.style.left = newPos.x + 'px';
+    element.style.top = newPos.y + 'px';
+}
 
 function getPosBoundaryCheck(x, y, dimensions) {
     const contentRect = content.getBoundingClientRect();
