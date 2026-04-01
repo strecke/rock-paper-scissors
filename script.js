@@ -239,6 +239,18 @@ function handleWindowInteraction() {
         drag.active = false;
     }
 
+    function handleTitleBarButtons(e, win) {
+        const action = e.target.ariaLabel;
+        const appId = win.dataset.app;
+
+        if (action === 'Close') {
+            e.stopPropagation();
+            const relatedWindows = windowStack.filter(w =>
+                w.dataset.app === appId && !w.classList.contains('close'));
+            relatedWindows.forEach(closeWindow);
+        }
+    }
+
     windows.forEach(win => {
         const titleBar = win.querySelector('.title-bar');
         const drag = createInitialWindowDragState();
@@ -248,7 +260,10 @@ function handleWindowInteraction() {
         });
 
         titleBar.addEventListener('pointerdown', e => {
-            if (e.target.tagName === 'BUTTON') return;
+            if (e.target.tagName === 'BUTTON') {
+                handleTitleBarButtons(e, win);
+                return;
+            }
 
             titleBar.setPointerCapture(e.pointerId);
             startInteraction(e, win, drag);
@@ -305,8 +320,8 @@ function setWindowFocus(win) {
         w.classList.remove('active');
     });
     win.classList.add('active');
-    win.focus();
     win.classList.remove('close');
+    win.focus();
 }
 
 function closeWindow(win) {
