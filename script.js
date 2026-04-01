@@ -33,29 +33,66 @@ const content = document.querySelector('.content');
 const windows = content.querySelectorAll('.window');
 const desktopItems = content.querySelectorAll('.desktop-item');
 
-function moveDesktopItem() {
+function handleDesktopItemPointer() {
     let contentRect = content.getBoundingClientRect();
     desktopItems.forEach(dI => {
-        let isDragging = false;
         let offsetX = 0;
         let offsetY = 0;
         let dIDimensions = { x: 0, y: 0 };
-        let isOverWindow = false;
         let prevPos = { x: 0, y: 0 };
-        // todo rename di
-        dI.addEventListener('pointerdown', e => {
-            isDragging = true;
+        let dragState = {
+            pointerId: null,
+            startX: 0,
+            startY: 0,
+            active: false,
+            moved: false,
+            isOverWindow: false,
+            firstTarget: null,
+            firstElement: null,
+        };
+
+        const DRAG_THRESHOLD = 4;
+
+        function startInteraction(e, dI, dragState) {
+            dragState.pointerId = e.pointerId;
+            dragState.startX = e.clientX;
+            dragState.startY = e.clientY;
+
+            dragState.active = false;
+            dragState.moved = false;
+            dragState.isOverWindow = false;
+            dragState.firstTarget = e.target;
+
+            dragState.firstElement = document.activeElement;
+
             dI.setPointerCapture(e.pointerId);
+            dI.style.zIndex = Number(windows.length + 1);
+        }
+
+        dI.addEventListener('pointerdown', e => {
+            if (e.target.closest('.desktop-item-label-editor')) return;
+            startInteraction(e, dI, dragState);
+
             const rect = dI.getBoundingClientRect();
             dIDimensions = { x: rect.width, y: rect.height };
             offsetX = e.clientX - rect.left;
             offsetY = e.clientY - rect.top;
             prevPos = { x: rect.left, y: rect.top };
-            dI.style.zIndex = Number(windows.length + 1);
+            
         });
 
         dI.addEventListener('pointermove', e => {
-            if (!isDragging) return;
+            if (dragState.pointerId !== e.pointerId) return;
+            const dx = e.clientX - dragState.startX;
+            const dy = e.clientY - dragState.startY;
+            const distance = Math.hypot(dx, dy);
+
+            if (!dragState.active && distance >= DRAG_THRESHOLD) {
+                dragState.active = true;
+                dragState.moved = true;
+            }
+
+            if (!dragState.active) return;
 
             const x = e.clientX - offsetX;
             const y = e.clientY - offsetY;
@@ -64,30 +101,94 @@ function moveDesktopItem() {
             dI.style.pointerEvents = 'none';
             const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
             dI.style.pointerEvents = '';
-            
-            isOverWindow = !!elementBelow?.closest('.window');
-            dI.style.cursor = isOverWindow ? 'no-drop' : '';
+
+            dragState.isOverWindow = !!elementBelow?.closest('.window');
+            dI.style.cursor = dragState.isOverWindow ? 'no-drop' : '';
 
             dI.style.left = newPos.x + 'px';
             dI.style.top = newPos.y + 'px';
         });
 
         dI.addEventListener('pointerup', e => {
-            isDragging = false;
+            if (dragState.pointerId !== e.pointerId) return;
             dI.style.zIndex = '';
+            dI.style.cursor = '';
             dI.releasePointerCapture(e.pointerId);
 
-            if (isOverWindow) {
-                dI.style.left = prevPos.x + 'px';
-                dI.style.top = prevPos.y + 'px';
-                e.target.style.cursor = '';
+            if (dragState.active) {
+                if (dragState.isOverWindow) {
+                    dI.style.left = prevPos.x + 'px';
+                    dI.style.top = prevPos.y + 'px';
+                }
+            } else {
+                handleRenameLabel(dI, dragState.firstTarget, dragState.firstElement);
             }
-            isOverWindow = false;
+            dragState.pointerId = null;
+            dragState.active = false;
+            dragState.moved = false;
+            dragState.isOverWindow = false;
+            dragState.firstTarget = null;
+            dragState.firstElement = null;
         });
     });
 }
 
-moveDesktopItem();
+handleDesktopItemPointer();
+
+function handleRenameLabel(dI, target, element) {
+    const dILabel = dI.querySelector('.desktop-item-label');
+    if (!(target === dILabel && element === dI)) return;
+
+    //dI.classList.add('is-renaming');
+
+    const oldText = dILabel.textContent;
+    const editor = document.createElement('textarea');
+    editor.className = 'desktop-item-label-editor';
+    editor.value = oldText;
+    editor.maxLength = 32;
+
+    const newDILabel = document.createElement('span');
+    newDILabel.className = 'desktop-item-label';
+
+    let finished = false;
+
+    const finishRename = commit => {
+        if (finished) return;
+        finished = true;
+        newDILabel.textContent = commit && editor.value.length > 0 ? editor.value : oldText;
+        editor.replaceWith(newDILabel);
+        dI.focus();
+        //dI.classList.remove('is-renaming');
+    };
+
+    dILabel.replaceWith(editor);
+    editor.focus();
+    editor.select();
+    editor.style.height = editor.scrollHeight + 'px';
+
+    editor.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            finishRename(true);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            finishRename(false);
+        }
+    });
+
+    editor.addEventListener('blur', () => {
+        finishRename(true);
+    });
+
+    editor.addEventListener('pointerdown', e => {
+        e.stopPropagation();
+    });
+
+    editor.addEventListener('input', e => {
+        editor.style.height = 'auto';
+        editor.style.height = editor.scrollHeight + 'px';
+    });
+}
 
 function moveWindow() {
     windows.forEach(win => {

@@ -428,6 +428,7 @@ button.desktop-item {
     text-shadow: 1px 1px 0px black;
     box-sizing: border-box;
     touch-action: none;
+    outline: none;
 }
 
 .desktop-icon-container {
@@ -449,7 +450,8 @@ button.desktop-item {
     transform: rotate(90deg);
 }
 
-button.desktop-item:focus .desktop-icon-container::after {
+button.desktop-item:focus .desktop-icon-container::after,
+button.desktop-item:focus-visible .desktop-icon-container::after {
     opacity: 1;
 }
 
@@ -486,8 +488,7 @@ button.desktop-item:focus .desktop-icon-container::after {
     width: 70px;
 }
 
-button.desktop-item:hover:not(:focus) .desktop-item-label,
-button.desktop-item:focus-visible .desktop-item-label {
+button.desktop-item:hover:not(:focus, :focus-visible) .desktop-item-label {
     outline: 1px dotted #ff0000;
     outline-offset: -1px;
 }
@@ -499,6 +500,27 @@ button.desktop-item:focus-visible .desktop-item-label {
     color: white;
     outline: 1px dotted #ffff53;
     outline-offset: -1px;
+}
+
+.desktop-item-label-editor {
+    width: 70px;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.05;
+    box-sizing: border-box;
+    background: white;
+    color: black;
+    border: 1px solid navy;
+    padding: 0 2px;
+    text-align: center;
+    outline: none;
+    overflow: hidden;
+    resize: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+    pointer-events: auto;
+    touch-action: auto;
+    user-select: text;
 }
 
 /* scrollbar styles */
