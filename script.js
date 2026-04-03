@@ -430,6 +430,7 @@ function openApplication(appId) {
     appState.focusedWindow = focusedWindow;
     appState.minimized = false;
     appState.open = true;
+    appState.active = true;
     focusApplicationGroup(appId);
 }
 
@@ -468,6 +469,8 @@ function closeApplication(appId) {
     // app specific
     if (appId === 'rps') resetGame();
 }
+
+openApplication('rps');
 
 function closeApplicationGroup(appId) {
     const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
