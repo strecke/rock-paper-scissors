@@ -381,7 +381,7 @@ const appRegistry = {
             this.hooks[appId][event]();
         }
     },
-}
+};
 
 function createApplicationState(appId) {
     return {
@@ -481,47 +481,43 @@ function closeApplication(appId) {
     appRegistry.trigger(appId, 'onClose');
 }
 
+const taskbarManager = {
+    items: {},
+    init: function () {
+        const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
+        taskbarItems.forEach(item => {
+            const appId = item.dataset.app;
+            this.items[appId] = item;
+
+            item.addEventListener('click', () => {
+                const appState = getApplicationState(appId);
+                appState.active ? minimizeApplication(appId) : openApplication(appId);
+            });
+        });
+    },
+    setStatus: function (appId, status) {
+        const item = this.items[appId];
+        if (!item) return;
+        item.classList.remove('active', 'close');
+        if (status) item.classList.add(status);
+    }
+};
+
+taskbarManager.init();
+
 function closeApplicationGroup(appId) {
-    const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
-    taskbarItems.forEach(t => {
-        if (t.dataset.app === appId) t.classList.add('close');
-    });
+    taskbarManager.setStatus(appId, 'close');
 }
 
 function focusApplicationGroup(appId) {
-    const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
-    taskbarItems.forEach(t => {
-        if (t.dataset.app === appId) {
-            t.classList.add('active');
-            t.classList.remove('close');
-        } else {
-            t.classList.remove('active');
-        }
+    Object.keys(taskbarManager.items).forEach(id => {
+        taskbarManager.setStatus(id, id === appId ? 'active' : '');
     });
 }
 
 function unfocusApplicationGroup(appId) {
-    const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
-
-    taskbarItems.forEach(t => {
-        if (t.dataset.app === appId) t.classList.remove('active');
-    });
+    taskbarManager.setStatus(appId, '');
 }
-
-function handleTaskbarClick() {
-    const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
-
-    taskbarItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const appId = item.dataset.app;
-            const appState = getApplicationState(appId);
-
-            appState.active ? minimizeApplication(appId) : openApplication(appId);
-        });
-    });
-}
-
-handleTaskbarClick();
 
 // game-logic
 
