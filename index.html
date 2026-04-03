@@ -23,7 +23,7 @@
         <button class="theme-toggle">🌝</button>
     </div> -->
     <div class="content">
-        <button class="desktop-item">
+        <button class="desktop-item" data-app="rps">
             <span class="desktop-icon-container">
                 <img class="desktop-main-icon" src="hand.svg" alt="Peace Symbol" width="48" height="48">
                 <img class="desktop-shortcut-icon" src="arrow redo.svg" alt="Shortcut Symbol" width="13" height="13">
@@ -34,8 +34,8 @@
             <div class="title-bar">
                 <div class="title-bar-text">Rock, Paper, Scissors</div>
                 <div class="title-bar-controls">
-                    <button aria-label="Minimize">_</button>
-                    <button aria-label="Close">x</button>
+                    <button data-action="minimize" aria-label="Minimize">_</button>
+                    <button data-action="close" aria-label="Close">x</button>
                 </div>
             </div>
             <div class="window-content game-content">
