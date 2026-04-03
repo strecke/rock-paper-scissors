@@ -371,6 +371,18 @@ function syncFocusedWindow(appId) {
 
 const applicationStates = new Map();
 
+const appRegistry = {
+    hooks: {},
+    register: function (appId, appHooks) {
+        this.hooks[appId] = appHooks;
+    },
+    trigger: function (appId, event) {
+        if (this.hooks[appId] && typeof this.hooks[appId][event] === 'function') {
+            this.hooks[appId][event]();
+        }
+    },
+}
+
 function createApplicationState(appId) {
     return {
         appId,
@@ -458,7 +470,6 @@ function closeApplication(appId) {
     const visibleWindows = getVisibleApplicationWindows(appId);
     visibleWindows.forEach(closeWindow);
 
-
     appState.open = false;
     appState.minimized = false;
     appState.active = false;
@@ -467,10 +478,8 @@ function closeApplication(appId) {
     closeApplicationGroup(appId);
 
     // app specific
-    if (appId === 'rps') resetGame();
+    appRegistry.trigger(appId, 'onClose');
 }
-
-openApplication('rps');
 
 function closeApplicationGroup(appId) {
     const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
@@ -694,3 +703,11 @@ function renderFinalWindow() {
 
     setWindowFocus(finalWindow);
 }
+
+appRegistry.register('rps', {
+    onClose: () => {
+        resetGame();
+    }
+});
+
+openApplication('rps');
