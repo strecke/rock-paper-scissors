@@ -53,7 +53,7 @@ function handleDesktopItemInteraction() {
 
         dI.addEventListener('dblclick', e => {
             if (e.target.closest('.desktop-item-label-editor')) return;
-            openApplication(dI.dataset.app);
+            appManager.open(dI.dataset.app);
         });
 
         makeDraggable(dI, dI, {
@@ -169,8 +169,8 @@ function handleWindowInteraction() {
 
             const appId = win.dataset.app;
             const action = btn.dataset.action;
-            if (action === 'close') closeApplication(appId);
-            else if (action === 'minimize') minimizeApplication(appId);
+            if (action === 'close') appManager.close(appId);
+            else if (action === 'minimize') appManager.minimize(appId);
         });
 
         makeDraggable(titleBar, win, {
@@ -209,15 +209,15 @@ function getPosBoundaryCheck(x, y, dimensions) {
 
 const windowManager = {
     stack: [],
+
     init: function (allWindows) {
         this.stack = [...allWindows];
     },
+
     focus: function (win) {
         if (!win || win.classList.contains('active')) return;
 
         const appId = win.dataset.app;
-        const appState = getApplicationState(appId);
-        appState.focusedWindow = win;
 
         this.stack = this.stack.filter(w => w !== win);
         this.stack.push(win);
@@ -229,11 +229,10 @@ const windowManager = {
         win.classList.remove('close');
         win.focus();
     },
+
     close: function (win) {
         win.classList.add('close');
         win.classList.remove('active');
-        const appId = win.dataset.app;
-        syncFocusedWindow(appId);
         const newWindowFocus = this.stack.findLast(w =>
             !w.classList.contains('close') && !w.classList.contains('minimized')
         );
@@ -242,18 +241,6 @@ const windowManager = {
 };
 
 windowManager.init(windows);
-
-function syncFocusedWindow(appId) {
-    const appState = getApplicationState(appId);
-    const visible = getVisibleApplicationWindows(appId);
-    const mainWindow = getMainApplicationWindow(appId);
-
-    if (visible.includes(appState.focusedWindow)) return;
-
-    appState.focusedWindow = visible.includes(mainWindow)
-        ? mainWindow
-        : visible.at(-1) ?? null;
-}
 
 // drag-and-drop-logic
 
@@ -327,7 +314,90 @@ function makeDraggable(dragTarget, moveTarget, options = {}) {
 
 // application-logic
 
-const applicationStates = new Map();
+const appManager = {
+    states: new Map(),
+
+    init: function () {
+        const appIds = [...new Set([...document.querySelectorAll('.window')]
+            .map(win => win.dataset.app))];
+
+        appIds.forEach(appId => {
+            this.states.set(appId, {
+                appId,
+                open: false,
+                minimized: false,
+                active: false,
+            });
+        });
+    },
+
+    getState: function (appId) {
+        return this.states.get(appId);
+    },
+
+    getWindows: function (appId) {
+        return [...document.querySelectorAll(`.window[data-app="${appId}"]`)];
+    },
+
+    open: function (appId) {
+        const state = this.getState(appId);
+        const appWindows = this.getWindows(appId);
+        if (!appWindows.length) return;
+
+        const mainWindow = appWindows.find(w => w.classList.contains('mainWindow') || appWindows[0]);
+        
+        if (state.minimized) {
+            appWindows.forEach(win => win.classList.remove('minimized'));
+        } else {
+            mainWindow.classList.remove('minimized', 'close');
+        }
+
+        state.open = true;
+        state.minimized = false;
+        state.active = true;
+
+        windowManager.focus(mainWindow);
+        taskbarManager.setStatus(appId, 'active');
+        // focusApplicationGroup(appId);
+    },
+
+    minimize: function (appId) {
+        const state = this.getState(appId);
+        const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains('close'));
+
+        if (!visibleWindows.length) return;
+
+        state.minimized = true;
+        state.active = false;
+
+        visibleWindows.forEach(win => {
+            win.classList.add('minimized');
+            win.classList.remove('active');
+        });
+
+        taskbarManager.setStatus(appId, '');
+
+        const newWindowFocus = windowManager.stack.findLast(w =>
+            !w.classList.contains('close') && !w.classList.contains('minimized'));
+        if (newWindowFocus) windowManager.focus(newWindowFocus);
+    },
+
+    close: function (appId) {
+        const state = this.getState(appId);
+        const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains('close'));
+
+        visibleWindows.forEach(win => windowManager.close(win));
+
+        state.open = false;
+        state.minimized = false;
+        state.active = false;
+
+        taskbarManager.setStatus(appId, 'close');
+        appRegistry.trigger(appId, 'onClose');
+    }
+}
+
+appManager.init();
 
 const appRegistry = {
     hooks: {},
@@ -341,104 +411,6 @@ const appRegistry = {
     },
 };
 
-function createApplicationState(appId) {
-    return {
-        appId,
-        open: false, // app closed/not opened
-        minimized: false,
-        active: false, // app visible
-        focusedWindow: getMainApplicationWindow(appId),
-    };
-}
-
-function getApplicationState(appId) {
-    if (!applicationStates.has(appId)) {
-        applicationStates.set(appId, createApplicationState(appId));
-    }
-    return applicationStates.get(appId);
-}
-
-function initApplicationStates() {
-    const appIds = [...new Set([...windows].map(win => win.dataset.app))];
-    appIds.forEach(appId => {
-        applicationStates.set(appId, createApplicationState(appId));
-    });
-}
-
-initApplicationStates();
-
-function getAllApplicationWindows(appId) {
-    return [...windows].filter(w => w.dataset.app === appId);
-}
-
-function getVisibleApplicationWindows(appId) {
-    return getAllApplicationWindows(appId).filter(w => !w.classList.contains('close'));
-}
-
-function getMainApplicationWindow(appId) {
-    return getAllApplicationWindows(appId).find(w => w.classList.contains('main-window'))
-        ?? getAllApplicationWindows(appId)[0];
-}
-
-function openApplication(appId) {
-    const appState = getApplicationState(appId);
-    const appWindows = getAllApplicationWindows(appId);
-    const mainWindow = getMainApplicationWindow(appId);
-
-    if (!appWindows.length) return;
-
-    const focusedWindow = appState.focusedWindow && appWindows.includes(appState.focusedWindow)
-        ? appState.focusedWindow : mainWindow;
-
-    if (appState.minimized) {
-        appWindows.forEach(win => win.classList.remove('minimized'));
-    } else {
-        focusedWindow.classList.remove('minimized', 'close');
-    }
-
-    windowManager.focus(focusedWindow);
-    appState.focusedWindow = focusedWindow;
-    appState.minimized = false;
-    appState.open = true;
-    appState.active = true;
-    focusApplicationGroup(appId);
-}
-
-function minimizeApplication(appId) {
-    const appState = getApplicationState(appId);
-    const visibleWindows = getVisibleApplicationWindows(appId);
-
-    if (!visibleWindows.length) return;
-
-    appState.minimized = true;
-    appState.active = false;
-
-    visibleWindows.forEach(win => {
-        win.classList.add('minimized');
-        win.classList.remove('active');
-    });
-
-    unfocusApplicationGroup(appId);
-    const newWindowFocus = windowManager.stack.findLast(w => !w.classList.contains('close') && !w.classList.contains('minimized'));
-    windowManager.focus(newWindowFocus);
-}
-
-function closeApplication(appId) {
-    const appState = getApplicationState(appId);
-    const visibleWindows = getVisibleApplicationWindows(appId);
-    visibleWindows.forEach(win => windowManager.close(win));
-
-    appState.open = false;
-    appState.minimized = false;
-    appState.active = false;
-    appState.focusedWindow = null;
-
-    closeApplicationGroup(appId);
-
-    // app specific
-    appRegistry.trigger(appId, 'onClose');
-}
-
 const taskbarManager = {
     items: {},
     init: function () {
@@ -448,8 +420,8 @@ const taskbarManager = {
             this.items[appId] = item;
 
             item.addEventListener('click', () => {
-                const appState = getApplicationState(appId);
-                appState.active ? minimizeApplication(appId) : openApplication(appId);
+                const appState = appManager.getState(appId);
+                appState.active ? appManager.minimize(appId) : appManager.open(appId);
             });
         });
     },
@@ -462,20 +434,6 @@ const taskbarManager = {
 };
 
 taskbarManager.init();
-
-function closeApplicationGroup(appId) {
-    taskbarManager.setStatus(appId, 'close');
-}
-
-function focusApplicationGroup(appId) {
-    Object.keys(taskbarManager.items).forEach(id => {
-        taskbarManager.setStatus(id, id === appId ? 'active' : '');
-    });
-}
-
-function unfocusApplicationGroup(appId) {
-    taskbarManager.setStatus(appId, '');
-}
 
 // game-logic
 
@@ -534,7 +492,7 @@ function bindGameEvents() {
     });
 
     finalWindow.querySelector('button.exit').addEventListener('click', () => {
-        closeApplication('rps');
+        appManager.close('rps');
     })
 }
 
@@ -662,4 +620,4 @@ appRegistry.register('rps', {
     }
 });
 
-openApplication('rps');
+appManager.open('rps');
