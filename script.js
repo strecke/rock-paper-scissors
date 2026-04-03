@@ -36,40 +36,7 @@ const windows = content.querySelectorAll('.window');
 const desktopItems = content.querySelectorAll('.desktop-item');
 
 function handleDesktopItemInteraction() {
-    function createInitialInteractionState() {
-        return {
-            pointer: {
-                id: null,
-                startX: 0,
-                startY: 0,
-            },
-            drag: {
-                active: false,
-                moved: false,
-                offsetX: 0,
-                offsetY: 0,
-                dimensions: { x: 0, y: 0 },
-                prevPos: { x: 0, y: 0 },
-            },
-            drop: {
-                isOverWindow: false,
-            },
-            click: {
-                initialTarget: null,
-                initialElement: null,
-            }
-        };
-    }
-
-    function updateDragState(e, interaction, threshold) {
-        const dx = e.clientX - interaction.pointer.startX;
-        const dy = e.clientY - interaction.pointer.startY;
-        const distance = Math.hypot(dx, dy);
-        if (!interaction.drag.active && distance >= threshold) {
-            interaction.drag.active = true;
-            interaction.drag.moved = true;
-        }
-    }
+    const DRAG_THRESHOLD = 4;
 
     function detectDropTargetIsWindow(e, dI) {
         dI.style.pointerEvents = 'none';
@@ -78,85 +45,45 @@ function handleDesktopItemInteraction() {
         return !!elementBelow?.closest('.window');
     }
 
-    function startInteraction(e, dI, interaction) {
-        interaction.pointer.id = e.pointerId;
-        interaction.pointer.startX = e.clientX;
-        interaction.pointer.startY = e.clientY;
-
-        const rect = dI.getBoundingClientRect();
-        interaction.drag.active = false;
-        interaction.drag.moved = false;
-        interaction.drag.offsetX = e.clientX - rect.left;
-        interaction.drag.offsetY = e.clientY - rect.top;
-        interaction.drag.startPos = { x: rect.left, y: rect.top };
-        interaction.drag.dimensions = { x: rect.width, y: rect.height };
-
-        interaction.drop.isOverWindow = false;
-
-        interaction.click.initialTarget = e.target;
-        interaction.click.initialElement = document.activeElement;
-
-        dI.setPointerCapture(e.pointerId);
-        dI.style.zIndex = Number(windows.length + 1);
-    }
-
-    function resetInteraction(interaction) {
-        interaction.pointer.id = null;
-        interaction.drag.active = false;
-        interaction.drag.moved = false;
-        interaction.drop.isOverWindow = false;
-        interaction.click.initialTarget = null;
-        interaction.click.initialElement = null;
-    }
-
-    const DRAG_THRESHOLD = 4;
-
     desktopItems.forEach(dI => {
-        const interaction = createInitialInteractionState();
+        let startPos = { x: 0, y: 0 };
+        let isOverWindow = false;
+        let initialTarget = null;
+        let initialActiveElement = null;
 
         dI.addEventListener('dblclick', e => {
             if (e.target.closest('.desktop-item-label-editor')) return;
             openApplication(dI.dataset.app);
         });
 
-        dI.addEventListener('pointerdown', e => {
-            if (e.target.closest('.desktop-item-label-editor')) return;
-            startInteraction(e, dI, interaction);
-        });
+        makeDraggable(dI, dI, {
+            threshold: DRAG_THRESHOLD,
+            ignoreSelectors: '.desktop-item-label-editor',
+            onStart: e => {
+                const rect = dI.getBoundingClientRect();
+                startPos = { x: rect.left, y: rect.top };
+                initialTarget = e.target;
+                initialActiveElement = document.activeElement;
+                dI.style.zIndex = windows.length + 1;
+            },
+            onMove: (e, interaction, x, y) => {
+                moveElement(dI, x, y, interaction);
+                isOverWindow = detectDropTargetIsWindow(e, dI);
+                dI.style.cursor = isOverWindow ? 'no-drop' : '';
+            },
+            onEnd: (e, interaction) => {
+                dI.style.zIndex = '';
+                dI.style.cursor = '';
 
-        dI.addEventListener('pointermove', e => {
-            if (interaction.pointer.id !== e.pointerId) return;
-
-            updateDragState(e, interaction, DRAG_THRESHOLD);
-
-            if (!interaction.drag.active) return;
-
-            const x = e.clientX - interaction.drag.offsetX;
-            const y = e.clientY - interaction.drag.offsetY;
-            moveElement(dI, x, y, interaction.drag)
-
-            interaction.drop.isOverWindow = detectDropTargetIsWindow(e, dI);
-            dI.style.cursor = interaction.drop.isOverWindow ? 'no-drop' : '';
-        });
-
-        dI.addEventListener('pointerup', e => {
-            if (interaction.pointer.id !== e.pointerId) return;
-
-            dI.releasePointerCapture(e.pointerId);
-            dI.style.zIndex = '';
-            dI.style.cursor = '';
-
-            if (interaction.drag.active) {
-                if (interaction.drop.isOverWindow) {
-                    const pos = interaction.drag.startPos;
-                    dI.style.left = pos.x + 'px';
-                    dI.style.top = pos.y + 'px';
+                if (interaction.moved) {
+                    if (isOverWindow) {
+                        dI.style.left = startPos.x + 'px';
+                        dI.style.top = startPos.y + 'px';
+                    }
+                } else {
+                    handleRenameLabel(dI, initialTarget, initialActiveElement);
                 }
-            } else {
-                handleRenameLabel(dI, interaction.click.initialTarget, interaction.click.initialElement);
             }
-            resetInteraction(interaction);
-
         });
     });
 }
@@ -228,80 +155,32 @@ function handleRenameLabel(dI, target, element) {
 // window-logic
 
 function handleWindowInteraction() {
-    function createInitialWindowInteraction() {
-        return {
-            pointerId: null,
-            active: false,
-            offsetX: 0,
-            offsetY: 0,
-            dimensions: { x: 0, y: 0 },
-        };
-    }
-
-    function startInteraction(e, win, interaction) {
-        interaction.pointerId = e.pointerId;
-        interaction.active = true;
-        const rect = win.getBoundingClientRect();
-        interaction.dimensions = { x: rect.width, y: rect.height };
-        interaction.offsetX = e.clientX - rect.left;
-        interaction.offsetY = e.clientY - rect.top;
-
-        win.style.transform = 'none';
-        win.style.left = rect.left + 'px';
-        win.style.top = rect.top + 'px';
-    }
-
-    function resetInteraction(interaction) {
-        interaction.pointerId = null;
-        interaction.active = false;
-    }
-
-    function handleTitleBarButtons(action, win) {
-        const appId = win.dataset.app;
-
-        if (action === 'close') {
-            closeApplication(appId);
-        } else if (action === 'minimize') {
-            minimizeApplication(appId);
-        }
-    }
-
     windows.forEach(win => {
         const titleBar = win.querySelector('.title-bar');
-        const interaction = createInitialWindowInteraction();
 
         win.addEventListener('pointerdown', () => {
             windowManager.focus(win);
-        });
-
-        titleBar.addEventListener('pointerdown', e => {
-            const btn = e.target.closest('button[data-action]');
-            if (btn) return;
-
-            titleBar.setPointerCapture(e.pointerId);
-            startInteraction(e, win, interaction);
         });
 
         titleBar.addEventListener('click', e => {
             const btn = e.target.closest('button[data-action]');
             if (!btn) return;
             e.stopPropagation();
-            handleTitleBarButtons(btn.dataset.action, win);
+
+            const appId = win.dataset.app;
+            const action = btn.dataset.action;
+            if (action === 'close') closeApplication(appId);
+            else if (action === 'minimize') minimizeApplication(appId);
         });
 
-        titleBar.addEventListener('pointermove', e => {
-            if (!interaction.active || interaction.pointerId !== e.pointerId) return;
-
-            const x = e.clientX - interaction.offsetX;
-            const y = e.clientY - interaction.offsetY;
-            moveElement(win, x, y, interaction);
-        });
-
-        titleBar.addEventListener('pointerup', e => {
-            if (interaction.pointerId !== e.pointerId) return;
-
-            resetInteraction(interaction);
-            titleBar.releasePointerCapture(e.pointerId);
+        makeDraggable(titleBar, win, {
+            ignoreSelectors: 'button[data-action]',
+            onStart: () => {
+                const rect = win.getBoundingClientRect();
+                win.style.transform = 'none';
+                win.style.left = rect.left + 'px';
+                win.style.top = rect.top + 'px';
+            },
         });
     });
 }
@@ -374,6 +253,76 @@ function syncFocusedWindow(appId) {
     appState.focusedWindow = visible.includes(mainWindow)
         ? mainWindow
         : visible.at(-1) ?? null;
+}
+
+// drag-and-drop-logic
+
+function makeDraggable(dragTarget, moveTarget, options = {}) {
+    let interaction = {
+        pointerId: null,
+        active: false,
+        moved: false,
+        startX: 0,
+        startY: 0,
+        offsetX: 0,
+        offsetY: 0,
+        dimensions: { x: 0, y: 0 },
+    };
+
+    const threshold = options.threshold || 0;
+
+    dragTarget.addEventListener('pointerdown', e => {
+        if (options.ignoreSelectors && e.target.closest(options.ignoreSelectors)) return;
+
+        interaction.pointerId = e.pointerId;
+        interaction.active = false;
+        interaction.moved = false;
+        interaction.startX = e.clientX;
+        interaction.startY = e.clientY;
+
+        const rect = moveTarget.getBoundingClientRect();
+        interaction.dimensions = { x: rect.width, y: rect.height };
+        interaction.offsetX = e.clientX - rect.left;
+        interaction.offsetY = e.clientY - rect.top;
+
+        dragTarget.setPointerCapture(e.pointerId);
+
+        if (options.onStart) options.onStart(e, interaction);
+    });
+
+    dragTarget.addEventListener('pointermove', e => {
+        if (interaction.pointerId !== e.pointerId) return;
+
+        const dx = e.clientX - interaction.startX;
+        const dy = e.clientY - interaction.startY;
+        const distance = Math.hypot(dx, dy);
+
+        if (!interaction.active && distance >= threshold) {
+            interaction.active = true;
+            interaction.moved = true;
+        }
+
+        if (!interaction.active) return;
+
+        const x = e.clientX - interaction.offsetX;
+        const y = e.clientY - interaction.offsetY;
+
+        if (options.onMove) {
+            options.onMove(e, interaction, x, y);
+        } else {
+            moveElement(moveTarget, x, y, interaction);
+        }
+    });
+
+    dragTarget.addEventListener('pointerup', e => {
+        if (interaction.pointerId !== e.pointerId) return;
+
+        interaction.active = false;
+        dragTarget.releasePointerCapture(e.pointerId);
+
+        if (options.onEnd) options.onEnd(e, interaction);
+        interaction.pointerId = null;
+    });
 }
 
 // application-logic
