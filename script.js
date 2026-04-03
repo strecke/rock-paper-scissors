@@ -344,19 +344,22 @@ const appManager = {
         const appWindows = this.getWindows(appId);
         if (!appWindows.length) return;
 
-        const mainWindow = appWindows.find(w => w.classList.contains('mainWindow') || appWindows[0]);
-        
+        const lastFocused = windowManager.stack.findLast(w =>
+            w.dataset.app === appId && !w.classList.contains('close'));
+
+        const windowToFocus = lastFocused || appWindows.find(w => w.classList.contains('main-window')) || appWindows[0];
+
         if (state.minimized) {
             appWindows.forEach(win => win.classList.remove('minimized'));
         } else {
-            mainWindow.classList.remove('minimized', 'close');
+            windowToFocus.classList.remove('minimized', 'close');
         }
 
         state.open = true;
         state.minimized = false;
         state.active = true;
 
-        windowManager.focus(mainWindow);
+        windowManager.focus(windowToFocus);
         taskbarManager.setStatus(appId, 'active');
         // focusApplicationGroup(appId);
     },
