@@ -271,7 +271,7 @@ function handleWindowInteraction() {
         const interaction = createInitialWindowInteraction();
 
         win.addEventListener('pointerdown', () => {
-            setWindowFocus(win);
+            windowManager.focus(win);
         });
 
         titleBar.addEventListener('pointerdown', e => {
@@ -328,32 +328,41 @@ function getPosBoundaryCheck(x, y, dimensions) {
     return { x: newPosLeft, y: newPosTop };
 }
 
-let windowStack = [...windows];
+const windowManager = {
+    stack: [],
+    init: function (allWindows) {
+        this.stack = [...allWindows];
+    },
+    focus: function (win) {
+        if (!win || win.classList.contains('active')) return;
 
-function setWindowFocus(win) {
-    if (!win) return;
-    if (win.classList.contains('active')) return;
-    const appState = getApplicationState(win.dataset.app);
-    appState.focusedWindow = win;
-    windowStack = windowStack.filter(w => w !== win);
-    windowStack.push(win);
-    windowStack.forEach((w, i) => {
-        w.style.zIndex = i + 1;
-        w.classList.remove('active');
-    });
-    win.classList.add('active');
-    win.classList.remove('close');
-    win.focus();
-}
+        const appId = win.dataset.app;
+        const appState = getApplicationState(appId);
+        appState.focusedWindow = win;
 
-function closeWindow(win) {
-    win.classList.add('close');
-    win.classList.remove('active');
-    syncFocusedWindow(win.dataset.app);
+        this.stack = this.stack.filter(w => w !== win);
+        this.stack.push(win);
+        this.stack.forEach((w, i) => {
+            w.style.zIndex = i + 1;
+            w.classList.remove('active');
+        });
+        win.classList.add('active');
+        win.classList.remove('close');
+        win.focus();
+    },
+    close: function (win) {
+        win.classList.add('close');
+        win.classList.remove('active');
+        const appId = win.dataset.app;
+        syncFocusedWindow(appId);
+        const newWindowFocus = this.stack.findLast(w =>
+            !w.classList.contains('close') && !w.classList.contains('minimized')
+        );
+        this.focus(newWindowFocus);
+    },
+};
 
-    const newWindowFocus = windowStack.findLast(w => !w.classList.contains('close') && !w.classList.contains('minimized'));
-    setWindowFocus(newWindowFocus);
-}
+windowManager.init(windows);
 
 function syncFocusedWindow(appId) {
     const appState = getApplicationState(appId);
@@ -438,7 +447,7 @@ function openApplication(appId) {
         focusedWindow.classList.remove('minimized', 'close');
     }
 
-    setWindowFocus(focusedWindow);
+    windowManager.focus(focusedWindow);
     appState.focusedWindow = focusedWindow;
     appState.minimized = false;
     appState.open = true;
@@ -461,14 +470,14 @@ function minimizeApplication(appId) {
     });
 
     unfocusApplicationGroup(appId);
-    const newWindowFocus = windowStack.findLast(w => !w.classList.contains('close') && !w.classList.contains('minimized'));
-    setWindowFocus(newWindowFocus);
+    const newWindowFocus = windowManager.stack.findLast(w => !w.classList.contains('close') && !w.classList.contains('minimized'));
+    windowManager.focus(newWindowFocus);
 }
 
 function closeApplication(appId) {
     const appState = getApplicationState(appId);
     const visibleWindows = getVisibleApplicationWindows(appId);
-    visibleWindows.forEach(closeWindow);
+    visibleWindows.forEach(win => windowManager.close(win));
 
     appState.open = false;
     appState.minimized = false;
@@ -544,7 +553,7 @@ function handleUserChoice(userChoice) {
     renderGameState(gameState);
 
     const roundWindow = document.querySelector('.round-window');
-    setWindowFocus(roundWindow);
+    windowManager.focus(roundWindow);
 }
 
 function resetGame() {
@@ -564,21 +573,19 @@ function bindGameEvents() {
 
     const roundWindow = document.querySelector('.round-window');
     roundWindow.querySelector('button').addEventListener('click', () => {
-        closeWindow(roundWindow);
+        windowManager.close(roundWindow);
         if (gameState.isLastRound) renderFinalWindow();
     });
 
     const finalWindow = document.querySelector('.final-window');
     finalWindow.querySelector('button.new').addEventListener('click', () => {
         resetGame();
-        closeWindow(finalWindow);
-        setWindowFocus(gameWindow);
+        windowManager.close(finalWindow);
+        windowManager.focus(gameWindow);
     });
 
     finalWindow.querySelector('button.exit').addEventListener('click', () => {
-        resetGame();
-        closeWindow(finalWindow);
-        closeWindow(gameWindow);
+        closeApplication('rps');
     })
 }
 
@@ -697,7 +704,7 @@ function renderFinalWindow() {
 
     renderHistoryTable(tBody, gameState.roundHistory);
 
-    setWindowFocus(finalWindow);
+    windowManager.focus(finalWindow);
 }
 
 appRegistry.register('rps', {
