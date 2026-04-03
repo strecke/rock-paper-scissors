@@ -29,6 +29,8 @@ function initClock() {
 
 initClock();
 
+// desktop-item-logic
+
 const content = document.querySelector('.content');
 const windows = content.querySelectorAll('.window');
 const desktopItems = content.querySelectorAll('.desktop-item');
@@ -111,6 +113,11 @@ function handleDesktopItemInteraction() {
 
     desktopItems.forEach(dI => {
         const interaction = createInitialInteractionState();
+
+        dI.addEventListener('dblclick', e => {
+            if (e.target.closest('.desktop-item-label-editor')) return;
+            openApplication(dI.dataset.app);
+        });
 
         dI.addEventListener('pointerdown', e => {
             if (e.target.closest('.desktop-item-label-editor')) return;
@@ -208,10 +215,20 @@ function handleRenameLabel(dI, target, element) {
         editor.style.height = 'auto';
         editor.style.height = editor.scrollHeight + 'px';
     });
+
+    editor.addEventListener('dblclick', e => {
+        e.stopPropagation()
+    });
+
+    editor.addEventListener('click', e => {
+        e.stopPropagation();
+    })
 }
 
+// window-logic
+
 function handleWindowInteraction() {
-    function createInitialWindowDragState() {
+    function createInitialWindowInteraction() {
         return {
             pointerId: null,
             active: false,
@@ -221,66 +238,69 @@ function handleWindowInteraction() {
         };
     }
 
-    function startInteraction(e, win, drag) {
-        drag.pointerId = e.pointerId;
-        drag.active = true;
+    function startInteraction(e, win, interaction) {
+        interaction.pointerId = e.pointerId;
+        interaction.active = true;
         const rect = win.getBoundingClientRect();
-        drag.dimensions = { x: rect.width, y: rect.height };
-        drag.offsetX = e.clientX - rect.left;
-        drag.offsetY = e.clientY - rect.top;
+        interaction.dimensions = { x: rect.width, y: rect.height };
+        interaction.offsetX = e.clientX - rect.left;
+        interaction.offsetY = e.clientY - rect.top;
 
         win.style.transform = 'none';
         win.style.left = rect.left + 'px';
         win.style.top = rect.top + 'px';
     }
 
-    function resetInteraction(drag) {
-        drag.pointerId = null;
-        drag.active = false;
+    function resetInteraction(interaction) {
+        interaction.pointerId = null;
+        interaction.active = false;
     }
 
-    function handleTitleBarButtons(e, win) {
-        const action = e.target.ariaLabel;
+    function handleTitleBarButtons(action, win) {
         const appId = win.dataset.app;
 
-        if (action === 'Close') {
-            e.stopPropagation();
-            const relatedWindows = windowStack.filter(w =>
-                w.dataset.app === appId && !w.classList.contains('close'));
-            relatedWindows.forEach(closeWindow);
+        if (action === 'close') {
+            closeApplication(appId);
+        } else if (action === 'minimize') {
+            minimizeApplication(appId);
         }
     }
 
     windows.forEach(win => {
         const titleBar = win.querySelector('.title-bar');
-        const drag = createInitialWindowDragState();
+        const interaction = createInitialWindowInteraction();
 
         win.addEventListener('pointerdown', () => {
             setWindowFocus(win);
         });
 
         titleBar.addEventListener('pointerdown', e => {
-            if (e.target.tagName === 'BUTTON') {
-                handleTitleBarButtons(e, win);
-                return;
-            }
+            const btn = e.target.closest('button[data-action]');
+            if (btn) return;
 
             titleBar.setPointerCapture(e.pointerId);
-            startInteraction(e, win, drag);
+            startInteraction(e, win, interaction);
+        });
+
+        titleBar.addEventListener('click', e => {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+            e.stopPropagation();
+            handleTitleBarButtons(btn.dataset.action, win);
         });
 
         titleBar.addEventListener('pointermove', e => {
-            if (!drag.active || drag.pointerId !== e.pointerId) return;
+            if (!interaction.active || interaction.pointerId !== e.pointerId) return;
 
-            const x = e.clientX - drag.offsetX;
-            const y = e.clientY - drag.offsetY;
-            moveElement(win, x, y, drag);
+            const x = e.clientX - interaction.offsetX;
+            const y = e.clientY - interaction.offsetY;
+            moveElement(win, x, y, interaction);
         });
 
         titleBar.addEventListener('pointerup', e => {
-            if (drag.pointerId !== e.pointerId) return;
-            resetInteraction(drag);
+            if (interaction.pointerId !== e.pointerId) return;
 
+            resetInteraction(interaction);
             titleBar.releasePointerCapture(e.pointerId);
         });
     });
@@ -313,6 +333,8 @@ let windowStack = [...windows];
 function setWindowFocus(win) {
     if (!win) return;
     if (win.classList.contains('active')) return;
+    const appState = getApplicationState(win.dataset.app);
+    appState.focusedWindow = win;
     windowStack = windowStack.filter(w => w !== win);
     windowStack.push(win);
     windowStack.forEach((w, i) => {
@@ -327,9 +349,167 @@ function setWindowFocus(win) {
 function closeWindow(win) {
     win.classList.add('close');
     win.classList.remove('active');
-    const newWindowFocus = windowStack.findLast(w => !w.classList.contains('close'));
+    syncFocusedWindow(win.dataset.app);
+
+    const newWindowFocus = windowStack.findLast(w => !w.classList.contains('close') && !w.classList.contains('minimized'));
     setWindowFocus(newWindowFocus);
 }
+
+function syncFocusedWindow(appId) {
+    const appState = getApplicationState(appId);
+    const visible = getVisibleApplicationWindows(appId);
+    const mainWindow = getMainApplicationWindow(appId);
+
+    if (visible.includes(appState.focusedWindow)) return;
+
+    appState.focusedWindow = visible.includes(mainWindow)
+        ? mainWindow
+        : visible.at(-1) ?? null;
+}
+
+// application-logic
+
+const applicationStates = new Map();
+
+function createApplicationState(appId) {
+    return {
+        appId,
+        open: false, // app closed/not opened
+        minimized: false,
+        active: false, // app visible
+        focusedWindow: getMainApplicationWindow(appId),
+    };
+}
+
+function getApplicationState(appId) {
+    if (!applicationStates.has(appId)) {
+        applicationStates.set(appId, createApplicationState(appId));
+    }
+    return applicationStates.get(appId);
+}
+
+function initApplicationStates() {
+    const appIds = [...new Set([...windows].map(win => win.dataset.app))];
+    appIds.forEach(appId => {
+        applicationStates.set(appId, createApplicationState(appId));
+    });
+}
+
+initApplicationStates();
+
+function getAllApplicationWindows(appId) {
+    return [...windows].filter(w => w.dataset.app === appId);
+}
+
+function getVisibleApplicationWindows(appId) {
+    return getAllApplicationWindows(appId).filter(w => !w.classList.contains('close'));
+}
+
+function getMainApplicationWindow(appId) {
+    return getAllApplicationWindows(appId).find(w => w.classList.contains('main-window'))
+        ?? getAllApplicationWindows(appId)[0];
+}
+
+function openApplication(appId) {
+    const appState = getApplicationState(appId);
+    const appWindows = getAllApplicationWindows(appId);
+    const mainWindow = getMainApplicationWindow(appId);
+
+    if (!appWindows.length) return;
+
+    const focusedWindow = appState.focusedWindow && appWindows.includes(appState.focusedWindow)
+        ? appState.focusedWindow : mainWindow;
+
+    if (appState.minimized) {
+        appWindows.forEach(win => win.classList.remove('minimized'));
+    } else {
+        focusedWindow.classList.remove('minimized', 'close');
+    }
+
+    setWindowFocus(focusedWindow);
+    appState.focusedWindow = focusedWindow;
+    appState.minimized = false;
+    appState.open = true;
+    focusApplicationGroup(appId);
+}
+
+function minimizeApplication(appId) {
+    const appState = getApplicationState(appId);
+    const visibleWindows = getVisibleApplicationWindows(appId);
+
+    if (!visibleWindows.length) return;
+
+    appState.minimized = true;
+    appState.active = false;
+
+    visibleWindows.forEach(win => {
+        win.classList.add('minimized');
+        win.classList.remove('active');
+    });
+
+    unfocusApplicationGroup(appId);
+    const newWindowFocus = windowStack.findLast(w => !w.classList.contains('close') && !w.classList.contains('minimized'));
+    setWindowFocus(newWindowFocus);
+}
+
+function closeApplication(appId) {
+    const appState = getApplicationState(appId);
+    const visibleWindows = getVisibleApplicationWindows(appId);
+    visibleWindows.forEach(closeWindow);
+
+
+    appState.open = false;
+    appState.minimized = false;
+    appState.active = false;
+    appState.focusedWindow = null;
+
+    closeApplicationGroup(appId);
+
+    // app specific
+    if (appId === 'rps') resetGame();
+}
+
+function closeApplicationGroup(appId) {
+    const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
+    taskbarItems.forEach(t => {
+        if (t.dataset.app === appId) t.classList.add('close');
+    });
+}
+
+function focusApplicationGroup(appId) {
+    const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
+    taskbarItems.forEach(t => {
+        if (t.dataset.app === appId) {
+            t.classList.add('active');
+            t.classList.remove('close');
+        } else {
+            t.classList.remove('active');
+        }
+    });
+}
+
+function unfocusApplicationGroup(appId) {
+    const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
+
+    taskbarItems.forEach(t => {
+        if (t.dataset.app === appId) t.classList.remove('active');
+    });
+}
+
+function handleTaskbarClick() {
+    const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
+
+    taskbarItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const appId = item.dataset.app;
+            const appState = getApplicationState(appId);
+
+            appState.active ? minimizeApplication(appId) : openApplication(appId);
+        });
+    });
+}
+
+handleTaskbarClick();
 
 // game-logic
 
@@ -364,7 +544,7 @@ function resetGame() {
     renderGameState(gameState);
 }
 
-function bindEvents() {
+function bindGameEvents() {
     const gameWindow = document.querySelector('.game-window');
     const gameContent = gameWindow.querySelector('.game-content');
     const rpsButtons = gameContent.querySelectorAll('section button');
@@ -394,7 +574,7 @@ function bindEvents() {
     })
 }
 
-bindEvents();
+bindGameEvents();
 
 function getComputerChoice() {
     return ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
