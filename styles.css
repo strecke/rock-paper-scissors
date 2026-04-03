@@ -9,6 +9,12 @@ button:disabled {
     pointer-events: none;
 }
 
+@font-face {
+    font-display: swap;
+    font-family: "VT323";
+    src: url('VT323-Regular.ttf');
+}
+
 * {
     font-family: "VT323", monospace;
     font-weight: 400;
