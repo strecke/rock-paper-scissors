@@ -440,186 +440,140 @@ taskbarManager.init();
 
 // game-logic
 
-const WIN_SCORE = 5;
+const rpsGame = {
+    WIN_SCORE: 5,
+    BEATS: { rock: 'scissors', paper: 'rock', scissors: 'paper' },
+    NAMES: { rock: 'Rock', paper: 'Paper', scissors: 'Scissors' },
+    state: {},
+    
+    init: function () {
+        this.bindEvents();
+        this.reset();
+    },
+    reset: function () {
+        this.state = {
+            userScore: 0,
+            computerScore: 0,
+            roundCounter: 1,
+            roundHistory: [],
+            isGameOver: false,
+            lastRound: null,
+        };
+        this.renderGameState();
+    },
 
-function createInitialGameState() {
-    return {
-        userScore: 0,
-        computerScore: 0,
-        roundCounter: 1,
-        roundHistory: [],
-        rpsButtonsDisabled: false,
-        isLastRound: false,
-        lastRound: null,
-    };
-}
+    bindEvents: function () {
+        const gameWindow = document.querySelector('.game-window[data-app="rps"]');
+        const rpsButtons = gameWindow.querySelectorAll('.game-content section button');
 
-let gameState = createInitialGameState();
-
-function handleUserChoice(userChoice) {
-    gameState = playRound(gameState, userChoice);
-
-    renderRound(gameState.lastRound);
-    renderGameState(gameState);
-
-    const roundWindow = document.querySelector('.round-window');
-    windowManager.focus(roundWindow);
-}
-
-function resetGame() {
-    gameState = createInitialGameState();
-    renderGameState(gameState);
-}
-
-function bindGameEvents() {
-    const gameWindow = document.querySelector('.game-window');
-    const gameContent = gameWindow.querySelector('.game-content');
-    const rpsButtons = gameContent.querySelectorAll('section button');
-    rpsButtons.forEach(b => {
-        b.addEventListener('click', () => {
-            handleUserChoice(b.dataset.choice);
+        rpsButtons.forEach(b => {
+            b.addEventListener('click', () => this.handleUserChoice(b.dataset.choice));
         });
-    });
 
-    const roundWindow = document.querySelector('.round-window');
-    roundWindow.querySelector('button').addEventListener('click', () => {
-        windowManager.close(roundWindow);
-        if (gameState.isLastRound) renderFinalWindow();
-    });
+        const roundWindow = document.querySelector('.round-window[data-app="rps"]');
+        roundWindow.querySelector('button').addEventListener('click', () => {
+            windowManager.close(roundWindow);
+            if (this.state.isGameOver) this.renderFinalWindow();
+        });
 
-    const finalWindow = document.querySelector('.final-window');
-    finalWindow.querySelector('button.new').addEventListener('click', () => {
-        resetGame();
-        windowManager.close(finalWindow);
-        windowManager.focus(gameWindow);
-    });
+        const finalWindow = document.querySelector('.final-window[data-app="rps"]');
+        finalWindow.querySelector('button.new').addEventListener('click', () => {
+            this.reset();
+            windowManager.close(finalWindow);
+            windowManager.focus(gameWindow);
+        });
 
-    finalWindow.querySelector('button.exit').addEventListener('click', () => {
-        appManager.close('rps');
-    })
-}
+        finalWindow.querySelector('button.exit').addEventListener('click', () => {
+            this.reset();
+            appManager.close('rps');
+        });
+    },
 
-bindGameEvents();
+    handleUserChoice: function (userChoice) {
+        const computerChoice = ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
+        const isTie = userChoice === computerChoice;
+        const isUserWinner = !isTie && this.BEATS[userChoice] === computerChoice;
 
-function getComputerChoice() {
-    return ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
-}
+        this.state.userScore += isUserWinner ? 1 : 0;
+        this.state.computerScore += (isTie || isUserWinner) ? 0 : 1;
+        this.state.isGameOver = this.state.userScore >= this.WIN_SCORE || this.state.computerScore >= this.WIN_SCORE;
 
-const BEATS = { rock: 'scissors', paper: 'rock', scissors: 'paper', };
-const NAMES = { rock: 'Rock', paper: 'Paper', scissors: 'Scissors', };
+        this.state.lastRound = {
+            round: this.state.roundCounter++,
+            userLabel: this.NAMES[userChoice],
+            computerLabel: this.NAMES[computerChoice],
+            isTie,
+            isUserWinner,
+        };
 
-function playRound(state, userChoice) {
-    const computerChoice = getComputerChoice();
-    const isTie = userChoice === computerChoice;
-    const isUserWinner = !isTie && BEATS[userChoice] === computerChoice;
-    const nextUserScore = state.userScore + (isUserWinner ? 1 : 0);
-    const nextComputerScore = state.computerScore + (isTie || isUserWinner ? 0 : 1);
+        this.state.roundHistory.push(this.state.lastRound);
 
-    const round = {
-        round: state.roundCounter,
-        userChoice,
-        computerChoice,
-        userLabel: NAMES[userChoice],
-        computerLabel: NAMES[computerChoice],
-        isTie,
-        isUserWinner,
-    };
+        this.renderRound();
+        this.renderGameState();
 
-    const isGameOver = nextUserScore >= WIN_SCORE || nextComputerScore >= WIN_SCORE;
+        const roundWindow = document.querySelector('.round-window[data-app="rps"]');
+        appManager.open('rps');
+        windowManager.focus(roundWindow);
+    },
 
-    return {
-        ...state,
-        userScore: nextUserScore,
-        computerScore: nextComputerScore,
-        roundCounter: state.roundCounter + 1,
-        roundHistory: [...state.roundHistory, round],
-        rpsButtonsDisabled: isGameOver,
-        isLastRound: isGameOver,
-        lastRound: round,
-    };
-}
+    renderRound: function () {
+        const round = this.state.lastRound;
+        const roundWindow = document.querySelector('.round-window[data-app="rps"]');
 
-function renderRound(round) {
-    const roundWindow = document.querySelector('.round-window');
-    const roundTitle = roundWindow.querySelector('.title-bar-text');
-    const userSelection = roundWindow.querySelector('.user-selection');
-    const computerSelection = roundWindow.querySelector('.computer-selection');
-    const resultMessage = roundWindow.querySelector('.result-message');
+        roundWindow.querySelector('.title-bar-text').textContent = `Results Round ${round.round}`;
+        roundWindow.querySelector('.user-selection').textContent = `User Chose: ${round.userLabel}`;
+        roundWindow.querySelector('.computer-selection').textContent = `Computer Chose: ${round.computerLabel}`;
 
+        const resultMessage = roundWindow.querySelector('.result-message');
+        if (round.isTie) resultMessage.textContent = `It’s a tie!`;
+        else if (round.isUserWinner) resultMessage.textContent = `You Win! ${round.userLabel} beats ${round.computerLabel}`;
+        else resultMessage.textContent = `You Lose! ${round.computerLabel} beats ${round.userLabel}`;
+    },
 
-    roundTitle.textContent = `Results Round ${round.round}`;
-    userSelection.textContent = `User Chose: ${round.userLabel}`;
-    computerSelection.textContent = `Computer Chose: ${round.computerLabel}`;
+    renderGameState: function () {
+        const gameWindow = document.querySelector('.game-window[data-app="rps"]');
+        const roundWindow = document.querySelector('.round-window[data-app="rps"]');
 
-    if (round.isTie) {
-        resultMessage.textContent = `It’s a tie!`;
-    } else if (round.isUserWinner) {
-        resultMessage.textContent = `You Win! ${round.userLabel} beats ${round.computerLabel}`;
-    } else {
-        resultMessage.textContent = `You Lose! ${round.computerLabel} beats ${round.userLabel}`;
-    }
-}
+        const highestPoints = Math.max(this.state.userScore, this.state.computerScore);
+        const progressPercent = Math.min((highestPoints / this.WIN_SCORE) * 100, 100);
 
-function renderGameState(state) {
-    const gameWindow = document.querySelector('.game-window');
-    const gameContent = gameWindow.querySelector('.game-content');
-    const rpsButtons = gameContent.querySelectorAll('section button');
+        gameWindow.querySelector('.progress-indicator-bar').style.width = progressPercent + '%';
+        roundWindow.querySelector('.users-points').textContent = `User: ${this.state.userScore}`;
+        roundWindow.querySelector('.computers-points').textContent = `Computer: ${this.state.computerScore}`;
 
-    const progressIndicator = gameContent.querySelector('.progress-indicator.game-progress .progress-indicator-bar');
-    const highestPoints = Math.max(state.userScore, state.computerScore);
-    const progressPercent = Math.min(highestPoints / WIN_SCORE * 100, 100);
-    progressIndicator.style.width = progressPercent + '%';
+        gameWindow.querySelectorAll('.game-content section button').forEach(b => {
+            b.disabled = this.state.isGameOver;
+        });
+    },
 
-    const roundWindow = document.querySelector('.round-window');
-    const usersPoints = roundWindow.querySelector('.users-points');
-    const computersPoints = roundWindow.querySelector('.computers-points');
+    renderFinalWindow: function () {
+        const finalWindow = document.querySelector('.window.final-window[data-app="rps"]');
+        const tBody = finalWindow.querySelector('.table table tbody');
 
-    usersPoints.textContent = `User: ${state.userScore}`;
-    computersPoints.textContent = `Computer: ${state.computerScore}`;
+        finalWindow.querySelector('.final-result').textContent = `Winner: ${this.state.userScore > this.state.computerScore ? `User` : `Computer`}`;
 
-    rpsButtons.forEach((b) => {
-        b.disabled = state.rpsButtonsDisabled;
-    });
-    // renderHistoryTable(state.roundHistory);
-}
+        tBody.replaceChildren();
+        this.state.roundHistory.forEach(round => {
+            const tr = document.createElement('tr');
+            if (round.isUserWinner) tr.classList.add('highlighted');
 
-function renderHistoryTable(tBody, roundHistory) {
-    tBody.replaceChildren();
+            const roundTh = document.createElement('th'); roundTh.textContent = round.round;
+            const userTh = document.createElement('th'); userTh.textContent = round.userLabel;
+            const computerTh = document.createElement('th'); computerTh.textContent = round.computerLabel;
 
-    for (const round of roundHistory) {
-        const tr = document.createElement('tr');
-        if (round.isUserWinner) tr.classList.add('highlighted');
+            tr.append(roundTh, userTh, computerTh);
+            tBody.append(tr);
+        });
 
-        const roundTh = document.createElement('th');
-        const userTh = document.createElement('th');
-        const computerTh = document.createElement('th');
+        windowManager.focus(finalWindow);
+    },
+};
 
-        roundTh.textContent = round.round;
-        userTh.textContent = round.userLabel;
-        computerTh.textContent = round.computerLabel;
-
-        tr.append(roundTh, userTh, computerTh);
-        tBody.append(tr);
-    }
-}
-
-function renderFinalWindow() {
-    const finalWindow = document.querySelector('.window.final-window');
-    const tBody = finalWindow.querySelector('.table table tbody');
-    const finalResultMessage = finalWindow.querySelector('.final-result');
-
-    const isUserWinner = gameState.userScore > gameState.computerScore;
-
-    finalResultMessage.textContent = `Winner: ${isUserWinner ? 'User' : 'Computer'}`;
-
-    renderHistoryTable(tBody, gameState.roundHistory);
-
-    windowManager.focus(finalWindow);
-}
+rpsGame.init();
 
 appRegistry.register('rps', {
     onClose: () => {
-        resetGame();
+        rpsGame.reset();
     }
 });
 
