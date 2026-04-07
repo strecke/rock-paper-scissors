@@ -515,6 +515,7 @@ const rpsGame = {
         const roundWindow = document.querySelector('.round-window[data-app="rps"]');
         appManager.open('rps');
         windowManager.focus(roundWindow);
+        roundWindow.querySelector('button').focus();
     },
 
     renderRound: function () {
