@@ -260,6 +260,7 @@ body {
     min-width: 0;
     padding: 0 5px;
     letter-spacing: 0;
+    margin: 0 3px;
 }
 
 .footer .taskbar-items .spacing {
@@ -358,7 +359,8 @@ body {
     position: relative;
 }
 
-.start-items li:hover .icon.icon-github {
+.start-items li:hover .icon.icon-github,
+.start-items li:hover .icon.icon-copy {
     filter: invert(1);
 }
 
@@ -435,6 +437,10 @@ body {
 
 .icon.icon-sl {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 26 26' xmlns='http://www.w3.org/2000/svg' xmlns:svg='http://www.w3.org/2000/svg' aria-label='Streamline Logo'%3E%3Cg class='layer'%3E%3Ctitle%3ELayer 1%3C/title%3E%3Cpath d='m18.74,4.06c0,2.23 -1.76,4.05 -3.93,4.05l-3.92,0l2.77,2.87l3.92,0c1.01,0 2.01,0.39 2.77,1.18c1.53,1.59 1.53,4.15 0,5.74l-6.68,6.92c-0.71,0.73 -1.69,1.18 -2.77,1.18c-2.16,0 -3.92,-1.81 -3.92,-4.06c0,-2.23 1.75,-4.05 3.92,-4.05l3.92,0l-2.78,-2.86l-3.92,0c-1.01,0 -2.01,-0.39 -2.77,-1.18c-1.53,-1.59 -1.53,-4.15 0,-5.74l6.69,-6.92c0.71,-0.74 1.69,-1.19 2.77,-1.19c2.16,0 3.93,1.81 3.93,4.06z' fill='%2365D80D' id='svg_1'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.icon.icon-copy {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' id='logo' width='40' height='40' viewBox='0 -.5 8 8'%3E%3Cpath d='m0 0h1m1 0h1m1 0h1m-4 1h1m2 0h1m1 1h1m-6 1h1m-2 1h1m-1 1h1' stroke='%23738ff5'%3E%3C/path%3E%3Cpath d='m2 1h2m1 0h1m-4 1h1m2 0h1m0 1h1m-6 1h1m4 0h1m-6 1h1m-2 1h1m5 0h1m-2 1h1' stroke='%23535bc9'%3E%3C/path%3E%3Cpath d='m3 2h2m-3 1h4m-4 1h1m1 0h1m-3 1h6m-7 1h5m-6 1h5' stroke='%23244bc1'%3E%3C/path%3E%3Cpath d='m3 4h1m1 0h1' stroke='%23fff'%3E%3C/path%3E%3C/svg%3E");
 }
 
 /* desktop-item styles */
