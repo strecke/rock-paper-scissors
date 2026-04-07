@@ -535,15 +535,28 @@ const rpsGame = {
     renderRound: function () {
         const round = this.state.lastRound;
         const roundWindow = document.querySelector('.round-window[data-app="rps"]');
+        const confirmBtn = roundWindow.querySelector('button');
 
         roundWindow.querySelector('.title-bar-text').textContent = `Results Round ${round.round}`;
         roundWindow.querySelector('.user-selection').textContent = `User Chose: ${round.userLabel}`;
         roundWindow.querySelector('.computer-selection').textContent = `Computer Chose: ${round.computerLabel}`;
 
         const resultMessage = roundWindow.querySelector('.result-message');
-        if (round.isTie) resultMessage.textContent = `It’s a tie!`;
-        else if (round.isUserWinner) resultMessage.textContent = `You Win! ${round.userLabel} beats ${round.computerLabel}`;
-        else resultMessage.textContent = `You Lose! ${round.computerLabel} beats ${round.userLabel}`;
+
+        const winPhrases = ['Hurray!', 'Awesome!', 'Take that!', 'Finally!', 'Let’s go!'];
+        const losePhrases = ['Not again...', 'Darn it!', 'Ouch...', 'Nevermind...', 'Yikes!'];
+        const tiePhrases = ['Phew!', 'Close one!', 'Again!', 'Boring...'];
+
+        if (round.isTie) {
+            resultMessage.textContent = `It’s a tie!`;
+            confirmBtn.textContent = tiePhrases[Math.floor(Math.random() * tiePhrases.length)];
+        } else if (round.isUserWinner) {
+            resultMessage.textContent = `You Win! ${round.userLabel} beats ${round.computerLabel}`;
+            confirmBtn.textContent = winPhrases[Math.floor(Math.random() * winPhrases.length)];
+        } else {
+            resultMessage.textContent = `You Lose! ${round.computerLabel} beats ${round.userLabel}`;
+            confirmBtn.textContent = losePhrases[Math.floor(Math.random() * losePhrases.length)];
+        }
     },
 
     renderGameState: function () {
