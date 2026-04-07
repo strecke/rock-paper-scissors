@@ -1,14 +1,24 @@
 // non-game-logic
-const menuButton = document.querySelector('.start-menu-container .start-menu-button');
-const menu = document.querySelector('.start-menu-container .start-menu');
+const startMenuButton = document.querySelector('.start-menu-container .start-menu-button');
+const startMenu = document.querySelector('.start-menu-container .start-menu');
+const startMenuItems = document.querySelectorAll('.start-menu-item');
 
-menuButton.addEventListener('click', (e) => {
-    menu.classList.toggle('open');
+startMenuButton.addEventListener('click', (e) => {
+    startMenu.classList.toggle('open');
 });
 
 document.addEventListener("click", (e) => {
-    if (!menu.contains(e.target) && !menuButton.contains(e.target)) {
-        menu.classList.remove('open');
+    if (!startMenu.contains(e.target) && !startMenuButton.contains(e.target)) {
+        startMenu.classList.remove('open');
+    }
+});
+
+startMenuItems.forEach(btn => {
+    if (btn.textContent === 'About') {
+        btn.addEventListener('click', () => {
+            appManager.open('about');
+            startMenu.classList.remove('open');
+        });
     }
 });
 
@@ -17,7 +27,7 @@ const clock = {
         const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         document.querySelector('.clock').textContent = timeStr;
     },
-    init: function() {
+    init: function () {
         this.update();
         const currentSeconds = new Date().getSeconds();
         const delay = (60 - currentSeconds) * 1000;
@@ -580,3 +590,18 @@ appRegistry.register('rps', {
 });
 
 appManager.open('rps');
+
+// about-app
+
+const aboutApp = {
+    init: function () {
+        const closeBtn = document.querySelector('.about-window .about-content button');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                appManager.close('about');
+            })
+        }
+    }
+}
+
+aboutApp.init();

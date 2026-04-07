@@ -27,6 +27,27 @@
             </span>
             <span class="desktop-item-label">Rock, Paper, Scissors</span>
         </button>
+        <div class="window about-window main-window close" data-app="about">
+            <div class="title-bar">
+                <div class="title-bar-text">About This Project</div>
+                <div class="title-bar-controls">
+                    <button data-action="minimize" aria-label="Minimize">_</button>
+                    <button data-action="close" aria-label="Close">x</button>
+                </div>
+            </div>
+            <div class="window-content about-content">
+                <p>&lt;3 Thank you for playing my Rock, Paper, Scissors adaptation!</p>
+                <p>It was a lot of work, plenty of Googling, reading documentation, browsing forums, and yes, sometimes
+                    asking ai search, but it was an absolute blast to build!</p>
+                <p>I adapted the W98 styling by Jordan, but chose not to use the pre-build stylesheet to
+                    maximize my own learning.</p>
+                <p>I also extensively used the online v86 emulator by Fabian as a reference.</p>
+                <section>
+                    <button>Close</button>
+                </section>
+            </div>
+        </div>
+
         <div class="window game-window" data-app="rps">
             <div class="title-bar">
                 <div class="title-bar-text">Rock, Paper, Scissors</div>
@@ -128,6 +149,12 @@
                             </a>
                         </li>
                         <li>
+                            <a href="https://copy.sh/v86/?profile=windows98" target="_blank" rel="noopener noreferrer">
+                                <span class="icon icon-copy"></span>
+                                Thanks to Fabian
+                            </a>
+                        </li>
+                        <li>
                             <a href="https://www.youtube.com/watch?v=UiIsFoxY6ww" target="_blank"
                                 rel="noopener noreferrer">
                                 <span class="icon icon-yt"></span>
@@ -149,6 +176,7 @@
             </div>
             <div class="spacing"></div>
             <button class="taskbar-item" data-app="rps">Rock, Paper, Scissors</button>
+            <button class="taskbar-item close" data-app="about">About</button>
         </div>
         <!-- <p>Copyright c current year strecke</p> -->
         <div class="clock">2:24 AM</div>
