@@ -12,22 +12,23 @@ document.addEventListener("click", (e) => {
     }
 });
 
-function updateClock() {
-    const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    document.querySelector('.clock').textContent = timeStr;
+const clock = {
+    update: function () {
+        const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        document.querySelector('.clock').textContent = timeStr;
+    },
+    init: function() {
+        this.update();
+        const currentSeconds = new Date().getSeconds();
+        const delay = (60 - currentSeconds) * 1000;
+        setTimeout(() => {
+            this.update();
+            setInterval(() => this.update(), 60000);
+        }, delay);
+    }
 }
 
-function initClock() {
-    updateClock();
-    const currentSeconds = new Date().getSeconds();
-    const delay = (60 - currentSeconds) * 1000;
-    setTimeout(() => {
-        updateClock();
-        setInterval(updateClock, 60000);
-    }, delay);
-}
-
-initClock();
+clock.init();
 
 // desktop-item-logic
 
@@ -445,7 +446,7 @@ const rpsGame = {
     BEATS: { rock: 'scissors', paper: 'rock', scissors: 'paper' },
     NAMES: { rock: 'Rock', paper: 'Paper', scissors: 'Scissors' },
     state: {},
-    
+
     init: function () {
         this.bindEvents();
         this.reset();
