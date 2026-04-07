@@ -61,11 +61,7 @@ function handleDesktopItemInteraction() {
         let isOverWindow = false;
         let initialTarget = null;
         let initialActiveElement = null;
-
-        dI.addEventListener('dblclick', e => {
-            if (e.target.closest('.desktop-item-label-editor')) return;
-            appManager.open(dI.dataset.app);
-        });
+        let lastTap = 0;
 
         makeDraggable(dI, dI, {
             threshold: DRAG_THRESHOLD,
@@ -92,7 +88,15 @@ function handleDesktopItemInteraction() {
                         dI.style.top = startPos.y + 'px';
                     }
                 } else {
-                    handleRenameLabel(dI, initialTarget, initialActiveElement);
+                    const now = Date.now();
+                    const timeSinceLastTap = now - lastTap;
+                    if (timeSinceLastTap < 300 & timeSinceLastTap > 0) {
+                        appManager.open(dI.dataset.app);
+                        lastTap = 0;
+                    } else {
+                        lastTap = now;
+                        handleRenameLabel(dI, initialTarget, initialActiveElement);
+                    }
                 }
             }
         });
