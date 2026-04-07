@@ -3,12 +3,6 @@
     display: none;
 }
 
-button:disabled {
-    text-shadow: 1px 1px 0 white;
-    color: grey;
-    pointer-events: none;
-}
-
 @font-face {
     font-display: swap;
     font-family: "VT323";
@@ -63,6 +57,13 @@ body {
 .footer button:focus {
     outline: 1px dotted black;
     outline-offset: -4px;
+}
+
+.window button:disabled,
+.footer button:disabled {
+    text-shadow: 1px 1px 0 white;
+    color: grey;
+    pointer-events: none;
 }
 
 /* window styles */
