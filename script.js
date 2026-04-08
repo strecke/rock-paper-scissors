@@ -5,11 +5,13 @@ const startMenuItems = document.querySelectorAll('.start-menu-item');
 
 startMenuButton.addEventListener('click', (e) => {
     startMenu.classList.toggle('open');
+    startMenuButton.classList.toggle('active');
 });
 
 document.addEventListener("click", (e) => {
     if (!startMenu.contains(e.target) && !startMenuButton.contains(e.target)) {
         startMenu.classList.remove('open');
+        startMenuButton.classList.remove('active');
     }
 });
 
@@ -18,6 +20,7 @@ startMenuItems.forEach(btn => {
         btn.addEventListener('click', () => {
             appManager.open('about');
             startMenu.classList.remove('open');
+            startMenuButton.classList.remove('active');
         });
     }
 });
@@ -621,7 +624,7 @@ const rpsGame = {
         const finalIcon = finalWindow.querySelector('.final-result-container .icon-final-window');
         finalIcon.classList.remove('icon-sad', 'icon-happy');
         finalIcon.classList.add(this.state.userScore > this.state.computerScore ? 'icon-happy' : 'icon-sad');
-        
+
         tBody.replaceChildren();
         this.state.roundHistory.forEach(round => {
             const tr = document.createElement('tr');
