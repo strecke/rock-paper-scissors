@@ -98,11 +98,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(90deg, navy, #1084d0);
+    background: linear-gradient(90deg, grey, #b5b5b5);
     padding: 3px 2px 3px 3px;
     cursor: move;
     user-select: none;
     touch-action: none;
+}
+
+.window.active .title-bar {
+    background: linear-gradient(90deg, navy, #1084d0);
 }
 
 .title-bar-text {
@@ -376,7 +380,6 @@ body {
 
 .start-menu-container .start-items li a,
 .start-menu-container .start-items li button {
-    /* all: unset; */
     display: flex;
     align-items: center;
     gap: 6px;
