@@ -236,8 +236,8 @@ const windowManager = {
         this.stack = [...allWindows];
     },
 
-    getTopAppId: function() {
-        const topWindow = this.stack.findLast(w => 
+    getTopAppId: function () {
+        const topWindow = this.stack.findLast(w =>
             !w.classList.contains('close') && !w.classList.contains('minimized')
         );
         return topWindow ? topWindow.dataset.app : null;
@@ -435,7 +435,7 @@ const appManager = {
         appRegistry.trigger(appId, 'onClose');
     },
 
-    toggle: function(appId) {
+    toggle: function (appId) {
         const isFocused = windowManager.getTopAppId() === appId;
 
         if (isFocused) this.minimize(appId);
@@ -618,10 +618,15 @@ const rpsGame = {
 
         finalWindow.querySelector('.final-result').textContent = `Winner: ${this.state.userScore > this.state.computerScore ? `User` : `Computer`}`;
 
+        const finalIcon = finalWindow.querySelector('.final-result-container .icon-final-window');
+        finalIcon.classList.remove('icon-sad', 'icon-happy');
+        finalIcon.classList.add(this.state.userScore > this.state.computerScore ? 'icon-happy' : 'icon-sad');
+        
         tBody.replaceChildren();
         this.state.roundHistory.forEach(round => {
             const tr = document.createElement('tr');
             if (round.isUserWinner) tr.classList.add('highlighted');
+            if (round.isTie) tr.classList.add('dimmed');
 
             const roundTh = document.createElement('th'); roundTh.textContent = round.round;
             const userTh = document.createElement('th'); userTh.textContent = round.userLabel;
