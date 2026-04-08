@@ -22,6 +22,13 @@ startMenuItems.forEach(btn => {
     }
 });
 
+document.addEventListener('click', e => {
+    if (!e.target.closest('.window') && !e.target.closest('.footer') && !e.target.closest('.desktop-item')) {
+        windowManager.stack.forEach(w => w.classList.remove('active'));
+        taskbarManager.setActiveApp(null);
+    }
+});
+
 const clock = {
     update: function () {
         const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -90,7 +97,7 @@ function handleDesktopItemInteraction() {
                 } else {
                     const now = Date.now();
                     const timeSinceLastTap = now - lastTap;
-                    if (timeSinceLastTap < 300 & timeSinceLastTap > 0) {
+                    if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
                         appManager.open(dI.dataset.app);
                         lastTap = 0;
                     } else {
@@ -229,10 +236,21 @@ const windowManager = {
         this.stack = [...allWindows];
     },
 
+    getTopAppId: function() {
+        const topWindow = this.stack.findLast(w => 
+            !w.classList.contains('close') && !w.classList.contains('minimized')
+        );
+        return topWindow ? topWindow.dataset.app : null;
+    },
+
     focus: function (win) {
-        if (!win || win.classList.contains('active')) return;
+        if (!win) return;
 
         const appId = win.dataset.app;
+
+        taskbarManager.setActiveApp(appId);
+
+        if (win.classList.contains('active')) return;
 
         this.stack = this.stack.filter(w => w !== win);
         this.stack.push(win);
@@ -243,6 +261,7 @@ const windowManager = {
         win.classList.add('active');
         win.classList.remove('close');
         win.focus();
+
     },
 
     close: function (win) {
@@ -251,7 +270,9 @@ const windowManager = {
         const newWindowFocus = this.stack.findLast(w =>
             !w.classList.contains('close') && !w.classList.contains('minimized')
         );
-        this.focus(newWindowFocus);
+
+        if (newWindowFocus) this.focus(newWindowFocus);
+        else taskbarManager.setActiveApp(null);
     },
 };
 
@@ -374,9 +395,9 @@ const appManager = {
         state.minimized = false;
         state.active = true;
 
+        taskbarManager.items[appId].classList.remove('close');
+
         windowManager.focus(windowToFocus);
-        taskbarManager.setStatus(appId, 'active');
-        // focusApplicationGroup(appId);
     },
 
     minimize: function (appId) {
@@ -393,11 +414,11 @@ const appManager = {
             win.classList.remove('active');
         });
 
-        taskbarManager.setStatus(appId, '');
-
         const newWindowFocus = windowManager.stack.findLast(w =>
-            !w.classList.contains('close') && !w.classList.contains('minimized'));
+            !w.classList.contains('close') && !w.classList.contains('minimized')
+        );
         if (newWindowFocus) windowManager.focus(newWindowFocus);
+        else taskbarManager.setActiveApp(null);
     },
 
     close: function (appId) {
@@ -412,6 +433,13 @@ const appManager = {
 
         taskbarManager.setStatus(appId, 'close');
         appRegistry.trigger(appId, 'onClose');
+    },
+
+    toggle: function(appId) {
+        const isFocused = windowManager.getTopAppId() === appId;
+
+        if (isFocused) this.minimize(appId);
+        else this.open(appId);
     }
 }
 
@@ -431,6 +459,7 @@ const appRegistry = {
 
 const taskbarManager = {
     items: {},
+
     init: function () {
         const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
         taskbarItems.forEach(item => {
@@ -438,16 +467,24 @@ const taskbarManager = {
             this.items[appId] = item;
 
             item.addEventListener('click', () => {
-                const appState = appManager.getState(appId);
-                appState.active ? appManager.minimize(appId) : appManager.open(appId);
+                appManager.toggle(appId);
             });
         });
     },
+
     setStatus: function (appId, status) {
         const item = this.items[appId];
         if (!item) return;
         item.classList.remove('active', 'close');
         if (status) item.classList.add(status);
+    },
+
+    setActiveApp: function (activeAppId) {
+        Object.keys(this.items).forEach(id => {
+            const item = this.items[id];
+            item.classList.remove('active');
+            if (id === activeAppId) item.classList.add('active');
+        });
     }
 };
 
