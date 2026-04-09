@@ -545,31 +545,83 @@ const rpsGame = {
     },
 
     handleUserChoice: function (userChoice) {
-        const computerChoice = ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
-        const isTie = userChoice === computerChoice;
-        const isUserWinner = !isTie && this.BEATS[userChoice] === computerChoice;
-
-        this.state.userScore += isUserWinner ? 1 : 0;
-        this.state.computerScore += (isTie || isUserWinner) ? 0 : 1;
-        this.state.isGameOver = this.state.userScore >= this.WIN_SCORE || this.state.computerScore >= this.WIN_SCORE;
-
-        this.state.lastRound = {
-            round: this.state.roundCounter++,
-            userLabel: this.NAMES[userChoice],
-            computerLabel: this.NAMES[computerChoice],
-            isTie,
-            isUserWinner,
-        };
-
-        this.state.roundHistory.push(this.state.lastRound);
-
-        this.renderRound();
-        this.renderGameState();
-
+        const gameWindow = document.querySelector('.game-window[data-app="rps"]');
+        const rpsButtons = gameWindow.querySelectorAll('.game-content section button');
         const roundWindow = document.querySelector('.round-window[data-app="rps"]');
+
+        const calcState = roundWindow.querySelector('.calculating-state');
+        const resultState = roundWindow.querySelector('.result-state');
+        const progressBar = roundWindow.querySelector('.round-progress-bar');
+        const confirmBtn = roundWindow.querySelector('button');
+        const indicatorContainer = roundWindow.querySelector('.progress-indicator');
+
+        const titleBarText = roundWindow.querySelector('.title-bar-text');
+        titleBarText.textContent = `Loading Round ${this.state.roundCounter}...`;
+
+        gameWindow.style.cursor = 'wait';
+        roundWindow.style.cursor = 'wait';
+        rpsButtons.forEach(b => {
+            b.disabled = true;
+            b.style.cursor = 'wait';
+        });
+
+        calcState.classList.remove('hidden');
+        resultState.classList.add('hidden');
+
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+
         appManager.open('rps');
         windowManager.focus(roundWindow);
-        roundWindow.querySelector('button').focus();
+
+        const maxContainerWidth = indicatorContainer.clientWidth - 1;
+        const blockWidth = 18;
+
+        const steps = Math.floor(maxContainerWidth / blockWidth);
+        const targetWidthPx = steps * blockWidth;
+
+        const thinkTime = steps * Math.floor(Math.random() * 60) + 60;
+
+        // const pauseTime = 1000 - thinkTime;
+
+        const pauseTime = 300;
+        progressBar.offsetHeight;
+
+
+        progressBar.style.transition = `width ${thinkTime}ms steps(${steps}, end)`;
+        progressBar.style.width = `${targetWidthPx}px`;
+
+        setTimeout(() => {
+            gameWindow.style.cursor = '';
+            roundWindow.style.cursor = '';
+            rpsButtons.forEach(b => b.style.cursor = '');
+
+            calcState.classList.add('hidden');
+            resultState.classList.remove('hidden');
+
+            const computerChoice = ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
+            const isTie = userChoice === computerChoice;
+            const isUserWinner = !isTie && this.BEATS[userChoice] === computerChoice;
+
+            this.state.userScore += isUserWinner ? 1 : 0;
+            this.state.computerScore += (isTie || isUserWinner) ? 0 : 1;
+            this.state.isGameOver = this.state.userScore >= this.WIN_SCORE || this.state.computerScore >= this.WIN_SCORE;
+
+            this.state.lastRound = {
+                round: this.state.roundCounter++,
+                userLabel: this.NAMES[userChoice],
+                computerLabel: this.NAMES[computerChoice],
+                isTie,
+                isUserWinner,
+            };
+
+            this.state.roundHistory.push(this.state.lastRound);
+
+            this.renderRound();
+            this.renderGameState();
+
+            confirmBtn.focus();
+        }, thinkTime + pauseTime);
     },
 
     WIN_PHRASES: ['Hurray!', 'Awesome!', 'Take that!', 'Finally!', 'Let’s go!'],

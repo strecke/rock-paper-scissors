@@ -30,7 +30,8 @@
             <div class="window-content about-content justify">
                 <div class="emoji-container">
                     <p><strong>&lt;3 Thank you for playing!</strong></p>
-                    <button class="emoji-button"><span data-state="happy" class="icon icon-emoji icon-happy"></span></button>
+                    <button class="emoji-button"><span data-state="happy"
+                            class="icon icon-emoji icon-happy"></span></button>
                 </div>
                 <p>It was a lot of work, plenty of Googling, reading docs, browsing forums, and yes, sometimes
                     looking at AI search results, but it was an absolute blast to build!</p>
@@ -70,12 +71,22 @@
                 <div class="title-bar-text">Results Round </div>
             </div>
             <div class="window-content round-content">
-                <p class="user-selection">User Chose: </p>
-                <p class="computer-selection">Computer Chose: </p>
-                <p class="result-message"></p>
-                <section>
-                    <button>OK</button>
-                </section>
+                <div class="calculating-state">
+                    <p>Computer is thinking...</p>
+                    <div class="progress-indicator">
+                        <span class="progress-indicator-bar round-progress-bar"></span>
+                    </div>
+                </div>
+                <div class="result-state hidden">
+                    <span>
+                        <p class="user-selection">User Chose: </p>
+                        <p class="computer-selection">Computer Chose: </p>
+                    </span>
+                    <p class="result-message"></p>
+                    <section>
+                        <button>OK</button>
+                    </section>
+                </div>
             </div>
             <div class="status-bar">
                 <p class="status-bar-field">Press ENTER to continue</p>
@@ -156,8 +167,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="https://github.com/phoikoi/VT323" target="_blank"
-                                rel="noopener noreferrer">
+                            <a href="https://github.com/phoikoi/VT323" target="_blank" rel="noopener noreferrer">
                                 <span class="icon icon-font"></span>
                                 Awesome Font by Peter
                             </a>
@@ -185,7 +195,7 @@
                         </li>
                         <li class="divider"></li>
                         <li><button class="start-menu-item"><span class="icon icon-about"></span>About</button></li>
-                        <li><button class="start-menu-item">Shutdown</button></li>
+                        <li><button class="start-menu-item">Log Off User...</button></li>
                     </ul>
                 </div>
             </div>
