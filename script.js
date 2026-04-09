@@ -657,11 +657,31 @@ appManager.open('rps');
 
 const aboutApp = {
     init: function () {
-        const closeBtn = document.querySelector('.about-window .about-content button');
+        const aboutWindow = document.querySelector('.about-window');
+        const emojiBtn = aboutWindow.querySelector('.about-content button.emoji-button');
+        const closeBtn = aboutWindow.querySelector('.about-content button[data-action]');
+
+
+        if (emojiBtn) {
+            const emoji = emojiBtn.querySelector('.icon-emoji');
+            const states = ['happy', 'sad', 'wink', 'nervous', 'melting', 'mask'];
+
+            emojiBtn.addEventListener('click', () => {
+                const currentState = emoji.dataset.state;
+                const availableStates = states.filter(state => state !== currentState);
+                const newState = availableStates[Math.floor(Math.random() * availableStates.length)];
+
+                emoji.classList.remove(`icon-${currentState}`);
+                emoji.classList.add(`icon-${newState}`);
+
+                emoji.dataset.state = newState;
+            });
+        }
+
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 appManager.close('about');
-            })
+            });
         }
     }
 }
