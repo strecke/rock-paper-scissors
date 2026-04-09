@@ -15,12 +15,29 @@ document.addEventListener("click", (e) => {
     }
 });
 
+document.body.addEventListener('mousedown', () => {
+    document.body.classList.add('using-mouse');
+});
+
+document.body.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+        document.body.classList.remove('using-mouse');
+    }
+});
+
 startMenuItems.forEach(btn => {
+    btn.addEventListener('click', () => {
+        startMenu.classList.remove('open');
+        startMenuButton.classList.remove('active');
+    });
     if (btn.textContent === 'About') {
         btn.addEventListener('click', () => {
             appManager.open('about');
-            startMenu.classList.remove('open');
-            startMenuButton.classList.remove('active');
+        });
+    }
+    if (btn.textContent.includes('Log Off')) {
+        btn.addEventListener('click', () => {
+            appManager.open('logoff');
         });
     }
 });
@@ -398,9 +415,10 @@ const appManager = {
         state.minimized = false;
         state.active = true;
 
-        taskbarManager.items[appId].classList.remove('close');
+        taskbarManager.items[appId]?.classList.remove('close');
 
         windowManager.focus(windowToFocus);
+        appRegistry.trigger(appId, 'onOpen');
     },
 
     minimize: function (appId) {
@@ -746,7 +764,103 @@ const aboutApp = {
                 appManager.close('about');
             });
         }
-    }
+    },
 }
 
 aboutApp.init();
+
+// auth-app
+
+const authApp = {
+    currentUser: 'User',
+    init: function () {
+        const logoffWindow = document.querySelector('.logoff-window');
+        const loginWindow = document.querySelector('.login-window');
+        const usernameInput = loginWindow.querySelector('#username');
+        const passwordInput = loginWindow.querySelector('#password');
+
+        usernameInput.addEventListener('input', e => {
+            e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+        });
+
+        passwordInput.addEventListener('input', e => {
+            const cursorPosition = passwordInput.selectionStart;
+            const currentLength = passwordInput.value.length;
+            passwordInput.value = '*'.repeat(currentLength);
+            passwordInput.setSelectionRange(cursorPosition, cursorPosition);
+        });
+
+        appRegistry.register('login', {
+            onClose:() => {
+                document.body.classList.remove('is-logged-off');
+            }
+        });
+
+        const btnYes = logoffWindow.querySelector('button[data-choice="yes"]');
+        const btnNo = logoffWindow.querySelector('button[data-choice="no"]');
+
+        appRegistry.register('logoff', {
+            onOpen: () => {
+                btnYes.focus();
+            }
+        });        
+
+        btnNo.addEventListener('click', () => {
+            appManager.close('logoff');
+        });
+
+        btnYes.addEventListener('click', () => {
+            appManager.close('logoff');
+            this.renderLogin();
+        });
+
+        const btnOk = loginWindow.querySelector('button[data-choice="ok"]');
+        const btnCancel = loginWindow.querySelector('button[data-choice="cancel"]');
+
+        btnCancel.addEventListener('click', () => {
+            this.cancelLogin();
+        });
+
+        btnOk.addEventListener('click', () => {
+            let newName = usernameInput.value.trim();
+            const isValidName = /^[a-zA-Z0-9]+$/.test(newName) && newName.length > 0 && newName.length <= 12;
+
+            if (!isValidName) newName = this.currentUser;
+            this.currentUser = newName;
+            this.updateStartMenuText();
+            this.cancelLogin();
+        });
+
+        [usernameInput, passwordInput].forEach(input => {
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') btnOk.click();
+            });
+        });
+
+        this.updateStartMenuText();
+    },
+
+    renderLogin: function () {
+        document.body.classList.add('is-logged-off');
+
+        const usernameInput = document.querySelector('.login-window #username');
+        const passwordInput = document.querySelector('.login-window #password');
+        usernameInput.value = this.currentUser;
+        passwordInput.value = '';
+        appManager.open('login');
+        setTimeout(() => usernameInput.focus(), 50);
+    },
+
+    cancelLogin: function () {
+        appManager.close('login');
+    },
+
+    updateStartMenuText: function () {
+        const textSpan = document.querySelector('.start-menu-item .logoff-text');
+        if (textSpan) {
+            textSpan.textContent = `Log Off ${this.currentUser}...`;
+        }
+    },
+}
+
+authApp.init();

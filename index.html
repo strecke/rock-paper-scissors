@@ -132,6 +132,53 @@
                 </section>
             </div>
         </div>
+        <div class="window logoff-window close" data-app="logoff">
+            <div class="title-bar">
+                <div class="title-bar-text">Log Off</div>
+                <div class="title-bar-controls">
+                    <button data-action="close" aria-label="Close">x</button>
+                </div>
+            </div>
+            <div class="window-content logoff-content">
+                <div class="emoji-container">
+                    <span class="icon icon-emoji icon-auth"></span>
+                    <span>
+                        <p>Are you sure you want to log off?</p>
+                        <section>
+                            <button data-choice="yes">Yes</button>
+                            <button data-choice="no">No</button>
+                        </section>
+                    </span>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="window login-window close" data-app="login">
+            <div class="title-bar">
+                <div class="title-bar-text">Enter Password</div>
+                <div class="title-bar-controls">
+                    <button data-action="close" aria-label="Close">x</button>
+                </div>
+            </div>
+            <div class="window-content login-content">
+                <p>Type a name to identify yourself. Enter a password if you want to.</p>
+                <p>Tip: If you don’t enter a password, you won’t get this promt again at startup.</p>
+                <div class="field-row">
+                    <label for="username">User name:</label>
+                    <input id="username" type="text" maxlength="12" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="field-row">
+                    <label for="password">Password:</label>
+                    <input id="password" type="text" autocomplete="off" spellcheck="false">
+                </div>
+                <section>
+                    <button data-choice="ok">OK</button>
+                    <button data-choice="cancel">Cancel</button>
+                </section>
+            </div>
+        </div>
+
     </div>
 
     <div class="footer">
@@ -195,7 +242,10 @@
                         </li>
                         <li class="divider"></li>
                         <li><button class="start-menu-item"><span class="icon icon-about"></span>About</button></li>
-                        <li><button class="start-menu-item">Log Off User...</button></li>
+                        <li><button class="start-menu-item">
+                                <span class="icon icon-auth"></span>
+                                <span class="logoff-text">Log Off User...</span>
+                            </button></li>
                     </ul>
                 </div>
             </div>
