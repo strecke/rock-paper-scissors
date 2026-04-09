@@ -500,8 +500,6 @@ const rpsGame = {
     BEATS: { rock: 'scissors', paper: 'rock', scissors: 'paper' },
     NAMES: { rock: 'Rock', paper: 'Paper', scissors: 'Scissors' },
     state: {},
-    EMOJI_WON: ['happy', 'wink', 'mask', 'confetti'],
-    EMOJI_LOST: ['sad', 'nervous', 'melting'],
 
     init: function () {
         this.bindEvents();
@@ -574,6 +572,10 @@ const rpsGame = {
         roundWindow.querySelector('button').focus();
     },
 
+    WIN_PHRASES: ['Hurray!', 'Awesome!', 'Take that!', 'Finally!', 'Let’s go!'],
+    LOSE_PHRASES: ['Not again...', 'Darn it!', 'Ouch...', 'Nevermind...', 'Yikes!'],
+    TIE_PHRASES: ['Phew!', 'Close one!', 'Again!', 'Boring...'],
+
     renderRound: function () {
         const round = this.state.lastRound;
         const roundWindow = document.querySelector('.round-window[data-app="rps"]');
@@ -585,19 +587,15 @@ const rpsGame = {
 
         const resultMessage = roundWindow.querySelector('.result-message');
 
-        const winPhrases = ['Hurray!', 'Awesome!', 'Take that!', 'Finally!', 'Let’s go!'];
-        const losePhrases = ['Not again...', 'Darn it!', 'Ouch...', 'Nevermind...', 'Yikes!'];
-        const tiePhrases = ['Phew!', 'Close one!', 'Again!', 'Boring...'];
-
         if (round.isTie) {
             resultMessage.textContent = `It’s a tie!`;
-            confirmBtn.textContent = tiePhrases[Math.floor(Math.random() * tiePhrases.length)];
+            confirmBtn.textContent = this.TIE_PHRASES[Math.floor(Math.random() * this.TIE_PHRASES.length)];
         } else if (round.isUserWinner) {
             resultMessage.textContent = `You Win! ${round.userLabel} beats ${round.computerLabel}`;
-            confirmBtn.textContent = winPhrases[Math.floor(Math.random() * winPhrases.length)];
+            confirmBtn.textContent = this.WIN_PHRASES[Math.floor(Math.random() * this.WIN_PHRASES.length)];
         } else {
             resultMessage.textContent = `You Lose! ${round.computerLabel} beats ${round.userLabel}`;
-            confirmBtn.textContent = losePhrases[Math.floor(Math.random() * losePhrases.length)];
+            confirmBtn.textContent = this.LOSE_PHRASES[Math.floor(Math.random() * this.LOSE_PHRASES.length)];
         }
     },
 
@@ -616,6 +614,9 @@ const rpsGame = {
             b.disabled = this.state.isGameOver;
         });
     },
+
+    EMOJI_WON: ['happy', 'wink', 'mask', 'confetti'],
+    EMOJI_LOST: ['sad', 'nervous', 'melting'],
 
     renderFinalWindow: function () {
         const finalWindow = document.querySelector('.window.final-window[data-app="rps"]');
