@@ -500,6 +500,8 @@ const rpsGame = {
     BEATS: { rock: 'scissors', paper: 'rock', scissors: 'paper' },
     NAMES: { rock: 'Rock', paper: 'Paper', scissors: 'Scissors' },
     state: {},
+    EMOJI_WON: ['happy', 'wink', 'mask', 'confetti'],
+    EMOJI_LOST: ['sad', 'nervous', 'melting'],
 
     init: function () {
         this.bindEvents();
@@ -619,11 +621,19 @@ const rpsGame = {
         const finalWindow = document.querySelector('.window.final-window[data-app="rps"]');
         const tBody = finalWindow.querySelector('.table table tbody');
 
-        finalWindow.querySelector('.final-result').textContent = `Winner: ${this.state.userScore > this.state.computerScore ? `User` : `Computer`}`;
+        finalWindow.querySelector('.final-result').textContent = `Winner: ${this.state.userScore > this.state.computerScore ? 'User' : 'Computer'}`;
 
-        const finalIcon = finalWindow.querySelector('.emoji-container .icon-emoji');
-        finalIcon.classList.remove('icon-sad', 'icon-happy');
-        finalIcon.classList.add(this.state.userScore > this.state.computerScore ? 'icon-happy' : 'icon-sad');
+        const finalEmoji = finalWindow.querySelector('.emoji-container .icon-emoji');
+
+        const currentState = finalEmoji.dataset.state ?? null;
+        let availableStates = this.state.userScore > this.state.computerScore ? this.EMOJI_WON : this.EMOJI_LOST;
+        availableStates = availableStates.filter(state => state !== currentState);
+        const newState = availableStates[Math.floor(Math.random() * availableStates.length)];
+
+        if (currentState) finalEmoji.classList.remove(`icon-${currentState}`);
+        finalEmoji.classList.add(`icon-${newState}`);
+
+        finalEmoji.dataset.state = newState;
 
         tBody.replaceChildren();
         this.state.roundHistory.forEach(round => {
@@ -664,7 +674,7 @@ const aboutApp = {
 
         if (emojiBtn) {
             const emoji = emojiBtn.querySelector('.icon-emoji');
-            const states = ['happy', 'sad', 'wink', 'nervous', 'melting', 'mask'];
+            const states = ['happy', 'sad', 'wink', 'nervous', 'melting', 'mask', 'confetti'];
 
             emojiBtn.addEventListener('click', () => {
                 const currentState = emoji.dataset.state;
