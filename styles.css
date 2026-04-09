@@ -283,7 +283,14 @@ body {
     min-width: 0;
     padding: 0 5px;
     letter-spacing: 0;
+}
+
+.footer .taskbar-items button.taskbar-item {
     margin: 0 3px;
+}
+
+.footer .taskbar-items .start-menu-button {
+    margin: 0 3px 0 0;
 }
 
 .footer .taskbar-items .spacing {
@@ -384,7 +391,9 @@ body {
 
 .start-items li:hover .icon.icon-github,
 .start-items li:hover .icon.icon-copy,
-.start-items li:hover .icon.icon-ph {
+.start-items li:hover .icon.icon-ph,
+.start-items li:hover .icon.icon-font,
+.start-items li:hover .icon.icon-about {
     filter: invert(1);
 }
 
@@ -469,8 +478,8 @@ body {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' id='logo' width='40' height='40' viewBox='0 -.5 8 8'%3E%3Cpath d='m0 0h1m1 0h1m1 0h1m-4 1h1m2 0h1m1 1h1m-6 1h1m-2 1h1m-1 1h1' stroke='%23738ff5'%3E%3C/path%3E%3Cpath d='m2 1h2m1 0h1m-4 1h1m2 0h1m0 1h1m-6 1h1m4 0h1m-6 1h1m-2 1h1m5 0h1m-2 1h1' stroke='%23535bc9'%3E%3C/path%3E%3Cpath d='m3 2h2m-3 1h4m-4 1h1m1 0h1m-3 1h6m-7 1h5m-6 1h5' stroke='%23244bc1'%3E%3C/path%3E%3Cpath d='m3 4h1m1 0h1' stroke='%23fff'%3E%3C/path%3E%3C/svg%3E");
 }
 
-.icon-yt {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M62.603 16.596a8.06 8.06 0 0 0-5.669-5.669C51.964 9.57 31.96 9.57 31.96 9.57s-20.005.04-24.976 1.397a8.06 8.06 0 0 0-5.669 5.669C0 21.607 0 32 0 32s0 10.393 1.356 15.404a8.06 8.06 0 0 0 5.669 5.669C11.995 54.43 32 54.43 32 54.43s20.005 0 24.976-1.356a8.06 8.06 0 0 0 5.669-5.669C64 42.434 64 32 64 32s-.04-10.393-1.397-15.404' fill='red'/%3E%3Cpath d='M25.592 41.612 42.187 32l-16.596-9.612z' fill='%23fff'/%3E%3C/svg%3E");
+.icon.icon-font {
+    background-image: url("data:image/svg+xml,%3Csvg width='208' height='208' viewBox='0 0 208 176' xmlns='http://www.w3.org/2000/svg'%3E%3Cg class='layer'%3E%3Ctitle%3ELayer 1%3C/title%3E%3Cpath d='M176 116c0 6.5-7.33 12-16 12s-16-5.5-16-12 7.33-12 16-12 16 5.5 16 12m32-100v144a16 16 0 0 1-16 16H16a16 16 0 0 1-16-16V16A16 16 0 0 1 16 0h176a16 16 0 0 1 16 16m-88.63 116.88-44-104a8 8 0 0 0-14.74 0l-44 104a8 8 0 0 0 14.74 6.24L42.84 112h50.32l11.47 27.12a8 8 0 0 0 14.74-6.24M192 84c0-15.44-14.36-28-32-28a34.86 34.86 0 0 0-20.78 6.68 8 8 0 0 0 9.56 12.83A18.84 18.84 0 0 1 160 72c8.56 0 15.8 5.36 16 11.76v8A35.24 35.24 0 0 0 160 88c-17.64 0-32 12.56-32 28s14.36 28 32 28a35.1 35.1 0 0 0 16.93-4.26A8 8 0 0 0 192 136zM49.61 96h36.78L68 52.53z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .icon.icon-ph {
@@ -479,6 +488,14 @@ body {
 
 .icon.icon-sl {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 26 26' xmlns='http://www.w3.org/2000/svg' xmlns:svg='http://www.w3.org/2000/svg' aria-label='Streamline Logo'%3E%3Cg class='layer'%3E%3Ctitle%3ELayer 1%3C/title%3E%3Cpath d='m18.74,4.06c0,2.23 -1.76,4.05 -3.93,4.05l-3.92,0l2.77,2.87l3.92,0c1.01,0 2.01,0.39 2.77,1.18c1.53,1.59 1.53,4.15 0,5.74l-6.68,6.92c-0.71,0.73 -1.69,1.18 -2.77,1.18c-2.16,0 -3.92,-1.81 -3.92,-4.06c0,-2.23 1.75,-4.05 3.92,-4.05l3.92,0l-2.78,-2.86l-3.92,0c-1.01,0 -2.01,-0.39 -2.77,-1.18c-1.53,-1.59 -1.53,-4.15 0,-5.74l6.69,-6.92c0.71,-0.74 1.69,-1.19 2.77,-1.19c2.16,0 3.93,1.81 3.93,4.06z' fill='%2365D80D' id='svg_1'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.icon-yt {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M62.603 16.596a8.06 8.06 0 0 0-5.669-5.669C51.964 9.57 31.96 9.57 31.96 9.57s-20.005.04-24.976 1.397a8.06 8.06 0 0 0-5.669 5.669C0 21.607 0 32 0 32s0 10.393 1.356 15.404a8.06 8.06 0 0 0 5.669 5.669C11.995 54.43 32 54.43 32 54.43s20.005 0 24.976-1.356a8.06 8.06 0 0 0 5.669-5.669C64 42.434 64 32 64 32s-.04-10.393-1.397-15.404' fill='red'/%3E%3Cpath d='M25.592 41.612 42.187 32l-16.596-9.612z' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+.icon.icon-about {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' id='Interface-Essential-Question-Help-Circle-1--Streamline-Pixel' height='32' width='32'%3E%3Cdesc%3E Interface Essential Question Help Circle 1 Streamline Icon: https://streamlinehq.com %3C/desc%3E%3Ctitle%3Einterface-essential-question-help-circle-1%3C/title%3E%3Cpath d='M30.48 9.14h-1.53V6.09h-1.52V4.57H25.9V3.05h-3.04V1.52h-3.05V0h-7.62v1.52H9.14v1.53H6.09v1.52H4.57v1.52H3.05v3.05H1.52v3.05H0v7.62h1.52v3.05h1.53v3.04h1.52v1.53h1.52v1.52h3.05v1.53h3.05V32h7.62v-1.52h3.05v-1.53h3.04v-1.52h1.53V25.9h1.52v-3.04h1.53v-3.05H32v-7.62h-1.52ZM19.81 25.9h-1.52v1.53h-4.58V25.9h-1.52v-4.57h1.52v-1.52h4.58v1.52h1.52Zm4.57 -13.71h-1.52v1.52h-1.53v1.53h-1.52v1.52h-1.52v1.53h-4.58v-3.05h1.53v-1.53h1.52v-1.52h1.53V9.14h-1.53V7.62h-3.05v1.52h-1.52v3.05H7.62V7.62h1.52V6.09h1.53V4.57h1.52V3.05h7.62v1.52h1.52v1.52h1.53v1.53h1.52Z' fill='%23000000' stroke-width='1'%3E%3C/path%3E%3C/svg%3E");
 }
 
 /* desktop-item styles */
