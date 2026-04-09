@@ -621,7 +621,7 @@ const rpsGame = {
 
         finalWindow.querySelector('.final-result').textContent = `Winner: ${this.state.userScore > this.state.computerScore ? `User` : `Computer`}`;
 
-        const finalIcon = finalWindow.querySelector('.final-result-container .icon-final-window');
+        const finalIcon = finalWindow.querySelector('.emoji-container .icon-emoji');
         finalIcon.classList.remove('icon-sad', 'icon-happy');
         finalIcon.classList.add(this.state.userScore > this.state.computerScore ? 'icon-happy' : 'icon-sad');
 

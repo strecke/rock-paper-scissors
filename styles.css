@@ -157,9 +157,19 @@ body {
     line-height: 1.5;
 }
 
+.window-content.justify p {
+    text-align: justify;
+}
+
 .window-content section {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+}
+
+.window-content .emoji-container {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
 }
 
@@ -169,12 +179,6 @@ body {
 
 .window-content.final-content section button:last-child {
     margin-left: 6px;
-}
-
-.window-content.final-content .final-result-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .window-content .progress-indicator {
@@ -435,7 +439,7 @@ body {
     filter: contrast(1.5);
 }
 
-.icon-final-window {
+.icon-emoji {
     filter: none;
     width: 48px;
     height: 48px;
