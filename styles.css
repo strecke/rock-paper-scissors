@@ -87,11 +87,15 @@ body {
 }
 
 .window.round-window {
-    transform: translate(-50%, -50%);
+    transform: translate(-30%, -50%);
 }
 
 .window.final-window {
     transform: translate(-40%, -70%);
+}
+
+.window.about-window {
+    transform: translate(-70%, -70%);
 }
 
 /* title-bar specific */
