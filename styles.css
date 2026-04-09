@@ -90,7 +90,7 @@ body.is-logged-off .window:not(.login-window) {
 }
 
 .window.game-window {
-    transform: translate(-50%, -80%);
+    transform: translate(-60%, -80%);
 }
 
 .window.round-window {
@@ -109,6 +109,13 @@ body.is-logged-off .window:not(.login-window) {
 .window.login-window,
 .window.logoff-window {
     transform: translate(-50%, -50%);
+}
+
+.window.login-window {
+    width: 370px;
+    box-sizing: border-box;
+    -webkit-font-smoothing: none;
+    letter-spacing: -0.5px;
 }
 
 /* title-bar specific */
@@ -170,7 +177,7 @@ body.is-logged-off .window:not(.login-window) {
     display: inline-flex;
     align-items: center;
     user-select: none;
-    font-size: 11px;
+    font-size: 14px;
     width: 55px;
 }
 
@@ -185,6 +192,7 @@ body.is-logged-off .window:not(.login-window) {
     border-radius: 0;
     appearance: none;
     outline: none;
+    flex: 1;
 }
 
 .window-content .field-row input:focus {
@@ -221,10 +229,32 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     align-items: center;
 }
 
-.window-content .emoji-container {
+.window-content .flex-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.window-content.login-content .login-container {
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.window-content.login-content .login-container p {
+    line-height: 1;
+    font-size: 14px;
+    margin-block-start: 7px;
+}
+
+.window-content.login-content .login-container p:first-child {
+    margin-block-start: 0;
+    margin-block-end: 7px;
+}
+
+.window-content.login-content .login-container section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .window-content.game-content section {
@@ -260,7 +290,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     transition: width 0.6s ease-in-out;
 }
 
-.window-content .progress-indicator .progress-indicator-bar.round-progress-bar {
+.window-content .progress-indicator .progress-indicator-bar.step-progress-bar {
     background-image: linear-gradient(90deg, navy 16px, transparent 0 2px);
     background-repeat: repeat;
     background-size: 18px 100%;
@@ -326,7 +356,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     color: #86878e;
 }
 
-.window-content.about-content > .emoji-container > button.emoji-button {
+.window-content.about-content > .flex-container > button.emoji-button {
     padding: 0;
     min-width: 0;
     height: 48px;
@@ -559,6 +589,19 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .icon.icon-auth {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' height='32' width='32'%3E%3Cdesc%3EInterface Essential Key 1 Streamline Icon: https://streamlinehq.com%3C/desc%3E%3Ctitle%3Einterface-essential-key_1%3C/title%3E%3Cpath d='M28.195 7.62h1.52v6.09h-1.52Zm-1.52 6.09h1.52v1.53h-1.52Zm0-7.61h1.52v1.52h-1.52Z'/%3E%3Cpath d='M25.145 19.81h3.05v1.52h-3.05v4.58h3.05v1.52h-3.05v3.05h1.53v-1.53h3.04v-4.57h-3.04v-1.52h3.04v-4.57h-3.04v-3.05h-1.53zm-3.05 10.67h3.05V32h-3.05Zm-1.52-25.91V6.1h3.05v1.52h-3.05v4.57h6.1V7.62h-1.53V6.1h1.53V4.57h-1.53V3.05h-1.52v1.52Zm3.05 6.1H22.1V9.14h1.53Zm-1.53-9.15h1.53v1.53h-1.53Zm0 13.72h-1.52v-1.53h-1.52v3.05h1.52v13.72h1.52zm-3.04-9.14h1.52v1.52h-1.52Zm-3.05 3.04v3.05h1.52v1.52h1.53V7.62h-1.53v1.52zm-1.53 7.62h4.58v1.53h-4.58Zm0-10.66h3.05v1.52h-3.05Zm0-6.1h7.62v1.52h-7.62Zm0 22.86h1.53v1.52h-1.53Zm-1.52 1.52h1.52v1.53h-1.52Zm0-3.05h1.52v1.53h-1.52Zm0-3.04h1.52v1.52h-1.52Zm0-10.67h1.52v1.52h-1.52Zm0-6.1h1.52v1.53h-1.52Zm-1.52 24.39h1.52v1.52h-1.52Zm0-6.1h1.52v1.52h-1.52Zm0-10.67h1.52v6.1h-1.52Zm0-6.09h1.52v4.57h-1.52Zm-1.53 21.33h1.53v1.53h-1.53Zm0-9.14h1.53v1.52h-1.53Zm-1.52 7.62h1.52v1.52h-1.52Zm0-6.1h1.52v1.53h-1.52Zm-1.52 7.62h1.52v1.53h-1.52Zm0-6.09h1.52v1.52h-1.52Zm-1.53 7.62h1.53v1.52h-1.53Zm0-6.1h1.53v1.52h-1.53Zm-1.52 4.57h1.52v1.53h-1.52Zm0-3.05h1.52v1.53h-1.52Zm-1.53 1.53h1.53v1.52h-1.53Z'/%3E%3C/svg%3E");
+}
+
+/* rps icons */
+.icon.stone-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' shape-rendering='crispEdges'%3E%3Cpath d='M12 3h8v2h-8zM8 5h4v2H8zm12 0h4v2h-4zM6 7h2v2H6zm18 0h2v2h-2zM4 9h2v2H4zm22 0h2v2h-2zM4 11h2v2H4zm24 0h2v2h-2zM2 13h2v2H2zm26 0h2v2h-2zM2 15h2v2H2zm26 0h2v2h-2zM2 17h2v2H2zm26 0h2v2h-2zM4 19h2v2H4zm22 0h2v2h-2zM4 21h2v2H4zm20 0h2v2h-2zM6 23h4v2H6zm16 0h2v2h-2zm-12 2h12v2H10zM8 11h2v2H8zm8 0h2v2h-2zm-6 4h6v2h-6zm10-8h2v2h-2zm-2 2h6v2h-6zm2 2h2v2h-2zM8 19h2v2H8zm14-2h2v2h-2z'/%3E%3C/svg%3E");
+}
+
+.icon.paper-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' height='32' width='32'%3E%3Cdesc%3EContent Files Notepad Streamline Icon: https://streamlinehq.com%3C/desc%3E%3Ctitle%3Econtent-files-notepad%3C/title%3E%3Cpath d='M12.955 0v1.52h-3.05v1.53h3.05v1.52h1.52V3.05h3.05v1.52h1.52V3.05h3.05v1.52h1.53V3.05h1.52V6.1h1.52V4.57h1.53v25.91h-16.76V32h18.28v-1.52h1.52V4.57h-1.52V3.05h-1.52V1.52h-4.57V0h-1.53v1.52h-3.05V0h-1.52v1.52h-3.05V0z'/%3E%3Cpath d='M23.625 6.1h1.52v3.04h-1.52Zm-1.53 6.09h4.57v-1.52h-3.04V9.14h-1.53z'/%3E%3Cpath d='M20.575 15.24h-1.53v3.05h1.53v-1.53h6.09v-1.52h-4.57v-3.05h-1.52zm-3.05 6.09h9.14v-1.52h-7.62v-1.52h-1.52zm-1.52-9.14h1.52v1.53h-1.52Zm0-3.05h1.52v1.53h-1.52Zm-3.05 15.24h13.71v1.53h-13.71Zm-1.52-10.66h4.57v1.52h-4.57Zm0-4.58h1.52v1.53h-1.52Z'/%3E%3Cpath d='M11.435 22.86h6.09v-1.53H2.285v1.53h7.62v7.62h1.53zm-1.53-10.67h1.53v1.53h-1.53Zm-1.52-9.14h1.52V6.1h-1.52ZM6.855 6.1h1.53v3.04h-1.53Zm-1.52 3.04h1.52v3.05h-1.52Zm-1.52 3.05h1.52v3.05h-1.52Zm-1.53 3.05h1.53v3.05h-1.53Zm-1.52 3.05h1.52v3.04H.765Z'/%3E%3C/svg%3E");
+}
+
+.icon.scissors-icon {
+    background-image: url("hand.svg");
 }
 
 /* emojis */

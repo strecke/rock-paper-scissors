@@ -28,7 +28,7 @@
                 </div>
             </div>
             <div class="window-content about-content justify">
-                <div class="emoji-container">
+                <div class="flex-container">
                     <p><strong>&lt;3 Thank you for playing!</strong></p>
                     <button class="emoji-button"><span data-state="happy"
                             class="icon icon-emoji icon-happy"></span></button>
@@ -74,7 +74,7 @@
                 <div class="calculating-state">
                     <p>Computer is thinking...</p>
                     <div class="progress-indicator">
-                        <span class="progress-indicator-bar round-progress-bar"></span>
+                        <span class="progress-indicator-bar step-progress-bar"></span>
                     </div>
                 </div>
                 <div class="result-state hidden">
@@ -100,7 +100,7 @@
                 <div class="title-bar-text">Final Results</div>
             </div>
             <div class="window-content final-content">
-                <div class="emoji-container">
+                <div class="flex-container">
                     <span>
                         <p class="final-result">Winner:</p>
                         <p>Game history</p>
@@ -140,7 +140,7 @@
                 </div>
             </div>
             <div class="window-content logoff-content">
-                <div class="emoji-container">
+                <div class="flex-container">
                     <span class="icon icon-emoji icon-auth"></span>
                     <span>
                         <p>Are you sure you want to log off?</p>
@@ -162,20 +162,25 @@
                 </div>
             </div>
             <div class="window-content login-content">
-                <p>Type a name to identify yourself. Enter a password if you want to.</p>
-                <p>Tip: If you don’t enter a password, you won’t get this promt again at startup.</p>
-                <div class="field-row">
-                    <label for="username">User name:</label>
-                    <input id="username" type="text" maxlength="12" autocomplete="off" spellcheck="false">
+                <div class="flex-container login-container">
+                    <span class="icon icon-emoji icon-auth"></span>
+                    <span>
+                        <p>Type a name to identify yourself. Enter a password if you want to.</p>
+                        <p>Tip: If you don’t enter a password, you won’t get this promt again at startup.</p>
+                        <div class="field-row">
+                            <label for="username"><u>U</u>ser name:</label>
+                            <input id="username" type="text" maxlength="12" autocomplete="off" spellcheck="false">
+                        </div>
+                        <div class="field-row">
+                            <label for="password"><u>P</u>assword:</label>
+                            <input id="password" type="text" autocomplete="off" spellcheck="false">
+                        </div>
+                    </span>
+                    <section>
+                        <button data-choice="ok">OK</button>
+                        <button data-choice="cancel">Cancel</button>
+                    </section>
                 </div>
-                <div class="field-row">
-                    <label for="password">Password:</label>
-                    <input id="password" type="text" autocomplete="off" spellcheck="false">
-                </div>
-                <section>
-                    <button data-choice="ok">OK</button>
-                    <button data-choice="cancel">Cancel</button>
-                </section>
             </div>
         </div>
 

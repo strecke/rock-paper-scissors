@@ -569,7 +569,7 @@ const rpsGame = {
 
         const calcState = roundWindow.querySelector('.calculating-state');
         const resultState = roundWindow.querySelector('.result-state');
-        const progressBar = roundWindow.querySelector('.round-progress-bar');
+        const progressBar = roundWindow.querySelector('.step-progress-bar');
         const confirmBtn = roundWindow.querySelector('button');
         const indicatorContainer = roundWindow.querySelector('.progress-indicator');
 
@@ -694,7 +694,7 @@ const rpsGame = {
 
         finalWindow.querySelector('.final-result').textContent = `Winner: ${this.state.userScore > this.state.computerScore ? 'User' : 'Computer'}`;
 
-        const finalEmoji = finalWindow.querySelector('.emoji-container .icon-emoji');
+        const finalEmoji = finalWindow.querySelector('.flex-container .icon-emoji');
 
         const currentState = finalEmoji.dataset.state ?? null;
         let availableStates = this.state.userScore > this.state.computerScore ? this.EMOJI_WON : this.EMOJI_LOST;
