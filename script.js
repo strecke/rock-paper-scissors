@@ -652,18 +652,37 @@ const rpsGame = {
         const confirmBtn = roundWindow.querySelector('button');
 
         roundWindow.querySelector('.title-bar-text').textContent = `Results Round ${round.round}`;
-        roundWindow.querySelector('.user-selection').textContent = `User Chose: ${round.userLabel}`;
-        roundWindow.querySelector('.computer-selection').textContent = `Computer Chose: ${round.computerLabel}`;
+        roundWindow.querySelector('p.user-selection').textContent = `${round.userLabel}`;
+        roundWindow.querySelector('p.computer-selection').textContent = `${round.computerLabel}`;
+
+        const userIcon = roundWindow.querySelector('span.icon.user-selection');
+        const computerIcon = roundWindow.querySelector('span.icon.computer-selection');
+
+        [userIcon, computerIcon].forEach(icon => {
+            icon.classList.remove('icon-rock', 'icon-paper', 'icon-scissors');
+        });
+
+        userIcon.classList.add(`icon-${round.userLabel.toLowerCase()}`);
+        computerIcon.classList.add(`icon-${round.computerLabel.toLowerCase()}`);
 
         const resultMessage = roundWindow.querySelector('.result-message');
+
+        const userFieldset = roundWindow.querySelector('fieldset:nth-child(1)');
+        const computerFieldset = roundWindow.querySelector('fieldset:nth-child(2)');
+
+        [userFieldset, computerFieldset].forEach(fieldset => fieldset.classList.remove('winner', 'loser'));
 
         if (round.isTie) {
             resultMessage.textContent = `It’s a tie!`;
             confirmBtn.textContent = this.TIE_PHRASES[Math.floor(Math.random() * this.TIE_PHRASES.length)];
         } else if (round.isUserWinner) {
+            userFieldset.classList.add('winner');
+            computerFieldset.classList.add('loser');
             resultMessage.textContent = `You Win! ${round.userLabel} beats ${round.computerLabel}`;
             confirmBtn.textContent = this.WIN_PHRASES[Math.floor(Math.random() * this.WIN_PHRASES.length)];
         } else {
+            userFieldset.classList.add('loser');
+            computerFieldset.classList.add('winner');
             resultMessage.textContent = `You Lose! ${round.computerLabel} beats ${round.userLabel}`;
             confirmBtn.textContent = this.LOSE_PHRASES[Math.floor(Math.random() * this.LOSE_PHRASES.length)];
         }
@@ -791,7 +810,7 @@ const authApp = {
         });
 
         appRegistry.register('login', {
-            onClose:() => {
+            onClose: () => {
                 document.body.classList.remove('is-logged-off');
             }
         });
@@ -803,7 +822,7 @@ const authApp = {
             onOpen: () => {
                 btnYes.focus();
             }
-        });        
+        });
 
         btnNo.addEventListener('click', () => {
             appManager.close('logoff');
