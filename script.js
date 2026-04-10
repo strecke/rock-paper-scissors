@@ -837,7 +837,11 @@ const authApp = {
         });
 
         btnYes.addEventListener('click', () => {
-            appManager.close('logoff');
+            appManager.states.forEach(state => {
+                if (state.open) {
+                    appManager.close(state.appId);
+                }
+            });
             this.renderLogin();
         });
 
