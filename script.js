@@ -680,6 +680,9 @@ const rpsGame = {
 
         [userFieldset, computerFieldset].forEach(fieldset => fieldset.classList.remove('winner', 'loser'));
 
+        const userLabel = userFieldset.querySelector('legend');
+        userLabel.textContent = authApp.currentUser;
+
         if (round.isTie) {
             resultMessage.textContent = `It’s a tie!`;
             confirmBtn.textContent = this.TIE_PHRASES[Math.floor(Math.random() * this.TIE_PHRASES.length)];
@@ -704,7 +707,7 @@ const rpsGame = {
         const progressPercent = Math.min((highestPoints / this.WIN_SCORE) * 100, 100);
 
         gameWindow.querySelector('.progress-indicator-bar').style.width = progressPercent + '%';
-        roundWindow.querySelector('.users-points').textContent = `User: ${this.state.userScore}`;
+        roundWindow.querySelector('.users-points').textContent = `You: ${this.state.userScore}`;
         roundWindow.querySelector('.computers-points').textContent = `Computer: ${this.state.computerScore}`;
 
         gameWindow.querySelectorAll('.game-content section button').forEach(b => {
@@ -718,8 +721,10 @@ const rpsGame = {
     renderFinalWindow: function () {
         const finalWindow = document.querySelector('.window.final-window[data-app="rps"]');
         const tBody = finalWindow.querySelector('.table table tbody');
+        const tHeadUserName = finalWindow.querySelector('.table table thead .current-user');
+        tHeadUserName.textContent = authApp.currentUser;
 
-        finalWindow.querySelector('.final-result').textContent = `Winner: ${this.state.userScore > this.state.computerScore ? 'User' : 'Computer'}`;
+        finalWindow.querySelector('.final-result').textContent = `Winner: ${this.state.userScore > this.state.computerScore ? authApp.currentUser : 'Computer'}`;
 
         const finalEmoji = finalWindow.querySelector('.flex-container .icon-emoji');
 
