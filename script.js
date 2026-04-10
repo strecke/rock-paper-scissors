@@ -592,6 +592,14 @@ const rpsGame = {
         appManager.open('rps');
         windowManager.focus(roundWindow);
 
+        if (window.getComputedStyle(roundWindow).transform !== 'none') {
+            const rect = roundWindow.getBoundingClientRect();
+
+            roundWindow.style.left = `${rect.left}px`;
+            roundWindow.style.right = `${rect.top}px`;
+            roundWindow.style.transform = 'none';
+        }
+
         const maxContainerWidth = indicatorContainer.clientWidth - 1;
         const blockWidth = 18;
 
