@@ -33,6 +33,10 @@ body.is-logged-off .window:not(.login-window) {
     display: none;
 }
 
+.boot-hidden {
+    visibility: hidden;
+}
+
 .shutdown-overlay {
     position: fixed;
     top: 0;

@@ -897,8 +897,6 @@ appRegistry.register('rps', {
     }
 });
 
-appManager.open('rps');
-
 // about-app
 
 const aboutApp = {
@@ -957,7 +955,8 @@ const authApp = {
 
         appRegistry.register('login', {
             onClose: () => {
-                document.body.classList.remove('is-logged-off');
+                //document.body.classList.remove('is-logged-off');
+                systemManager.bootSequence();
             }
         });
 
@@ -1047,3 +1046,39 @@ const authApp = {
 }
 
 authApp.init();
+
+const systemManager = {
+    wait: ms => new Promise(resolve => setTimeout(resolve, Math.random() * 200 + ms)),
+    show: elements => elements.forEach(e => e.classList.remove('boot-hidden')),
+
+    bootSequence: async function () {
+        const groups = {
+            desktopItems: document.querySelectorAll('.desktop-item'),
+            footer: document.querySelectorAll('.footer'),
+            clock: document.querySelectorAll('.clock'),
+            taskbarItems: document.querySelectorAll('.taskbar-items .taskbar-item'),
+        };
+        Object.values(groups).forEach(group => group.forEach(e => e.classList.add('boot-hidden')));
+
+        document.body.classList.remove('is-logged-off');
+
+        await this.wait(400);
+        this.show(groups.footer);
+        for (let item of groups.desktopItems) {
+            await this.wait(50);
+            this.show([item]);
+        }
+
+        await this.wait(200);
+        this.show(groups.clock);
+
+        await this.wait(600);
+        appManager.open('rps');
+
+        await this.wait(400);
+        this.show(groups.taskbarItems);
+    },
+
+}
+
+appManager.open('rps');
