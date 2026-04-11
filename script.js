@@ -749,7 +749,10 @@ const rpsGame = {
         progressBar.style.transition = `width ${thinkTime}ms steps(${steps}, end)`;
         progressBar.style.width = `${targetWidthPx}px`;
 
-        progressBar.addEventListener('transitionend', () => {
+        let isRoundProcessed = false;
+        const finalizeRound = () => {
+            if (isRoundProcessed) return;
+            isRoundProcessed = true;
             setTimeout(() => {
                 gameWindow.style.cursor = '';
                 roundWindow.style.cursor = '';
@@ -781,8 +784,12 @@ const rpsGame = {
 
                 confirmBtn.focus();
             }, pauseTime);
-        }, { once: true });
+        };
 
+        progressBar.addEventListener('transitionend', e => {
+            if (e.propertyName === 'width') finalizeRound();
+        }, { once: true });
+        setTimeout(finalizeRound, thinkTime + 20);
     },
 
     WIN_PHRASES: ['Hurray!', 'Awesome!', 'Take that!', 'Finally!', 'Let’s go!'],
