@@ -406,7 +406,7 @@ const appManager = {
         const windowToFocus = lastFocused || appWindows.find(w => w.classList.contains('main-window')) || appWindows[0];
 
         if (state.minimized) {
-            appWindows.forEach(win => win.classList.remove('minimized'));
+            this.maximize(appId, appWindows, windowToFocus);
         } else {
             windowToFocus.classList.remove('minimized', 'close');
         }
@@ -421,25 +421,119 @@ const appManager = {
         appRegistry.trigger(appId, 'onOpen');
     },
 
+    DURATION_FACTOR: 1.4,
+
+    maximize: function (appId, appWindows, windowToFocus) {
+        const taskbarButton = taskbarManager.items[appId];
+
+        if (taskbarButton) {
+            const titleBar = windowToFocus.querySelector('.title-bar');
+            windowToFocus.style.visibility = 'hidden';
+            windowToFocus.classList.remove('minimized');
+
+            const endRect = titleBar.getBoundingClientRect();
+            const startRect = taskbarButton.getBoundingClientRect();
+
+            const distance = Math.hypot(endRect.left - startRect.left, endRect.top - startRect.top);
+            const duration = distance / this.DURATION_FACTOR;
+
+            const ghostTitleBar = document.createElement('div');
+            ghostTitleBar.className = 'title-bar ghost-title-bar';
+            const titleText = windowToFocus.querySelector('.title-bar-text').cloneNode(true);
+            ghostTitleBar.appendChild(titleText);
+
+            ghostTitleBar.style.left = `${startRect.left}px`;
+            ghostTitleBar.style.top = `${startRect.top}px`;
+            ghostTitleBar.style.width = `${startRect.width}px`;
+            ghostTitleBar.style.height = `${startRect.height}px`;
+            ghostTitleBar.style.transition = `all ${duration}ms linear`;
+
+            taskbarButton.style.pointerEvents = 'none';
+
+            document.body.appendChild(ghostTitleBar);
+            ghostTitleBar.offsetHeight;
+
+            ghostTitleBar.style.left = `${endRect.left}px`;
+            ghostTitleBar.style.top = `${endRect.top}px`;
+            ghostTitleBar.style.width = `${endRect.width}px`;
+            ghostTitleBar.style.height = `${endRect.height}px`;
+
+            ghostTitleBar.addEventListener('transitionend', e => {
+                if (e.propertyName !== 'left') return;
+                taskbarButton.style.pointerEvents = '';
+                ghostTitleBar.remove();
+                windowToFocus.style.visibility = '';
+                appWindows.forEach(win => win.classList.remove('minimized'));
+            });
+        } else {
+            // fallback no taskbar-button
+            appWindows.forEach(win => win.classList.remove('minimized'));
+        }
+    },
+
     minimize: function (appId) {
         const state = this.getState(appId);
-        const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains('close'));
-
+        const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains('close') && !w.classList.contains('minimized'));
         if (!visibleWindows.length) return;
 
-        state.minimized = true;
-        state.active = false;
+        const activeWindow = visibleWindows.find(w => w.classList.contains('active') || visibleWindows[0]);
+        const taskbarButton = taskbarManager.items[appId];
 
-        visibleWindows.forEach(win => {
-            win.classList.add('minimized');
-            win.classList.remove('active');
-        });
+        const finalizeMinimize = () => {
+            state.minimized = true;
+            state.active = false;
 
-        const newWindowFocus = windowManager.stack.findLast(w =>
-            !w.classList.contains('close') && !w.classList.contains('minimized')
-        );
-        if (newWindowFocus) windowManager.focus(newWindowFocus);
-        else taskbarManager.setActiveApp(null);
+            visibleWindows.forEach(win => {
+                win.classList.add('minimized');
+                win.classList.remove('active');
+            });
+
+            const newWindowFocus = windowManager.stack.findLast(w =>
+                !w.classList.contains('close') && !w.classList.contains('minimized')
+            );
+            if (newWindowFocus) windowManager.focus(newWindowFocus);
+            else taskbarManager.setActiveApp(null);
+        };
+
+        if (activeWindow && taskbarButton) {
+            const titleBar = activeWindow.querySelector('.title-bar');
+            const startRect = titleBar.getBoundingClientRect();
+            const endRect = taskbarButton.getBoundingClientRect();
+
+            const distance = Math.hypot(endRect.left - startRect.left, endRect.top - startRect.top);
+            const duration = distance / this.DURATION_FACTOR;
+
+            const ghostTitleBar = document.createElement('div');
+            ghostTitleBar.className = 'title-bar ghost-title-bar';
+            const titleText = activeWindow.querySelector('.title-bar-text').cloneNode(true);
+            ghostTitleBar.appendChild(titleText);
+
+            ghostTitleBar.style.left = `${startRect.left}px`;
+            ghostTitleBar.style.top = `${startRect.top}px`;
+            ghostTitleBar.style.width = `${startRect.width}px`;
+            ghostTitleBar.style.height = `${startRect.height}px`;
+            ghostTitleBar.style.transition = `all ${duration}ms linear`;
+
+            taskbarButton.style.pointerEvents = 'none';
+
+            document.body.appendChild(ghostTitleBar);
+
+            ghostTitleBar.offsetHeight;
+
+            ghostTitleBar.style.left = `${endRect.left}px`;
+            ghostTitleBar.style.top = `${endRect.top}px`;
+            ghostTitleBar.style.width = `${endRect.width}px`;
+            ghostTitleBar.style.height = `${endRect.height}px`;
+
+            ghostTitleBar.addEventListener('transitionend', e => {
+                if (e.propertyName !== 'left') return;
+                taskbarButton.style.pointerEvents = '';
+                ghostTitleBar.remove();
+                finalizeMinimize();
+            });
+        } else {
+            finalizeMinimize();
+        }
     },
 
     close: function (appId) {
