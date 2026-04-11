@@ -913,6 +913,7 @@ const rpsGame = {
         });
 
         windowManager.focus(finalWindow);
+        finalWindow.querySelector('button.new').focus();
     },
 };
 
