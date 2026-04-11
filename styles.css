@@ -120,7 +120,6 @@ body.is-logged-off .window:not(.login-window) {
 
 .window-drag-ghost {
     position: fixed;
-    z-index: 9999999;
     pointer-events: none;
     box-sizing: border-box;
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='4' height='4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 0H0v2h2v2h2V2H2V0z' fill='%23fff'/%3E%3C/svg%3E");
@@ -145,7 +144,6 @@ body.is-logged-off .window:not(.login-window) {
 .ghost-title-bar {
     position: fixed;
     box-sizing: border-box;
-    z-index: 9999999;
     margin: 0;
     padding: 0;
     pointer-events: none;

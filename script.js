@@ -241,6 +241,8 @@ function handleWindowInteraction() {
                 if (!interaction.ghost) {
                     interaction.ghost = document.createElement('div');
                     interaction.ghost.className = 'window-drag-ghost';
+                    interaction.ghost.style.zIndex = windows.length + 1;
+
 
                     interaction.ghost.style.width = interaction.dimensions.x + 'px';
                     interaction.ghost.style.height = interaction.dimensions.y + 'px';
@@ -482,6 +484,8 @@ const appManager = {
             ghostTitleBar.style.width = `${startRect.width}px`;
             ghostTitleBar.style.height = `${startRect.height}px`;
             ghostTitleBar.style.transition = `all ${duration}ms linear`;
+            
+            ghostTitleBar.style.zIndex = windows.length + 1;
 
             taskbarButton.style.pointerEvents = 'none';
 
@@ -549,6 +553,8 @@ const appManager = {
             ghostTitleBar.style.transition = `all ${duration}ms linear`;
 
             taskbarButton.style.pointerEvents = 'none';
+
+            ghostTitleBar.style.zIndex = windows.length + 1;
 
             document.body.appendChild(ghostTitleBar);
 
