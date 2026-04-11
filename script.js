@@ -101,7 +101,13 @@ function handleDesktopItemInteraction() {
                 dI.style.zIndex = windows.length + 1;
             },
             onMove: (e, interaction, x, y) => {
-                moveElement(dI, x, y, interaction);
+                if (!interaction.ghost) {
+                    interaction.ghost = dI.cloneNode(true);
+                    interaction.ghost.classList.add('desktop-item-ghost');
+                    interaction.ghost.style.zIndex = dI.style.zIndex + 1;
+                    document.body.appendChild(interaction.ghost);
+                }
+                moveElement(interaction.ghost, x, y, interaction);
                 isOverWindow = detectDropTargetIsWindow(e, dI);
                 dI.style.cursor = isOverWindow ? 'no-drop' : '';
             },
@@ -110,9 +116,17 @@ function handleDesktopItemInteraction() {
                 dI.style.cursor = '';
 
                 if (interaction.moved) {
-                    if (isOverWindow) {
-                        dI.style.left = startPos.x + 'px';
-                        dI.style.top = startPos.y + 'px';
+                    if (interaction.ghost) {
+                        if (!isOverWindow) {
+                            dI.style.left = interaction.ghost.style.left;
+                            dI.style.top = interaction.ghost.style.top;
+                        }
+                        // else {
+                        //     dI.style.left = startPos.x + 'px';
+                        //     dI.style.top = startPos.y + 'px';
+                        // }
+                        interaction.ghost.remove();
+                        interaction.ghost = undefined;
                     }
                 } else {
                     const now = Date.now();

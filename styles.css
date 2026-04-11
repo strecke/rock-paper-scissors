@@ -151,7 +151,7 @@ body.is-logged-off .window:not(.login-window) {
     pointer-events: none;
     cursor: auto;
     background: linear-gradient(90deg, navy, #1084d0);
-    will-change: transform, opacity;
+    /* will-change: transform, opacity; */
 }
 
 .ghost-title-bar {
@@ -841,6 +841,27 @@ button.desktop-item:hover:not(:focus, :focus-visible) .desktop-item-label::after
     pointer-events: auto;
     touch-action: auto;
     user-select: text;
+}
+
+button.desktop-item-ghost {
+    position: fixed;
+    opacity: 0.6;
+    pointer-events: none;
+    text-shadow: none;
+}
+
+button.desktop-item-ghost .desktop-icon-container::after {
+    opacity: 0.6;
+}
+
+button.desktop-item-ghost .desktop-item-label {
+    /* background: transparent; */
+    color: black;
+    outline: none;
+}
+
+button.desktop-item-ghost .desktop-item-label::after {
+    display: none;
 }
 
 /* scrollbar styles */
