@@ -484,7 +484,7 @@ const appManager = {
             ghostTitleBar.style.width = `${startRect.width}px`;
             ghostTitleBar.style.height = `${startRect.height}px`;
             ghostTitleBar.style.transition = `all ${duration}ms linear`;
-            
+
             ghostTitleBar.style.zIndex = windows.length + 1;
 
             taskbarButton.style.pointerEvents = 'none';
@@ -967,6 +967,20 @@ const authApp = {
         appRegistry.register('logoff', {
             onOpen: () => {
                 btnYes.focus();
+                if (!document.querySelector('.shutdown-overlay')) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'shutdown-overlay';
+                    overlay.style.zIndex = logoffWindow.style.zIndex - 1;
+                    overlay.addEventListener('mousedown', e => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    });
+                    document.body.appendChild(overlay);
+                }
+            },
+            onClose: () => {
+                const overlay = document.querySelector('.shutdown-overlay');
+                if (overlay) overlay.remove();
             }
         });
 

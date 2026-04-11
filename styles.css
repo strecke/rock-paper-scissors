@@ -33,6 +33,17 @@ body.is-logged-off .window:not(.login-window) {
     display: none;
 }
 
+.shutdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='2' height='2' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M1 0H0v1h1v1h1V1H1V0z' fill='%23000'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    cursor: default;
+}
+
 .content {
     display: flex;
     flex-direction: column;
