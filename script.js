@@ -749,37 +749,40 @@ const rpsGame = {
         progressBar.style.transition = `width ${thinkTime}ms steps(${steps}, end)`;
         progressBar.style.width = `${targetWidthPx}px`;
 
-        setTimeout(() => {
-            gameWindow.style.cursor = '';
-            roundWindow.style.cursor = '';
-            rpsButtons.forEach(b => b.style.cursor = '');
+        progressBar.addEventListener('transitionend', () => {
+            setTimeout(() => {
+                gameWindow.style.cursor = '';
+                roundWindow.style.cursor = '';
+                rpsButtons.forEach(b => b.style.cursor = '');
 
-            calcState.classList.add('hidden');
-            resultState.classList.remove('hidden');
+                calcState.classList.add('hidden');
+                resultState.classList.remove('hidden');
 
-            const computerChoice = ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
-            const isTie = userChoice === computerChoice;
-            const isUserWinner = !isTie && this.BEATS[userChoice] === computerChoice;
+                const computerChoice = ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
+                const isTie = userChoice === computerChoice;
+                const isUserWinner = !isTie && this.BEATS[userChoice] === computerChoice;
 
-            this.state.userScore += isUserWinner ? 1 : 0;
-            this.state.computerScore += (isTie || isUserWinner) ? 0 : 1;
-            this.state.isGameOver = this.state.userScore >= this.WIN_SCORE || this.state.computerScore >= this.WIN_SCORE;
+                this.state.userScore += isUserWinner ? 1 : 0;
+                this.state.computerScore += (isTie || isUserWinner) ? 0 : 1;
+                this.state.isGameOver = this.state.userScore >= this.WIN_SCORE || this.state.computerScore >= this.WIN_SCORE;
 
-            this.state.lastRound = {
-                round: this.state.roundCounter++,
-                userLabel: this.NAMES[userChoice],
-                computerLabel: this.NAMES[computerChoice],
-                isTie,
-                isUserWinner,
-            };
+                this.state.lastRound = {
+                    round: this.state.roundCounter++,
+                    userLabel: this.NAMES[userChoice],
+                    computerLabel: this.NAMES[computerChoice],
+                    isTie,
+                    isUserWinner,
+                };
 
-            this.state.roundHistory.push(this.state.lastRound);
+                this.state.roundHistory.push(this.state.lastRound);
 
-            this.renderRound();
-            this.renderGameState();
+                this.renderRound();
+                this.renderGameState();
 
-            confirmBtn.focus();
-        }, thinkTime + pauseTime);
+                confirmBtn.focus();
+            }, pauseTime);
+        }, { once: true });
+
     },
 
     WIN_PHRASES: ['Hurray!', 'Awesome!', 'Take that!', 'Finally!', 'Let’s go!'],
@@ -1045,6 +1048,8 @@ const authApp = {
 }
 
 authApp.init();
+
+// system-manager
 
 const systemManager = {
     wait: ms => new Promise(resolve => setTimeout(resolve, Math.random() * 200 + ms)),
