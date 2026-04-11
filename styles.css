@@ -106,6 +106,7 @@ body.is-logged-off .window:not(.login-window) {
 
 .window.game-window {
     transform: translate(-60%, -80%);
+    width: 260px;
 }
 
 .window.round-window {

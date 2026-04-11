@@ -692,6 +692,24 @@ const rpsGame = {
             this.reset();
             appManager.close('rps');
         });
+
+        document.addEventListener('keydown', e => {
+            if (!gameWindow.classList.contains('active')) return;
+            const keyMap = {
+                '1': 'rock',
+                '2': 'paper',
+                '3': 'scissors',
+            };
+
+            const choice = keyMap[e.key];
+            if (!choice) return;
+
+            const btn = gameWindow.querySelector(`button[data-choice="${choice}"]`);
+            if (btn && !btn.disabled) {
+                btn.focus();
+                this.handleUserChoice(choice);
+            }
+        });
     },
 
     handleUserChoice: function (userChoice) {
