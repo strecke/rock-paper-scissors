@@ -382,7 +382,6 @@ const appManager = {
                 appId,
                 open: false,
                 minimized: false,
-                active: false,
             });
         });
     },
@@ -413,7 +412,6 @@ const appManager = {
 
         state.open = true;
         state.minimized = false;
-        state.active = true;
 
         taskbarManager.items[appId]?.classList.remove('close');
 
@@ -481,7 +479,6 @@ const appManager = {
 
         const finalizeMinimize = () => {
             state.minimized = true;
-            state.active = false;
 
             visibleWindows.forEach(win => {
                 win.classList.add('minimized');
@@ -544,7 +541,6 @@ const appManager = {
 
         state.open = false;
         state.minimized = false;
-        state.active = false;
 
         taskbarManager.setStatus(appId, 'close');
         appRegistry.trigger(appId, 'onClose');
