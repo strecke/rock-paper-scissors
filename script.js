@@ -42,8 +42,8 @@ startMenuItems.forEach(btn => {
     }
 });
 
-document.addEventListener('click', e => {
-    if (!e.target.closest('.window') && !e.target.closest('.footer') && !e.target.closest('.desktop-item')) {
+document.addEventListener('mousedown', e => {
+    if (!e.target.closest('.window') && !e.target.closest('.taskbar-item')) {
         windowManager.stack.forEach(w => w.classList.remove('active'));
         taskbarManager.setActiveApp(null);
     }
