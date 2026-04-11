@@ -123,13 +123,10 @@ body.is-logged-off .window:not(.login-window) {
     z-index: 9999999;
     pointer-events: none;
     box-sizing: border-box;
-    
-background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='4' height='4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 0H0v2h2v2h2V2H2V0z' fill='%23fff'/%3E%3C/svg%3E");    background-repeat: repeat;
-    
-    clip-path: polygon(
-        0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 
-        8px 8px, 8px calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 8px, 8px 8px
-    );
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='4' height='4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 0H0v2h2v2h2V2H2V0z' fill='%23fff'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%,
+            8px 8px, 8px calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 8px, 8px 8px);
     mix-blend-mode: difference;
 }
 
@@ -793,11 +790,23 @@ button.desktop-item:focus-visible .desktop-icon-container::after {
     word-break: break-word;
     box-sizing: border-box;
     width: 70px;
+    position: relative;
 }
 
-button.desktop-item:hover:not(:focus, :focus-visible) .desktop-item-label {
-    outline: 1px dotted #ff0000;
+.desktop-item-label::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    mix-blend-mode: difference;
     outline-offset: -1px;
+}
+
+button.desktop-item:hover:not(:focus, :focus-visible) .desktop-item-label::after {
+    outline: 1px dotted #fff;
 }
 
 .desktop-item:active .desktop-item-label,
@@ -805,8 +814,12 @@ button.desktop-item:hover:not(:focus, :focus-visible) .desktop-item-label {
 .desktop-item:focus .desktop-item-label {
     background: navy;
     color: white;
-    outline: 1px dotted #ffff53;
-    outline-offset: -1px;
+}
+
+.desktop-item:active .desktop-item-label::after,
+.desktop-item:focus-visible .desktop-item-label::after,
+.desktop-item:focus .desktop-item-label::after {
+    outline: 1px dotted #fff;
 }
 
 .desktop-item-label-editor {
