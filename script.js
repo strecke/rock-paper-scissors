@@ -223,6 +223,25 @@ function handleWindowInteraction() {
                 win.style.left = rect.left + 'px';
                 win.style.top = rect.top + 'px';
             },
+            onMove: (e, interaction, x, y) => {
+                if (!interaction.ghost) {
+                    interaction.ghost = document.createElement('div');
+                    interaction.ghost.className = 'window-drag-ghost';
+
+                    interaction.ghost.style.width = interaction.dimensions.x + 'px';
+                    interaction.ghost.style.height = interaction.dimensions.y + 'px';
+                    document.body.appendChild(interaction.ghost);
+                }
+                moveElement(interaction.ghost, x, y, interaction);
+            },
+            onEnd: (e, interaction) => {
+                if (interaction.ghost) {
+                    win.style.left = interaction.ghost.style.left;
+                    win.style.top = interaction.ghost.style.top;
+                    interaction.ghost.remove();
+                    interaction.ghost = undefined;
+                }
+            },
         });
     });
 }
@@ -357,15 +376,19 @@ function makeDraggable(dragTarget, moveTarget, options = {}) {
         }
     });
 
-    dragTarget.addEventListener('pointerup', e => {
+    const handleDragEnd = e => {
         if (interaction.pointerId !== e.pointerId) return;
 
         interaction.active = false;
         dragTarget.releasePointerCapture(e.pointerId);
+        interaction.pointerId = null;
 
         if (options.onEnd) options.onEnd(e, interaction);
-        interaction.pointerId = null;
-    });
+    };
+
+    dragTarget.addEventListener('pointerup', handleDragEnd);
+    //dragTarget.addEventListener('pointercancel', handleDragEnd);
+    dragTarget.addEventListener('lostpointercapture', handleDragEnd);
 }
 
 // application-logic
