@@ -98,13 +98,12 @@ function handleDesktopItemInteraction() {
                 startPos = { x: rect.left, y: rect.top };
                 initialTarget = e.target;
                 initialActiveElement = document.activeElement;
-                dI.style.zIndex = windows.length + 1;
             },
             onMove: (e, interaction, x, y) => {
                 if (!interaction.ghost) {
                     interaction.ghost = dI.cloneNode(true);
                     interaction.ghost.classList.add('desktop-item-ghost');
-                    interaction.ghost.style.zIndex = dI.style.zIndex + 1;
+                    interaction.ghost.style.zIndex = windows.length + 1;
                     document.body.appendChild(interaction.ghost);
                 }
                 moveElement(interaction.ghost, x, y, interaction);
