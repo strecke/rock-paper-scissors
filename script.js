@@ -256,9 +256,9 @@ const windowManager = {
         this.stack = [...allWindows];
     },
 
-    getTopAppId: function () {
+    getFocusedAppId: function () {
         const topWindow = this.stack.findLast(w =>
-            !w.classList.contains('close') && !w.classList.contains('minimized')
+            !w.classList.contains('close') && !w.classList.contains('minimized') && w.classList.contains('active')
         );
         return topWindow ? topWindow.dataset.app : null;
     },
@@ -476,7 +476,7 @@ const appManager = {
         const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains('close') && !w.classList.contains('minimized'));
         if (!visibleWindows.length) return;
 
-        const activeWindow = visibleWindows.find(w => w.classList.contains('active') || visibleWindows[0]);
+        const activeWindow = visibleWindows.find(w => w.classList.contains('active')) || visibleWindows[0];
         const taskbarButton = taskbarManager.items[appId];
 
         const finalizeMinimize = () => {
@@ -551,7 +551,7 @@ const appManager = {
     },
 
     toggle: function (appId) {
-        const isFocused = windowManager.getTopAppId() === appId;
+        const isFocused = windowManager.getFocusedAppId() === appId;
 
         if (isFocused) this.minimize(appId);
         else this.open(appId);
