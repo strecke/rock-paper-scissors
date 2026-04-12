@@ -280,6 +280,39 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     align-items: center;
 }
 
+.window-content .grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    -webkit-font-smoothing: none;
+}
+
+.window-content fieldset {
+    border: 2px solid;
+    border-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='5' height='5' fill='gray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h5v5H0V2h2v1h1V2H0' fill='%23fff'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h4v4H0V1h1v2h2V1H0'/%3E%3C/svg%3E") 2;
+    padding: 10px;
+    padding-block-start: 8px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+}
+
+.window-content fieldset legend {
+    padding: 0 4px;
+    background: silver;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 15px;
+}
+
+.window-content fieldset p {
+    margin: 0;
+}
+
+/* content app specific */
 .window-content.login-content .login-container {
     align-items: flex-start;
     gap: 10px;
@@ -313,32 +346,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 }
 
 .window-content.round-content .result-state .grid-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
     margin-bottom: 15px;
-    -webkit-font-smoothing: none;
-}
-
-.window-content.round-content .result-state .grid-container > fieldset {
-    border: 2px solid;
-    border-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='5' height='5' fill='gray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h5v5H0V2h2v1h1V2H0' fill='%23fff'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h4v4H0V1h1v2h2V1H0'/%3E%3C/svg%3E") 2;
-    padding: 10px;
-    padding-block-start: 8px;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 9px;
-}
-
-.window-content.round-content .result-state .grid-container > fieldset legend {
-    padding: 0 4px;
-    background: silver;
-}
-
-.window-content.round-content .result-state .grid-container > fieldset p {
-    margin: 0;
 }
 
 .window-content.round-content .result-state .grid-container > fieldset.winner {
@@ -354,8 +362,62 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     font-weight: 700;
 }
 
-.window-content.final-content section button:last-child {
-    margin-left: 6px;
+.window-content.final-content p.game-over-highlight {
+    text-align: center;
+    letter-spacing: 8px;
+    font-weight: 700;
+    text-shadow: 1px 1px 0px #86878e;
+    line-height: 1;
+    font-size: 15px;
+}
+
+.window-content.final-content > .flex-container {
+    flex-direction: column;
+    box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px grey;
+    box-sizing: border-box;
+    user-select: none;
+    padding: 10px 0;
+    gap: 8px;
+}
+
+.window-content.final-content > .flex-container .icon-emoji {
+    width: 60px;
+    height: 60px;
+}
+
+.window-content.final-content > .flex-container > div.winner-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.window-content.final-content > .flex-container > div.winner-text p {
+    letter-spacing: 4px;
+    -webkit-font-smoothing: none;
+    margin: 0;
+}
+
+.window-content.final-content > .flex-container > div.winner-text .icon {
+    height: 18px;
+    width: 18px;
+    filter: drop-shadow(1px 1px 0px #86878e);
+}
+
+.window-content.final-content > fieldset.stats-box {
+    padding: 8px 10px;
+    margin: 10px 0;
+}
+
+.window-content.final-content > fieldset.stats-box > .grid-container {
+    gap: 6px;
+}
+
+.window-content.final-content section {
+    justify-content: space-between;
+}
+
+.window-content.final-content section button {
+    padding: 0 8px;
 }
 
 .window-content .progress-indicator {
@@ -385,6 +447,13 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     transition: none;
 }
 
+.window-content.about-content > .flex-container > button.emoji-button {
+    padding: 0;
+    min-width: 0;
+    height: 48px;
+}
+
+/* status-bar */
 .status-bar {
     display: flex;
     gap: 1px;
@@ -398,6 +467,13 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     padding: 2px 3px;
     font-size: 13px;
     -webkit-font-smoothing: none;
+}
+
+/* table */
+.window-content .table-caption {
+    margin-bottom: 3px;
+    font-size: 15px;
+    text-align: center;
 }
 
 .table {
@@ -442,12 +518,6 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .table table tbody tr.dimmed {
     color: #86878e;
-}
-
-.window-content.about-content > .flex-container > button.emoji-button {
-    padding: 0;
-    min-width: 0;
-    height: 48px;
 }
 
 /* footer syles */
@@ -697,6 +767,20 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .icon.icon-scissors {
     background-image: url("hand.svg");
+}
+
+.icon.icon-user {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdesc%3EPet Animals Frog Face Streamline Icon: https://streamlinehq.com%3C/desc%3E%3Cpath d='M30.48 15.24H32v7.62h-1.52ZM28.95 22.86h1.53v3.04h-1.53ZM28.95 13.71h1.53v1.53h-1.53ZM28.95 4.57h1.53v7.62h-1.53ZM27.43 25.9h1.52v1.53h-1.52ZM27.43 12.19h1.52v1.52h-1.52ZM27.43 3.05h1.52v1.52h-1.52ZM27.43 6.09h-1.52V4.57h-4.57v1.52h-1.53v4.58h1.53v1.52h4.57v-1.52h1.52Zm-3.05 1.53h-1.52V6.09h1.52ZM24.38 27.43h3.05v1.52h-3.05ZM7.62 28.95h16.76v1.53H7.62ZM19.81 1.52h7.62v1.53h-7.62ZM18.29 15.24h1.52v1.52h-1.52ZM18.29 3.05h1.52v1.52h-1.52ZM16.76 12.19h1.53v1.52h-1.53ZM16.76 4.57h1.53v3.05h-1.53ZM15.24 16.76h3.05v1.52h-3.05ZM15.24 7.62h1.52v1.52h-1.52ZM13.72 12.19h1.52v1.52h-1.52ZM13.72 4.57h1.52v3.05h-1.52ZM12.19 3.05h1.53v1.52h-1.53ZM10.67 4.57H6.1v1.52H4.57v4.58H6.1v1.52h4.57v-1.52h1.52V6.09h-1.52ZM9.15 7.62H7.62V6.09h1.53ZM4.57 27.43h3.05v1.52H4.57ZM4.57 1.52h7.62v1.53H4.57ZM3.05 25.9h1.52v1.53H3.05ZM3.05 12.19h1.52v1.52H3.05ZM3.05 3.05h1.52v1.52H3.05ZM1.53 22.86h1.52v3.04H1.53ZM1.53 13.71h1.52v1.53H1.53ZM1.53 4.57h1.52v7.62H1.53ZM0 15.24h1.53v7.62H0Z'/%3E%3C/svg%3E");
+}
+
+.icon.icon-computer {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdesc%3EEntertainment Events Hobbies Game Machines Arcade 2 Streamline Icon: https://streamlinehq.com%3C/desc%3E%3Cpath d='M30.47 4.57h-1.52V3.05h-1.53V1.52H25.9V0H3.04v6.1h1.53v1.52h1.52V6.1h18.29v1.52h1.52v15.24h-1.52v1.52h-1.53v1.52H3.04v-1.52H1.52v1.52H0V32h1.52v-4.57h19.81V32H32V6.1h-1.53Zm-24.38 0H4.57V1.52h1.52Zm3.05 0H7.61V1.52h1.53Zm13.71 0H10.66V1.52h12.19Zm7.62 10.67h-1.52V7.62h-1.53V6.1H25.9V4.57h-1.52V3.05h1.52v1.52h1.52V6.1h1.53v1.52h1.52Z'/%3E%3Cpath d='M19.8 15.24h1.53v1.52H19.8ZM16.76 22.86h4.57v1.52h-4.57ZM18.28 12.19h1.52v1.52h-1.52ZM19.8 32v-3.05h-4.57V32h1.53v-1.52h1.52V32zM13.71 16.76h6.09v1.53h-6.09ZM13.71 12.19h1.52v1.52h-1.52ZM12.19 15.24h1.52v1.52h-1.52ZM10.66 22.86h1.53v1.52h-1.53Z'/%3E%3Cpath d='M24.38 21.33V9.14H9.14v12.19ZM10.66 10.67h12.19v9.14H10.66ZM7.61 22.86h1.53v1.52H7.61ZM6.09 7.62h1.52v13.71H6.09ZM4.57 21.33h1.52v1.53H4.57ZM3.04 22.86h1.53v1.52H3.04Z'/%3E%3C/svg%3E");
+}
+
+.icon.icon-user,
+.icon.icon-computer {
+    width: 12px;
+    height: 12px;
 }
 
 /* emojis */

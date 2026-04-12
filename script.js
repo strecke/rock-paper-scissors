@@ -659,10 +659,14 @@ const rpsGame = {
         this.state = {
             userScore: 0,
             computerScore: 0,
+            ties: 0,
             roundCounter: 1,
             roundHistory: [],
             isGameOver: false,
             lastRound: null,
+            get winrate() {
+                return Math.round((this.userScore / this.roundCounter) * 1000) / 10;
+            },
         };
         this.renderGameState();
     },
@@ -783,12 +787,13 @@ const rpsGame = {
                 const isTie = userChoice === computerChoice;
                 const isUserWinner = !isTie && this.BEATS[userChoice] === computerChoice;
 
-                this.state.userScore += isUserWinner ? 1 : 0;
-                this.state.computerScore += (isTie || isUserWinner) ? 0 : 1;
+                if (isTie) this.state.ties++;
+                else if (isUserWinner) this.state.userScore++;
+                else this.state.computerScore++;
                 this.state.isGameOver = this.state.userScore >= this.WIN_SCORE || this.state.computerScore >= this.WIN_SCORE;
 
                 this.state.lastRound = {
-                    round: this.state.roundCounter++,
+                    round: !this.state.isGameOver ? this.state.roundCounter++ : this.state.roundCounter,
                     userLabel: this.NAMES[userChoice],
                     computerLabel: this.NAMES[computerChoice],
                     isTie,
@@ -823,15 +828,15 @@ const rpsGame = {
         roundWindow.querySelector('p.user-selection').textContent = `${round.userLabel}`;
         roundWindow.querySelector('p.computer-selection').textContent = `${round.computerLabel}`;
 
-        const userIcon = roundWindow.querySelector('span.icon.user-selection');
-        const computerIcon = roundWindow.querySelector('span.icon.computer-selection');
+        const userSelectionIcon = roundWindow.querySelector('span.icon.user-selection');
+        const computerSelectionIcon = roundWindow.querySelector('span.icon.computer-selection');
 
-        [userIcon, computerIcon].forEach(icon => {
+        [userSelectionIcon, computerSelectionIcon].forEach(icon => {
             icon.classList.remove('icon-rock', 'icon-paper', 'icon-scissors');
         });
 
-        userIcon.classList.add(`icon-${round.userLabel.toLowerCase()}`);
-        computerIcon.classList.add(`icon-${round.computerLabel.toLowerCase()}`);
+        userSelectionIcon.classList.add(`icon-${round.userLabel.toLowerCase()}`);
+        computerSelectionIcon.classList.add(`icon-${round.computerLabel.toLowerCase()}`);
 
         const resultMessage = roundWindow.querySelector('.result-message');
 
@@ -840,7 +845,7 @@ const rpsGame = {
 
         [userFieldset, computerFieldset].forEach(fieldset => fieldset.classList.remove('winner', 'loser'));
 
-        const userLabel = userFieldset.querySelector('legend');
+        const userLabel = userFieldset.querySelector('legend span:not(.icon)');
         userLabel.textContent = authApp.currentUser;
 
         if (round.isTie) {
@@ -884,19 +889,35 @@ const rpsGame = {
         const tHeadUserName = finalWindow.querySelector('.table table thead .current-user');
         tHeadUserName.textContent = authApp.currentUser;
 
-        finalWindow.querySelector('.final-result').textContent = `Winner: ${this.state.userScore > this.state.computerScore ? authApp.currentUser : 'Computer'}`;
+        const isUserWinner = this.state.userScore > this.state.computerScore;
+
+        finalWindow.querySelector('.final-result').textContent = `${isUserWinner ? authApp.currentUser : 'Computer'}`;
 
         const finalEmoji = finalWindow.querySelector('.flex-container .icon-emoji');
-
         const currentState = finalEmoji.dataset.state ?? null;
-        let availableStates = this.state.userScore > this.state.computerScore ? this.EMOJI_WON : this.EMOJI_LOST;
+        let availableStates = isUserWinner ? this.EMOJI_WON : this.EMOJI_LOST;
         availableStates = availableStates.filter(state => state !== currentState);
         const newState = availableStates[Math.floor(Math.random() * availableStates.length)];
 
         if (currentState) finalEmoji.classList.remove(`icon-${currentState}`);
         finalEmoji.classList.add(`icon-${newState}`);
-
         finalEmoji.dataset.state = newState;
+
+        const winnerIcon = finalWindow.querySelector('.winner-text .icon');
+        winnerIcon.classList.remove('icon-user', 'icon-computer');
+        winnerIcon.classList.add(isUserWinner ? 'icon-user' : 'icon-computer');
+
+        const finalStats = {
+            total: this.state.roundCounter,
+            winrate: this.state.winrate,
+            user: this.state.userScore,
+            computer: this.state.computerScore,
+            ties: this.state.ties,
+        };
+
+        Object.entries(finalStats).forEach(([stat, value]) => {
+            finalWindow.querySelector(`.stats-box .stat-${stat}`).textContent = value;
+        });
 
         tBody.replaceChildren();
         this.state.roundHistory.forEach(round => {
@@ -1033,7 +1054,7 @@ const authApp = {
 
         btnOk.addEventListener('click', () => {
             let newName = usernameInput.value.trim();
-            const isValidName = /^[a-zA-Z0-9]+$/.test(newName) && newName.length > 0 && newName.length <= 12;
+            const isValidName = /^[a-zA-Z0-9]+$/.test(newName) && newName.length > 0 && newName.length <= 10;
 
             if (!isValidName) newName = this.currentUser;
             this.currentUser = newName;

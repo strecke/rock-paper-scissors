@@ -86,12 +86,12 @@
 
                     <div class="grid-container">
                         <fieldset>
-                            <legend>User</legend>
+                            <legend><span class="icon icon-user"></span><span>User</span></legend>
                             <span class="user-selection icon icon-emoji icon-scissors"></span>
                             <p class="user-selection">Scissors</p>
                         </fieldset>
                         <fieldset>
-                            <legend>Computer</legend>
+                            <legend><span class="icon icon-computer"></span><span>Computer</span></legend>
                             <span class="computer-selection icon icon-emoji icon-rock"></span>
                             <p class="computer-selection">Rock</p>
                         </fieldset>
@@ -114,13 +114,16 @@
                 <div class="title-bar-text">Final Results</div>
             </div>
             <div class="window-content final-content">
+                <p class="game-over-highlight">&gt; GAME OVER &lt;</p>
                 <div class="flex-container">
-                    <span>
-                        <p class="final-result">Winner:</p>
-                        <p>Game history</p>
-                    </span>
-                    <span class="icon icon-emoji"></span>
+                    <span class="icon icon-emoji icon-happy" data-state="happy"></span>
+                    <div class="winner-text">
+                        <p class="game-over-highlight">Winner:</p>
+                        <span class="icon icon-user"></span>
+                        <p class="final-result game-over-highlight">User</p>
+                    </div>
                 </div>
+                <p class="table-caption">Game history</p>
                 <div class="table">
                     <table>
                         <thead>
@@ -139,9 +142,19 @@
                         </tbody>
                     </table>
                 </div>
-
+                <fieldset class="stats-box">
+                    <legend>Statistics</legend>
+                    <div class="grid-container">
+                        <p>Total Rounds: <span class="stat-total">0</span></p>
+                        <p>Winrate: <span class="stat-winrate">0</span> %</p>
+                        <p>User Wins: <span class="stat-user">0</span></p>
+                        <p>Computer Wins: <span class="stat-computer">0</span></p>
+                        <p>Ties: <span class="stat-ties">0</span></p>
+                    </div>
+                </fieldset>
                 <section>
                     <button class="new">New Game</button>
+                    <button class="history">History...</button>
                     <button class="exit">Exit</button>
                 </section>
             </div>
@@ -183,7 +196,7 @@
                         <p>Tip: If you don’t enter a password, you won’t get this promt again at startup.</p>
                         <div class="field-row">
                             <label for="username"><u>U</u>ser name:</label>
-                            <input id="username" type="text" maxlength="12" autocomplete="off" spellcheck="false">
+                            <input id="username" type="text" maxlength="10" autocomplete="off" spellcheck="false">
                         </div>
                         <div class="field-row">
                             <label for="password"><u>P</u>assword:</label>
