@@ -651,12 +651,33 @@ const rpsGame = {
     NAMES: { rock: 'Rock', paper: 'Paper', scissors: 'Scissors' },
     state: {},
     globalHistory: [],
+    isLocalStorageEnabled: null,
 
-    loadHistory: function () {
-        // LocalStorage
-        // const saved = localStorage.getItem('rps_history');
-        // if (saved) this.globalHistory = JSON.parse(saved);
-        return this.globalHistory;
+    renderEmptyHistory: function (tBody) {
+        tBody.replaceChildren();
+        const tr = document.createElement('tr');
+        const th = document.createElement('th');
+        th.colSpan = 4;
+        th.style.textAlign = 'center';
+        th.classList.add('dimmed');
+        th.textContent = 'No games played yet.';
+        tr.append(th); tBody.append(tr);
+    },
+
+    initStorage: function () {
+        const saved = localStorage.getItem('rps_history');
+        if (saved) {
+            this.globalHistory = JSON.parse(saved);
+            this.isLocalStorageEnabled = true;
+        } else {
+            this.isLocalStorageEnabled = null;
+        }
+    },
+
+    persistToStorage: function () {
+        if (this.isLocalStorageEnabled) {
+            localStorage.setItem('rps_history', JSON.stringify(this.globalHistory));
+        }
     },
 
     saveToHistory: function () {
@@ -677,11 +698,12 @@ const rpsGame = {
         gameRecord.date = new Date(gameRecord.id).toLocaleDateString();
 
         this.globalHistory.push(gameRecord);
-        // LocalStorage
-        // localStorage.setItem('rps_history', JSON.stringify(this.globalHistory));
+
+        if (this.isLocalStorageEnabled) this.persistToStorage();
     },
 
     init: function () {
+        this.initStorage();
         this.bindEvents();
         this.reset();
     },
@@ -711,9 +733,18 @@ const rpsGame = {
         });
 
         const roundWindow = document.querySelector('.round-window[data-app="rps"]');
+        const promptWindow = document.querySelector('.window.prompt-window[data-app="rps"]');
         roundWindow.querySelector('button').addEventListener('click', () => {
             windowManager.close(roundWindow);
-            if (this.state.isGameOver) this.renderFinalWindow();
+            if (this.state.isGameOver) {
+                this.saveToHistory();
+                if (this.isLocalStorageEnabled === null) {
+                    windowManager.focus(promptWindow);
+                    promptWindow.querySelector('button[data-choice="yes"]').focus();
+                } else {
+                    this.renderFinalWindow();
+                }
+            };
         });
 
         const finalWindow = document.querySelector('.final-window[data-app="rps"]');
@@ -740,15 +771,10 @@ const rpsGame = {
 
         historyWindow.querySelector('button.clear-history').addEventListener('click', () => {
             this.globalHistory = [];
-            // localStorage.removeItem('rps_history');
+            localStorage.removeItem('rps_history');
+            this.isLocalStorageEnabled = null;
             const tBody = historyWindow.querySelector('tbody');
-            tBody.replaceChildren();
-            const tr = document.createElement('tr'); const th = document.createElement('th');
-            th.colSpan = 4;
-            th.style.textAlign = 'center';
-            th.classList.add('dimmed');
-            th.textContent = 'No games played yet.';
-            tr.append(th); tBody.append(tr);
+            this.renderEmptyHistory(tBody);
         });
 
         document.addEventListener('keydown', e => {
@@ -768,27 +794,31 @@ const rpsGame = {
                 this.handleUserChoice(choice);
             }
         });
+
+        const handlePromptClose = isYes => {
+            this.isLocalStorageEnabled = isYes;
+            if (isYes) this.persistToStorage();
+            windowManager.close(promptWindow);
+            this.renderFinalWindow();
+        };
+
+        promptWindow.querySelectorAll('button').forEach(b => {
+            b.addEventListener('click', () => handlePromptClose(b.dataset.choice === 'yes'));
+        });
     },
 
     renderHistoryWindow: function () {
         const historyWindow = document.querySelector('.window.history-window[data-app="rps"]');
         const tBody = historyWindow.querySelector('tbody');
 
-        const historyData = this.loadHistory();
-        tBody.replaceChildren();
-
-        if (!historyData.length) {
-            const tr = document.createElement('tr');
-            const th = document.createElement('th');
-            th.colSpan = 4;
-            th.style.textAlign = 'center';
-            th.classList.add('dimmed');
-            th.textContent = 'No games played yet.';
-            tr.append(th); tBody.append(tr);
+        if (!this.globalHistory.length) {
+            this.renderEmptyHistory(tBody);
             return;
         }
 
-        historyData.slice().reverse().forEach(game => {
+        tBody.replaceChildren();
+
+        this.globalHistory.slice().reverse().forEach(game => {
             const tr = document.createElement('tr');
 
             if (game.winner === authApp.currentUser && game.isUserWinner) tr.classList.add('highlighted');
@@ -880,7 +910,7 @@ const rpsGame = {
                 else this.state.computerScore++;
                 this.state.isGameOver = this.state.userScore >= this.WIN_SCORE || this.state.computerScore >= this.WIN_SCORE;
 
-                if (this.state.isGameOver) this.saveToHistory();
+                // if (this.state.isGameOver) this.saveToHistory();
 
                 this.state.lastRound = {
                     round: !this.state.isGameOver ? this.state.roundCounter++ : this.state.roundCounter,
@@ -1022,7 +1052,7 @@ const rpsGame = {
             tr.append(roundTh, userTh, computerTh);
             tBody.append(tr);
         });
-        
+
         this.renderHistoryWindow();
 
         windowManager.focus(finalWindow);

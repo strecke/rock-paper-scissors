@@ -49,7 +49,7 @@
             </div>
         </div>
 
-        <div class="window game-window" data-app="rps">
+        <div class="window game-window main-window" data-app="rps">
             <div class="title-bar">
                 <div class="title-bar-text">Rock, Paper, Scissors</div>
                 <div class="title-bar-controls">
@@ -107,7 +107,6 @@
                 <p class="status-bar-field users-points">User:</p>
                 <p class="status-bar-field computers-points">Computer:</p>
             </div>
-
         </div>
         <div class="window final-window close" data-app="rps">
             <div class="title-bar">
@@ -159,6 +158,28 @@
                 </section>
             </div>
         </div>
+
+        <div class="window prompt-window close" data-app="rps">
+            <div class="title-bar">
+                <div class="title-bar-text">Local Storage Warning</div>
+                <div class="title-bar-controls">
+                    <button class="close-prompt" aria-label="Close">x</button>
+                </div>
+            </div>
+            <div class="window-content prompt-content">
+                <div class="grid-container">
+                    <span class="icon icon-emoji icon-warning"></span>
+                    <div>
+                        <p>Do you want to save your game history on your local machine?</p>
+                        <section>
+                        <button data-choice="yes">Yes</button>
+                        <button data-choice="no">No</button>
+                    </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="window history-window close" data-app="rps">
             <div class="title-bar">
                 <div class="title-bar-text">Game History</div>
