@@ -102,7 +102,7 @@ function handleDesktopItemInteraction() {
             onMove: (e, interaction, x, y) => {
                 if (!interaction.ghost) {
                     interaction.ghost = dI.cloneNode(true);
-                    interaction.ghost.classList.add('desktop-item-ghost');
+                    interaction.ghost.classList.add('desktop-item-ghost', 'dimmed');
                     interaction.ghost.style.zIndex = windows.length + 1;
                     document.body.appendChild(interaction.ghost);
                 }
@@ -933,7 +933,7 @@ const rpsGame = {
         const userFieldset = roundWindow.querySelector('fieldset:nth-child(1)');
         const computerFieldset = roundWindow.querySelector('fieldset:nth-child(2)');
 
-        [userFieldset, computerFieldset].forEach(fieldset => fieldset.classList.remove('winner', 'loser'));
+        [userFieldset, computerFieldset].forEach(fieldset => fieldset.classList.remove('winner', 'dimmed'));
 
         const userLabel = userFieldset.querySelector('legend span:not(.icon)');
         userLabel.textContent = authApp.currentUser;
@@ -943,11 +943,11 @@ const rpsGame = {
             confirmBtn.textContent = this.TIE_PHRASES[Math.floor(Math.random() * this.TIE_PHRASES.length)];
         } else if (round.isUserWinner) {
             userFieldset.classList.add('winner');
-            computerFieldset.classList.add('loser');
+            computerFieldset.classList.add('dimmed');
             resultMessage.textContent = `You Win! ${round.userLabel} beats ${round.computerLabel}`;
             confirmBtn.textContent = this.WIN_PHRASES[Math.floor(Math.random() * this.WIN_PHRASES.length)];
         } else {
-            userFieldset.classList.add('loser');
+            userFieldset.classList.add('dimmed');
             computerFieldset.classList.add('winner');
             resultMessage.textContent = `You Lose! ${round.computerLabel} beats ${round.userLabel}`;
             confirmBtn.textContent = this.LOSE_PHRASES[Math.floor(Math.random() * this.LOSE_PHRASES.length)];

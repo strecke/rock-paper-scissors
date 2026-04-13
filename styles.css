@@ -115,10 +115,11 @@ body.is-logged-off .window:not(.login-window) {
 }
 
 .window.final-window {
-    transform: translate(-40%, -70%);
+    transform: translate(-40%, -60%);
 }
 
 .window.history-window {
+    transform: translate(-50%, -60%);
     width: 265px;
 }
 
@@ -318,7 +319,8 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 }
 
 .window-content .dimmed {
-    color: #86878e;
+    opacity: 0.47;
+    /* color: #86878e; */
 }
 
 /* content app specific */
@@ -360,10 +362,6 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .window-content.round-content .result-state .grid-container > fieldset.winner {
     -webkit-font-smoothing: auto;
-}
-
-.window-content.round-content .result-state .grid-container > fieldset.loser {
-    opacity: 0.6;
 }
 
 .window-content.round-content .result-state > .result-message {
@@ -959,13 +957,12 @@ button.desktop-item:hover:not(:focus, :focus-visible) .desktop-item-label::after
 
 button.desktop-item-ghost {
     position: fixed;
-    opacity: 0.6;
     pointer-events: none;
     text-shadow: none;
 }
 
 button.desktop-item-ghost .desktop-icon-container::after {
-    opacity: 0.6;
+    opacity: 0.47;
 }
 
 button.desktop-item-ghost .desktop-item-label {
