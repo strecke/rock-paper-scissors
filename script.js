@@ -731,6 +731,7 @@ const rpsGame = {
         const historyWindow = document.querySelector('.window.history-window[data-app="rps"]');
         finalWindow.querySelector('button.history').addEventListener('click', () => {
             windowManager.focus(historyWindow);
+            historyWindow.querySelector('.history-content section .close-history').focus();
         });
 
         historyWindow.querySelectorAll('button.close-history').forEach(b => {

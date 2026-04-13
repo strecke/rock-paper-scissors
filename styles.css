@@ -317,6 +317,10 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     margin: 0;
 }
 
+.window-content .dimmed {
+    color: #86878e;
+}
+
 /* content app specific */
 .window-content.login-content .login-container {
     align-items: flex-start;
@@ -425,6 +429,10 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     padding: 0 8px;
 }
 
+.window-content.history-content section button:last-child {
+    margin-left: 6px;
+}
+
 .window-content .progress-indicator {
     appearance: none;
     border: none;
@@ -519,10 +527,6 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 .table table tbody tr.highlighted {
     background-color: navy;
     color: white;
-}
-
-.table table tbody tr.dimmed {
-    color: #86878e;
 }
 
 /* footer syles */
