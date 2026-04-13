@@ -123,6 +123,10 @@ body.is-logged-off .window:not(.login-window) {
     width: 265px;
 }
 
+.window.prompt-window {
+    transform: translate(-50%, -50%);
+}
+
 .window.about-window {
     transform: translate(-70%, -70%);
 }
