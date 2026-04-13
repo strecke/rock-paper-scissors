@@ -653,6 +653,12 @@ const rpsGame = {
     globalHistory: [],
     isLocalStorageEnabled: null,
 
+    init: function () {
+        this.initStorage();
+        this.bindEvents();
+        this.reset();
+    },
+
     renderEmptyHistory: function (tBody) {
         tBody.replaceChildren();
         const tr = document.createElement('tr');
@@ -702,12 +708,6 @@ const rpsGame = {
         if (this.isLocalStorageEnabled) this.persistToStorage();
     },
 
-    init: function () {
-        this.initStorage();
-        this.bindEvents();
-        this.reset();
-    },
-
     reset: function () {
         this.state = {
             userScore: 0,
@@ -740,6 +740,7 @@ const rpsGame = {
                 this.saveToHistory();
                 if (this.isLocalStorageEnabled === null) {
                     windowManager.focus(promptWindow);
+                    systemManager.showOverlay(promptWindow);
                     promptWindow.querySelector('button[data-choice="yes"]').focus();
                 } else {
                     this.renderFinalWindow();
@@ -799,6 +800,7 @@ const rpsGame = {
             this.isLocalStorageEnabled = isYes;
             if (isYes) this.persistToStorage();
             windowManager.close(promptWindow);
+            systemManager.hideOverlay();
             this.renderFinalWindow();
         };
 
@@ -1137,20 +1139,10 @@ const authApp = {
         appRegistry.register('logoff', {
             onOpen: () => {
                 btnYes.focus();
-                if (!document.querySelector('.shutdown-overlay')) {
-                    const overlay = document.createElement('div');
-                    overlay.className = 'shutdown-overlay';
-                    overlay.style.zIndex = logoffWindow.style.zIndex - 1;
-                    overlay.addEventListener('mousedown', e => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                    });
-                    document.body.appendChild(overlay);
-                }
+                systemManager.showOverlay(logoffWindow);
             },
             onClose: () => {
-                const overlay = document.querySelector('.shutdown-overlay');
-                if (overlay) overlay.remove();
+                systemManager.hideOverlay();
             }
         });
 
@@ -1223,6 +1215,25 @@ authApp.init();
 const systemManager = {
     wait: ms => new Promise(resolve => setTimeout(resolve, Math.random() * 200 + ms)),
     show: elements => elements.forEach(e => e.classList.remove('boot-hidden')),
+
+    showOverlay: function(targetWindow) {
+        if (!document.querySelector('.shutdown-overlay')) {
+            const overlay = document.createElement('div');
+            overlay.className = 'shutdown-overlay';
+            overlay.style.zIndex = targetWindow.style.zIndex - 1;
+
+            overlay.addEventListener('mousedown', e => {
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            document.body.appendChild(overlay);
+        }
+    },
+
+    hideOverlay: function() {
+        const overlay = document.querySelector('.shutdown-overlay');
+        if (overlay) overlay.remove();
+    },
 
     bootSequence: async function () {
         const groups = {
