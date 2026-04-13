@@ -229,7 +229,7 @@ function handleWindowInteraction() {
         });
 
         makeDraggable(titleBar, win, {
-            ignoreSelectors: 'button[data-action]',
+            ignoreSelectors: 'button',
             onStart: () => {
                 const rect = win.getBoundingClientRect();
                 win.style.transform = 'none';
@@ -650,11 +650,42 @@ const rpsGame = {
     BEATS: { rock: 'scissors', paper: 'rock', scissors: 'paper' },
     NAMES: { rock: 'Rock', paper: 'Paper', scissors: 'Scissors' },
     state: {},
+    globalHistory: [],
+
+    loadHistory: function () {
+        // LocalStorage
+        // const saved = localStorage.getItem('rps_history');
+        // if (saved) this.globalHistory = JSON.parse(saved);
+        return this.globalHistory;
+    },
+
+    saveToHistory: function () {
+        const isUserWinner = this.state.userScore > this.state.computerScore;
+        const gameRecord = {
+            id: Date.now(),
+            userName: authApp.currentUser,
+            userScore: this.state.userScore,
+            computerScore: this.state.computerScore,
+            ties: this.state.ties,
+            totalRounds: this.state.roundCounter,
+            isUserWinner: isUserWinner,
+            winner: isUserWinner ? authApp.currentUser : 'Computer',
+            date: '',
+            score: `${this.state.userScore} : ${this.state.computerScore}`,
+        };
+
+        gameRecord.date = new Date(gameRecord.id).toLocaleDateString();
+
+        this.globalHistory.push(gameRecord);
+        // LocalStorage
+        // localStorage.setItem('rps_history', JSON.stringify(this.globalHistory));
+    },
 
     init: function () {
         this.bindEvents();
         this.reset();
     },
+
     reset: function () {
         this.state = {
             userScore: 0,
@@ -697,6 +728,28 @@ const rpsGame = {
             appManager.close('rps');
         });
 
+        const historyWindow = document.querySelector('.window.history-window[data-app="rps"]');
+        finalWindow.querySelector('button.history').addEventListener('click', () => {
+            windowManager.focus(historyWindow);
+        });
+
+        historyWindow.querySelectorAll('button.close-history').forEach(b => {
+            b.addEventListener('click', () => windowManager.close(historyWindow));
+        });
+
+        historyWindow.querySelector('button.clear-history').addEventListener('click', () => {
+            this.globalHistory = [];
+            // localStorage.removeItem('rps_history');
+            const tBody = historyWindow.querySelector('tbody');
+            tBody.replaceChildren();
+            const tr = document.createElement('tr'); const th = document.createElement('th');
+            th.colSpan = 4;
+            th.style.textAlign = 'center';
+            th.classList.add('dimmed');
+            th.textContent = 'No games played yet.';
+            tr.append(th); tBody.append(tr);
+        });
+
         document.addEventListener('keydown', e => {
             if (!gameWindow.classList.contains('active')) return;
             const keyMap = {
@@ -713,6 +766,40 @@ const rpsGame = {
                 btn.focus();
                 this.handleUserChoice(choice);
             }
+        });
+    },
+
+    renderHistoryWindow: function () {
+        const historyWindow = document.querySelector('.window.history-window[data-app="rps"]');
+        const tBody = historyWindow.querySelector('tbody');
+
+        const historyData = this.loadHistory();
+        tBody.replaceChildren();
+
+        if (!historyData.length) {
+            const tr = document.createElement('tr');
+            const th = document.createElement('th');
+            th.colSpan = 4;
+            th.style.textAlign = 'center';
+            th.classList.add('dimmed');
+            th.textContent = 'No games played yet.';
+            tr.append(th); tBody.append(tr);
+            return;
+        }
+
+        historyData.slice().reverse().forEach(game => {
+            const tr = document.createElement('tr');
+
+            if (game.winner === authApp.currentUser && game.isUserWinner) tr.classList.add('highlighted');
+            if (!game.isUserWinner) tr.classList.add('dimmed');
+
+            const dateTh = document.createElement('th'); dateTh.textContent = game.date;
+            const winnerTh = document.createElement('th'); winnerTh.textContent = game.winner;
+            const scoreTh = document.createElement('th'); scoreTh.textContent = game.score;
+            const roundsTh = document.createElement('th'); roundsTh.textContent = game.totalRounds;
+
+            tr.append(dateTh, winnerTh, scoreTh, roundsTh);
+            tBody.appendChild(tr);
         });
     },
 
@@ -791,6 +878,8 @@ const rpsGame = {
                 else if (isUserWinner) this.state.userScore++;
                 else this.state.computerScore++;
                 this.state.isGameOver = this.state.userScore >= this.WIN_SCORE || this.state.computerScore >= this.WIN_SCORE;
+
+                if (this.state.isGameOver) this.saveToHistory();
 
                 this.state.lastRound = {
                     round: !this.state.isGameOver ? this.state.roundCounter++ : this.state.roundCounter,
@@ -932,6 +1021,8 @@ const rpsGame = {
             tr.append(roundTh, userTh, computerTh);
             tBody.append(tr);
         });
+        
+        this.renderHistoryWindow();
 
         windowManager.focus(finalWindow);
         finalWindow.querySelector('button.new').focus();

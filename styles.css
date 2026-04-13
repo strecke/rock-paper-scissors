@@ -118,6 +118,10 @@ body.is-logged-off .window:not(.login-window) {
     transform: translate(-40%, -70%);
 }
 
+.window.history-window {
+    width: 265px;
+}
+
 .window.about-window {
     transform: translate(-70%, -70%);
 }
@@ -201,6 +205,7 @@ body.is-logged-off .window:not(.login-window) {
 .title-bar-controls button:active {
     padding: 0;
     text-shadow: 0 -1px black;
+    min-height: 17px;
 }
 
 .title-bar-controls button:focus:not(:focus-visible) {
