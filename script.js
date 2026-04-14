@@ -40,6 +40,11 @@ startMenuItems.forEach(btn => {
             appManager.open('logoff');
         });
     }
+    if (btn.textContent === 'Shut Down...') {
+        btn.addEventListener('click', () => {
+            appManager.open('shutdown');
+        });
+    }
 });
 
 document.addEventListener('mousedown', e => {
@@ -1128,7 +1133,6 @@ const authApp = {
 
         appRegistry.register('login', {
             onClose: () => {
-                //document.body.classList.remove('is-logged-off');
                 systemManager.bootSequence();
             }
         });
@@ -1210,13 +1214,43 @@ const authApp = {
 
 authApp.init();
 
+const shutdownApp = {
+    init: function () {
+        const shutdownWindow = document.querySelector('.shutdown-window');
+
+        appRegistry.register('shutdown', {
+            onOpen: () => {
+                shutdownWindow.querySelector('button[data-choice="yes"]').focus();
+                systemManager.showOverlay(shutdownWindow);
+            },
+
+            onClose: () => systemManager.hideOverlay(),
+        });
+
+        shutdownWindow.querySelectorAll('button').forEach(b => {
+            b.addEventListener('click', () => {
+                appManager.close('shutdown');
+                if (b.dataset.choice === 'yes') this.shutdown();
+            });
+        });
+    },
+
+    shutdown: function () {
+        document.body.style.userSelect = 'none';
+        systemManager.shutdownSequence();
+    },
+};
+
+shutdownApp.init();
+
 // system-manager
 
 const systemManager = {
     wait: ms => new Promise(resolve => setTimeout(resolve, Math.random() * 200 + ms)),
     show: elements => elements.forEach(e => e.classList.remove('boot-hidden')),
+    hide: elements => elements.forEach(e => e.classList.add('boot-hidden')),
 
-    showOverlay: function(targetWindow) {
+    showOverlay: function (targetWindow) {
         if (!document.querySelector('.shutdown-overlay')) {
             const overlay = document.createElement('div');
             overlay.className = 'shutdown-overlay';
@@ -1230,39 +1264,76 @@ const systemManager = {
         }
     },
 
-    hideOverlay: function() {
+    hideOverlay: function () {
         const overlay = document.querySelector('.shutdown-overlay');
         if (overlay) overlay.remove();
     },
 
+    groups: {
+        desktopItems: document.querySelectorAll('.desktop-item'),
+        footer: document.querySelectorAll('.footer'),
+        clock: document.querySelectorAll('.clock'),
+        taskbarItems: document.querySelectorAll('.taskbar-items .taskbar-item'),
+    },
+
     bootSequence: async function () {
-        const groups = {
-            desktopItems: document.querySelectorAll('.desktop-item'),
-            footer: document.querySelectorAll('.footer'),
-            clock: document.querySelectorAll('.clock'),
-            taskbarItems: document.querySelectorAll('.taskbar-items .taskbar-item'),
-        };
-        Object.values(groups).forEach(group => group.forEach(e => e.classList.add('boot-hidden')));
+        Object.values(this.groups).forEach(this.hide);
 
         document.body.classList.remove('is-logged-off');
 
         await this.wait(400);
-        this.show(groups.footer);
-        for (let item of groups.desktopItems) {
+        this.show(this.groups.footer);
+        for (const item of this.groups.desktopItems) {
             await this.wait(50);
             this.show([item]);
         }
 
         await this.wait(200);
-        this.show(groups.clock);
+        this.show(this.groups.clock);
 
         await this.wait(600);
         appManager.open('rps');
 
         await this.wait(400);
-        this.show(groups.taskbarItems);
+        this.show(this.groups.taskbarItems);
     },
 
+    shutdownSequence: async function () {
+        await this.wait(400);
+        this.hide(this.groups.taskbarItems);
+
+        await this.wait(400);
+
+        for (const state of appManager.states.values()) {
+            if (state.open) {
+                await this.wait(100);
+                appManager.close(state.appId)
+            };
+        }
+
+        await this.wait(400);
+        this.hide(this.groups.clock);
+
+        for (const item of this.groups.desktopItems) {
+            await this.wait(50);
+            this.hide([item]);
+        }
+
+        await this.wait(1000);
+        this.hide(this.groups.footer);
+
+        await this.wait(400);
+        document.body.classList.add('is-logged-off');
+
+        await this.wait(3000);
+        document.body.replaceChildren();
+        
+        const shutdownMessage = document.createElement('p');
+        shutdownMessage.textContent = 'It is now safe to turn off your monitor.';
+        document.body.appendChild(shutdownMessage);
+        document.body.classList.add('is-turned-off');
+
+    },
 }
 
 appManager.open('rps');

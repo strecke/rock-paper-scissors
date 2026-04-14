@@ -33,6 +33,57 @@ body.is-logged-off .window:not(.login-window) {
     display: none;
 }
 
+body.is-turned-off {
+    background-color: black;
+    text-align: center;
+    height: 100vh;
+    color: #fff;
+    font-size: 20px;
+    text-shadow: 0 0 5px #C8C8C8;
+    overflow: hidden;
+}
+
+body.is-turned-off::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(0, 128, 128, 0.602), #000 120%);
+    opacity: 0;
+    animation: fadeIn 3s ease-in-out forwards;
+}
+
+body.is-turned-off p {
+    font-size: 20px;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    opacity: 0;
+    animation: fadeIn 2s ease-in-out forwards 1.5s;
+}
+
+body.is-turned-off::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: repeating-linear-gradient(0deg,
+            rgba(0, 0, 0, 0.15),
+            rgba(0, 0, 0, 0.15) 3px,
+            transparent 3px,
+            transparent 6px);
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
 .boot-hidden {
     visibility: hidden;
 }
@@ -123,16 +174,14 @@ body.is-logged-off .window:not(.login-window) {
     width: 265px;
 }
 
-.window.prompt-window {
-    transform: translate(-50%, -50%);
-}
-
 .window.about-window {
     transform: translate(-70%, -70%);
 }
 
 .window.login-window,
-.window.logoff-window {
+.window.logoff-window,
+.window.shutdown-window,
+.window.prompt-window {
     transform: translate(-50%, -50%);
 }
 
@@ -356,6 +405,11 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     padding-top: 8px;
 }
 
+.window-content.shutdown-content .flex-container {
+    gap: 20px;
+}
+
+.window-content.shutdown-content section,
 .window-content.game-content section {
     justify-content: space-between;
 }
@@ -366,6 +420,12 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .window-content.round-content .result-state .grid-container > fieldset.winner {
     -webkit-font-smoothing: auto;
+}
+
+.window-content.round-content .grid-container > fieldset .icon.icon-computer,
+.window-content.round-content .grid-container > fieldset .icon.icon-user {
+    width: 12px;
+    height: 12px;
 }
 
 .window-content.round-content .result-state > .result-message {
@@ -687,7 +747,8 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 .start-items li:hover .icon.icon-copy,
 .start-items li:hover .icon.icon-ph,
 .start-items li:hover .icon.icon-font,
-.start-items li:hover .icon.icon-about {
+.start-items li:hover .icon.icon-about,
+.start-items li:hover .icon.icon-computer {
     filter: invert(1);
 }
 
@@ -781,7 +842,6 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .icon.icon-auth {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' id='Interface-Essential-Key-1--Streamline-Pixel' height='32' width='32'%3E%3Cdesc%3E Interface Essential Key 1 Streamline Icon: https://streamlinehq.com %3C/desc%3E%3Ctitle%3Einterface-essential-key_1%3C/title%3E%3Cg%3E%3Cpath d='M19.055 7.62h1.52v6.09h-1.52Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M26.675 7.62h1.52v6.09h-1.52Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M20.575 6.1h6.1v1.52h-6.1Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M20.575 12.19h6.1v18.29h-6.1Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M26.675 19.81h1.52v1.52h-1.52Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M26.675 25.91h1.52v1.52h-1.52Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M28.195 7.62h1.52v6.09h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M26.675 13.71h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M26.675 6.1h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Crect width='6.1' height='9.141' x='12.9545' y='7.61975' fill='%23008080'/%3E%3Crect width='4.57' height='4.57' x='9.905' y='15.239' fill='%23008080'/%3E%3Crect width='6.1' height='6.09' x='6.86' y='18.29' fill='%23008080'/%3E%3Crect width='3.051' height='4.58' x='3.815' y='21.33' fill='%23008080'/%3E%3Crect width='3.041' height='3.05' x='11.435' y='22.86' fill='%23008080'/%3E%3Cpath d='m25.145 19.81 3.05 0 0 1.52 -3.05 0 0 4.58 3.05 0 0 1.52 -3.05 0 0 3.05 1.53 0 0 -1.53 3.04 0 0 -4.57 -3.04 0 0 -1.52 3.04 0 0 -4.57 -3.04 0 0 -3.05 -1.53 0 0 4.57z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M22.095 30.48h3.05V32h-3.05Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M20.575 4.57V6.1h3.05v1.52h-3.05v4.57h6.1V7.62h-1.53V6.1h1.53V4.57h-1.53V3.05h-1.52v1.52Zm3.05 6.1H22.1V9.14h1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M22.095 1.52h1.53v1.53h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='m22.095 15.24 -1.52 0 0 -1.53 -1.52 0 0 3.05 1.52 0 0 13.72 1.52 0 0 -15.24z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M19.055 6.1h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='m16.005 9.14 0 3.05 1.52 0 0 1.52 1.53 0 0 -6.09 -1.53 0 0 1.52 -1.52 0z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M14.475 16.76h4.58v1.53h-4.58Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M14.475 6.1h3.05v1.52h-3.05Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M14.475 0h7.62v1.52h-7.62Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M14.475 22.86h1.53v1.52h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M12.955 24.38h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M12.955 21.33h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M12.955 18.29h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M12.955 7.62h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M12.955 1.52h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M11.435 25.91h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M11.435 19.81h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M11.435 9.14h1.52v6.1h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M11.435 3.05h1.52v4.57h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M9.905 24.38h1.53v1.53h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M9.905 15.24h1.53v1.52h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M8.385 22.86h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M8.385 16.76h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M6.865 24.38h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M6.865 18.29h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M5.335 25.91h1.53v1.52h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M5.335 19.81h1.53v1.52h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M3.815 24.38h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M3.815 21.33h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M2.285 22.86h1.53v1.52h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E%0A");
-    /* background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' id='Interface-Essential-Key-1--Streamline-Pixel' height='32' width='32'%3E%3Cdesc%3E Interface Essential Key 1 Streamline Icon: https://streamlinehq.com %3C/desc%3E%3Ctitle%3Einterface-essential-key_1%3C/title%3E%3Cg%3E%3Cpath d='M19.055 7.62h1.52v6.09h-1.52Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M26.675 7.62h1.52v6.09h-1.52Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M20.575 6.1h6.1v1.52h-6.1Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M20.575 12.19h6.1v18.29h-6.1Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M26.675 19.81h1.52v1.52h-1.52Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M26.675 25.91h1.52v1.52h-1.52Z' fill='%23fff000' stroke-width='1'/%3E%3Cpath d='M28.195 7.62h1.52v6.09h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M26.675 13.71h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M26.675 6.1h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='m25.145 19.81 3.05 0 0 1.52 -3.05 0 0 4.58 3.05 0 0 1.52 -3.05 0 0 3.05 1.53 0 0 -1.53 3.04 0 0 -4.57 -3.04 0 0 -1.52 3.04 0 0 -4.57 -3.04 0 0 -3.05 -1.53 0 0 4.57z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M22.095 30.48h3.05V32h-3.05Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M20.575 4.57V6.1h3.05v1.52h-3.05v4.57h6.1V7.62h-1.53V6.1h1.53V4.57h-1.53V3.05h-1.52v1.52Zm3.05 6.1H22.1V9.14h1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M22.095 1.52h1.53v1.53h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='m22.095 15.24 -1.52 0 0 -1.53 -1.52 0 0 3.05 1.52 0 0 13.72 1.52 0 0 -15.24z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M19.055 6.1h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='m16.005 9.14 0 3.05 1.52 0 0 1.52 1.53 0 0 -6.09 -1.53 0 0 1.52 -1.52 0z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M14.475 16.76h4.58v1.53h-4.58Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M14.475 6.1h3.05v1.52h-3.05Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M14.475 0h7.62v1.52h-7.62Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M14.475 22.86h1.53v1.52h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M12.955 24.38h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M12.955 21.33h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M12.955 18.29h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M12.955 7.62h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M12.955 1.52h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M11.435 25.91h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M11.435 19.81h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M11.435 9.14h1.52v6.1h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M11.435 3.05h1.52v4.57h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M9.905 24.38h1.53v1.53h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M9.905 15.24h1.53v1.52h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M8.385 22.86h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M8.385 16.76h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M6.865 24.38h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M6.865 18.29h1.52v1.52h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M5.335 25.91h1.53v1.52h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M5.335 19.81h1.53v1.52h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M3.815 24.38h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M3.815 21.33h1.52v1.53h-1.52Z' fill='%23000000' stroke-width='1'/%3E%3Cpath d='M2.285 22.86h1.53v1.52h-1.53Z' fill='%23000000' stroke-width='1'/%3E%3C/g%3E%3C/svg%3E%0A"); */
 }
 
 /* rps icons */
@@ -803,12 +863,6 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .icon.icon-computer {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cdesc%3EEntertainment Events Hobbies Game Machines Arcade 2 Streamline Icon: https://streamlinehq.com%3C/desc%3E%3Cpath d='M30.47 4.57h-1.52V3.05h-1.53V1.52H25.9V0H3.04v6.1h1.53v1.52h1.52V6.1h18.29v1.52h1.52v15.24h-1.52v1.52h-1.53v1.52H3.04v-1.52H1.52v1.52H0V32h1.52v-4.57h19.81V32H32V6.1h-1.53Zm-24.38 0H4.57V1.52h1.52Zm3.05 0H7.61V1.52h1.53Zm13.71 0H10.66V1.52h12.19Zm7.62 10.67h-1.52V7.62h-1.53V6.1H25.9V4.57h-1.52V3.05h1.52v1.52h1.52V6.1h1.53v1.52h1.52Z'/%3E%3Cpath d='M19.8 15.24h1.53v1.52H19.8ZM16.76 22.86h4.57v1.52h-4.57ZM18.28 12.19h1.52v1.52h-1.52ZM19.8 32v-3.05h-4.57V32h1.53v-1.52h1.52V32zM13.71 16.76h6.09v1.53h-6.09ZM13.71 12.19h1.52v1.52h-1.52ZM12.19 15.24h1.52v1.52h-1.52ZM10.66 22.86h1.53v1.52h-1.53Z'/%3E%3Cpath d='M24.38 21.33V9.14H9.14v12.19ZM10.66 10.67h12.19v9.14H10.66ZM7.61 22.86h1.53v1.52H7.61ZM6.09 7.62h1.52v13.71H6.09ZM4.57 21.33h1.52v1.53H4.57ZM3.04 22.86h1.53v1.52H3.04Z'/%3E%3C/svg%3E");
-}
-
-.icon.icon-user,
-.icon.icon-computer {
-    width: 12px;
-    height: 12px;
 }
 
 .icon.icon-warning {

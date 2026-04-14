@@ -172,9 +172,9 @@
                     <div>
                         <p>Do you want to save your game history on your local machine?</p>
                         <section>
-                        <button data-choice="yes">Yes</button>
-                        <button data-choice="no">No</button>
-                    </section>
+                            <button data-choice="yes">Yes</button>
+                            <button data-choice="no">No</button>
+                        </section>
                     </div>
                 </div>
             </div>
@@ -213,7 +213,6 @@
             </div>
         </div>
 
-
         <div class="window logoff-window close" data-app="logoff">
             <div class="title-bar">
                 <div class="title-bar-text">Log Off</div>
@@ -232,10 +231,30 @@
                         </section>
                     </span>
                 </div>
-
-
             </div>
         </div>
+
+        <div class="window shutdown-window close" data-app="shutdown">
+            <div class="title-bar">
+                <div class="title-bar-text">Shut Down</div>
+                <div class="title-bar-controls">
+                    <button data-action="close" aria-label="Close">x</button>
+                </div>
+            </div>
+            <div class="window-content shutdown-content">
+                <div class="flex-container">
+                    <span class="icon icon-emoji icon-computer"></span>
+                    <span>
+                        <p>Are you sure you want to shut down your computer?</p>
+                        <section>
+                            <button data-choice="yes">Yes</button>
+                            <button data-choice="no">No</button>
+                        </section>
+                    </span>
+                </div>
+            </div>
+        </div>
+
         <div class="window login-window close" data-app="login">
             <div class="title-bar">
                 <div class="title-bar-text">Enter Password</div>
@@ -329,10 +348,14 @@
                         </li>
                         <li class="divider"></li>
                         <li><button class="start-menu-item"><span class="icon icon-about"></span>About</button></li>
-                        <li><button class="start-menu-item">
+                        <li>
+                            <button class="start-menu-item">
                                 <span class="icon icon-auth"></span>
                                 <span class="logoff-text">Log Off User...</span>
-                            </button></li>
+                            </button>
+                        </li>
+                        <li><button class="start-menu-item"><span class="icon icon-computer"></span>Shut
+                                Down...</button></li>
                     </ul>
                 </div>
             </div>
