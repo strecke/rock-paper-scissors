@@ -340,6 +340,13 @@
                             </a>
                         </li>
                         <li>
+                            <a href="https://css-tricks.com/old-timey-terminal-styling/" target="_blank"
+                                rel="noopener noreferrer">
+                                <span class="icon icon-ct"></span>
+                                Overlay Styling
+                            </a>
+                        </li>
+                        <li>
                             <a href="https://www.youtube.com/watch?v=UiIsFoxY6ww" target="_blank"
                                 rel="noopener noreferrer">
                                 <span class="icon icon-yt"></span>
@@ -347,15 +354,24 @@
                             </a>
                         </li>
                         <li class="divider"></li>
-                        <li><button class="start-menu-item"><span class="icon icon-about"></span>About</button></li>
                         <li>
-                            <button class="start-menu-item">
+                            <button class="start-menu-item" data-app="about">
+                                <span class="icon icon-about"></span>
+                                <span>About</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button class="start-menu-item" data-app="logoff">
                                 <span class="icon icon-auth"></span>
                                 <span class="logoff-text">Log Off User...</span>
                             </button>
                         </li>
-                        <li><button class="start-menu-item"><span class="icon icon-computer"></span>Shut
-                                Down...</button></li>
+                        <li>
+                            <button class="start-menu-item" data-app="shutdown">
+                                <span class="icon icon-computer"></span>
+                                <span>Shut Down...</span>
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -30,17 +30,17 @@ startMenuItems.forEach(btn => {
         startMenu.classList.remove('open');
         startMenuButton.classList.remove('active');
     });
-    if (btn.textContent === 'About') {
+    if (btn.dataset.app === 'about') {
         btn.addEventListener('click', () => {
             appManager.open('about');
         });
     }
-    if (btn.textContent.includes('Log Off')) {
+    if (btn.dataset.app === 'logoff') {
         btn.addEventListener('click', () => {
             appManager.open('logoff');
         });
     }
-    if (btn.textContent === 'Shut Down...') {
+    if (btn.dataset.app === 'shutdown') {
         btn.addEventListener('click', () => {
             appManager.open('shutdown');
         });
