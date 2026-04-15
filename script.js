@@ -73,7 +73,7 @@ const clock = {
         }, delay);
     },
 
-    stop: function() {
+    stop: function () {
         if (this.timeoutId) clearTimeout(this.timeoutId);
         if (this.intervalId) clearInterval(this.intervalId);
     }
@@ -298,6 +298,20 @@ function getPosBoundaryCheck(x, y, dimensions) {
             ? contentRect.bottom - dimensions.y : newPosTop;
     return { x: newPosLeft, y: newPosTop };
 }
+
+function enforceBoundariesOnResize() {
+    const movableElements = document.querySelectorAll('.window[style*="left"], .desktop-item[style*="left"');
+
+    movableElements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        let currentLeft = parseFloat(el.style.left);
+        let currentTop = parseFloat(el.style.top);
+
+        moveElement(el, currentLeft, currentTop, { dimensions: { x: rect.width, y: rect.height } });
+    });
+}
+
+window.addEventListener('resize', enforceBoundariesOnResize);
 
 const windowManager = {
     stack: [],
@@ -1285,7 +1299,7 @@ const systemManager = {
         if (overlay) overlay.remove();
     },
 
-    lockUI: function() {
+    lockUI: function () {
         if (!document.querySelector('.ui-locker')) {
             const locker = document.createElement('div');
             locker.className = 'ui-locker';
@@ -1293,7 +1307,7 @@ const systemManager = {
         }
     },
 
-    unlockUi: function() {
+    unlockUi: function () {
         const locker = document.querySelector('.ui-locker');
         if (locker) locker.remove();
     },
