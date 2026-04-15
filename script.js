@@ -1276,6 +1276,19 @@ const systemManager = {
         if (overlay) overlay.remove();
     },
 
+    lockUI: function() {
+        if (!document.querySelector('.ui-locker')) {
+            const locker = document.createElement('div');
+            locker.className = 'ui-locker';
+            document.body.appendChild(locker);
+        }
+    },
+
+    unlockUi: function() {
+        const locker = document.querySelector('.ui-locker');
+        if (locker) locker.remove();
+    },
+
     showDialog: function ({ title = 'Warning', message = '', type = 'warning', onClick, dataChoices = ['ok'], dataApp }) {
         const dialogWindow = document.querySelector('.window.dialog-window');
         const dialogButtonSection = dialogWindow.querySelector('.dialog-content section');
@@ -1319,6 +1332,7 @@ const systemManager = {
     },
 
     bootSequence: async function () {
+        this.lockUI();
         Object.values(this.groups).forEach(this.hide);
 
         document.body.classList.remove('is-logged-off');
@@ -1340,9 +1354,11 @@ const systemManager = {
 
         await this.wait(400);
         this.show(this.groups.taskbarItems);
+        this.unlockUi();
     },
 
     shutdownSequence: async function () {
+        this.lockUI();
         await this.wait(400);
         this.hide(this.groups.taskbarItems);
         audioManager.play('logoff');
@@ -1372,12 +1388,12 @@ const systemManager = {
 
         await this.wait(3000);
         document.body.replaceChildren();
+        this.unlockUi();
 
         const shutdownMessage = document.createElement('p');
         shutdownMessage.textContent = 'It is now safe to turn off your monitor.';
         document.body.appendChild(shutdownMessage);
         document.body.classList.add('is-turned-off');
-
     },
 
     refresh: async function () {

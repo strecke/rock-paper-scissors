@@ -120,6 +120,13 @@ body.is-turned-off::after {
     cursor: default;
 }
 
+.ui-locker {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    cursor: wait;
+}
+
 .content {
     display: flex;
     flex-direction: column;
