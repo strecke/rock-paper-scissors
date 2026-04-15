@@ -740,7 +740,7 @@ const rpsGame = {
         });
 
         const roundWindow = document.querySelector('.round-window[data-app="rps"]');
-        const promptWindow = document.querySelector('.window.prompt-window[data-app="rps"]');
+        const dialogWindow = document.querySelector('.window.dialog-window[data-app="rps"]');
         roundWindow.querySelector('button').addEventListener('click', e => {
             windowManager.close(roundWindow);
             if (this.state.isGameOver) {
@@ -748,9 +748,9 @@ const rpsGame = {
                 if (this.isLocalStorageEnabled === null) {
                     e.stopPropagation();
                     audioManager.play('error');
-                    windowManager.focus(promptWindow);
-                    systemManager.showOverlay(promptWindow);
-                    promptWindow.querySelector('button[data-choice="yes"]').focus();
+                    windowManager.focus(dialogWindow);
+                    systemManager.showOverlay(dialogWindow);
+                    dialogWindow.querySelector('button[data-choice="yes"]').focus();
                 } else {
                     this.renderFinalWindow();
                 }
@@ -805,18 +805,18 @@ const rpsGame = {
             }
         });
 
-        const handlePromptClose = isYes => {
+        const handleDialogClose = isYes => {
             this.isLocalStorageEnabled = isYes;
             if (isYes) this.persistToStorage();
-            windowManager.close(promptWindow);
+            windowManager.close(dialogWindow);
             systemManager.hideOverlay();
             this.renderFinalWindow();
         };
 
-        promptWindow.querySelectorAll('button').forEach(b => {
+        dialogWindow.querySelectorAll('button').forEach(b => {
             b.addEventListener('click', e => {
                 e.stopPropagation();
-                handlePromptClose(b.dataset.choice === 'yes')
+                handleDialogClose(b.dataset.choice === 'yes')
             });
         });
     },
