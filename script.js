@@ -1347,6 +1347,11 @@ const systemManager = {
         document.body.classList.add('is-turned-off');
 
     },
+
+    refresh: async function () {
+        await this.wait(100);
+        location.reload();
+    }
 };
 
 const audioManager = {
@@ -1357,7 +1362,7 @@ const audioManager = {
             click: new Audio('sounds/click.mp3'),
             error: new Audio('sounds/error.wav'),
             login: new Audio('sounds/intro.mp3'),
-            logoff: new Audio('sounds/outro.mp3'),
+            logoff: new Audio('sounds/outro_3.mp3'),
             explosion: new Audio('sounds/explosion.mp3'),
             levelup: new Audio('sounds/levelup.mp3'),
         };
@@ -1402,5 +1407,97 @@ const audioManager = {
 };
 
 audioManager.init();
+
+const contextMenuManager = {
+    menuElement: document.querySelector('.context-menu'),
+
+    init: function () {
+        document.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            if (!e.target.closest('.content') && !e.target.closest('.desktop-item') || e.target.closest('.window')) return;
+
+            this.closeMenu();
+
+            const targetDesktopItem = e.target.closest('.desktop-item');
+            let menuItems = [];
+
+            if (targetDesktopItem) {
+                targetDesktopItem.focus();
+                menuItems = [
+                    { label: 'Open', action: () => appManager.open(targetDesktopItem.dataset.app) },
+                    { divider: true },
+                    { label: 'Rename', action: () => handleRenameLabel(targetDesktopItem, targetDesktopItem.querySelector('.desktop-item-label'), targetDesktopItem) },
+                    { label: 'Delete', action: () => targetDesktopItem.remove() },
+                ];
+            } else {
+                menuItems = [
+                    { label: 'Refresh', action: () => systemManager.refresh() },
+                    { divider: true },
+                    { label: 'Properties', action: () => appManager.open('about') },
+                ];
+            }
+
+            this.showMenu(e.clientX, e.clientY, menuItems);
+        });
+
+        document.addEventListener('pointerdown', e => {
+            if (this.menuElement && !this.menuElement.contains(e.target)) {
+                this.closeMenu();
+            }
+        });
+
+        window.addEventListener('resize', () => this.closeMenu());
+    },
+
+    showMenu: function (x, y, items) {
+        this.menuElement.replaceChildren();
+
+        items.forEach(item => {
+            if (item.divider) {
+                const div = document.createElement('div');
+                div.className = 'divider';
+                this.menuElement.appendChild(div);
+            } else {
+                const btn = document.createElement('button');
+                btn.className = 'context-menu-item';
+                btn.textContent = item.label;
+                btn.addEventListener('click', () => {
+                    item.action();
+                    this.closeMenu();
+                });
+                this.menuElement.appendChild(btn);
+            }
+        });
+
+        const menuWidth = this.menuElement.offsetWidth;
+        const menuHeight = this.menuElement.offsetHeight;
+
+        let posX = x;
+        let posY = y;
+        let originX = 'left';
+        let originY = 'top';
+
+        if (x + menuWidth > window.innerWidth) {
+            posX = x - menuWidth;
+            originX = 'right';
+        }
+
+        if (y + menuHeight > window.innerHeight) {
+            posY = y - menuHeight;
+            originY = 'bottom';
+        }
+
+        this.menuElement.style.left = `${posX}px`;
+        this.menuElement.style.top = `${posY}px`;
+        this.menuElement.style.transformOrigin = `${originX} ${originY}`;
+
+        setTimeout(() => this.menuElement.classList.add('open'), 150);
+    },
+    closeMenu: function () {
+        this.menuElement.classList.remove('open');
+    },
+}
+
+contextMenuManager.init();
 
 appManager.open('rps');
