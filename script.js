@@ -225,7 +225,9 @@ function handleWindowInteraction() {
         titleBar.addEventListener('click', e => {
             const btn = e.target.closest('button[data-action]');
             if (!btn) return;
+
             e.stopPropagation();
+            audioManager.play('click', 0.5);
 
             const appId = win.dataset.app;
             const action = btn.dataset.action;
@@ -739,11 +741,13 @@ const rpsGame = {
 
         const roundWindow = document.querySelector('.round-window[data-app="rps"]');
         const promptWindow = document.querySelector('.window.prompt-window[data-app="rps"]');
-        roundWindow.querySelector('button').addEventListener('click', () => {
+        roundWindow.querySelector('button').addEventListener('click', e => {
             windowManager.close(roundWindow);
             if (this.state.isGameOver) {
                 this.saveToHistory();
                 if (this.isLocalStorageEnabled === null) {
+                    e.stopPropagation();
+                    audioManager.play('error');
                     windowManager.focus(promptWindow);
                     systemManager.showOverlay(promptWindow);
                     promptWindow.querySelector('button[data-choice="yes"]').focus();
@@ -797,7 +801,7 @@ const rpsGame = {
             const btn = gameWindow.querySelector(`button[data-choice="${choice}"]`);
             if (btn && !btn.disabled) {
                 btn.focus();
-                this.handleUserChoice(choice);
+                btn.click();
             }
         });
 
@@ -810,7 +814,10 @@ const rpsGame = {
         };
 
         promptWindow.querySelectorAll('button').forEach(b => {
-            b.addEventListener('click', () => handlePromptClose(b.dataset.choice === 'yes'));
+            b.addEventListener('click', e => {
+                e.stopPropagation();
+                handlePromptClose(b.dataset.choice === 'yes')
+            });
         });
     },
 
@@ -1061,6 +1068,8 @@ const rpsGame = {
         });
 
         this.renderHistoryWindow();
+        if (isUserWinner) audioManager.play('levelup');
+        else audioManager.play('explosion');
 
         windowManager.focus(finalWindow);
         finalWindow.querySelector('button.new').focus();
@@ -1106,7 +1115,7 @@ const aboutApp = {
             });
         }
     },
-}
+};
 
 aboutApp.init();
 
@@ -1210,7 +1219,7 @@ const authApp = {
             textSpan.textContent = `Log Off ${this.currentUser}...`;
         }
     },
-}
+};
 
 authApp.init();
 
@@ -1259,6 +1268,7 @@ const systemManager = {
             overlay.addEventListener('mousedown', e => {
                 e.stopPropagation();
                 e.preventDefault();
+                audioManager.play('error');
             });
             document.body.appendChild(overlay);
         }
@@ -1283,15 +1293,17 @@ const systemManager = {
 
         await this.wait(400);
         this.show(this.groups.footer);
+        audioManager.play('login');
         for (const item of this.groups.desktopItems) {
-            await this.wait(50);
+            await this.wait(150);
             this.show([item]);
         }
 
-        await this.wait(200);
+
+        await this.wait(400);
         this.show(this.groups.clock);
 
-        await this.wait(600);
+        await this.wait(2000);
         appManager.open('rps');
 
         await this.wait(400);
@@ -1301,6 +1313,7 @@ const systemManager = {
     shutdownSequence: async function () {
         await this.wait(400);
         this.hide(this.groups.taskbarItems);
+        audioManager.play('logoff');
 
         await this.wait(400);
 
@@ -1327,13 +1340,67 @@ const systemManager = {
 
         await this.wait(3000);
         document.body.replaceChildren();
-        
+
         const shutdownMessage = document.createElement('p');
         shutdownMessage.textContent = 'It is now safe to turn off your monitor.';
         document.body.appendChild(shutdownMessage);
         document.body.classList.add('is-turned-off');
 
     },
-}
+};
+
+const audioManager = {
+    sounds: {},
+    isActivated: false,
+    init: function () {
+        this.sounds = {
+            click: new Audio('sounds/click.mp3'),
+            error: new Audio('sounds/error.wav'),
+            login: new Audio('sounds/intro.mp3'),
+            logoff: new Audio('sounds/outro.mp3'),
+            explosion: new Audio('sounds/explosion.mp3'),
+            levelup: new Audio('sounds/levelup.mp3'),
+        };
+
+        Object.values(this.sounds).forEach(audio => {
+            audio.preload = 'audio';
+        });
+
+        const activateAudio = () => {
+            if (this.isActivated) return;
+            this.isActivated = true;
+
+            const silentPlay = this.sounds.click.cloneNode();
+            silentPlay.volume = 0;
+            silentPlay.play().catch(() => { });
+
+            document.removeEventListener('pointerdown', activateAudio);
+            document.removeEventListener('keydown', activateAudio);
+        }
+
+        document.addEventListener('pointerdown', activateAudio);
+        document.addEventListener('keydown', activateAudio);
+
+        document.body.addEventListener('click', e => {
+            const isClickable = e.target.closest('button, a');
+            if (isClickable) this.play('click', 0.5);
+        });
+    },
+
+    play: function (soundName, volume = 1.0) {
+        if (!this.sounds[soundName]) {
+            console.warn(`Sound "${soundName}" not found.`);
+            return;
+        }
+
+        const soundClone = this.sounds[soundName].cloneNode();
+        soundClone.volume = volume;
+        soundClone.play().catch(e => {
+            console.warn('Audio error');
+        });
+    }
+};
+
+audioManager.init();
 
 appManager.open('rps');
