@@ -1088,14 +1088,16 @@ button.desktop-item:hover:not(:focus, :focus-visible) .desktop-item-label::after
 
 .desktop-item:active .desktop-item-label,
 .desktop-item:focus-visible .desktop-item-label,
-.desktop-item:focus .desktop-item-label {
+.desktop-item:focus .desktop-item-label,
+.desktop-item.selected .desktop-item-label {
     background: navy;
     color: white;
 }
 
 .desktop-item:active .desktop-item-label::after,
 .desktop-item:focus-visible .desktop-item-label::after,
-.desktop-item:focus .desktop-item-label::after {
+.desktop-item:focus .desktop-item-label::after,
+.desktop-item.selected .desktop-item-label::after {
     outline: 1px dotted #fff;
 }
 
@@ -1138,6 +1140,16 @@ button.desktop-item-ghost .desktop-item-label {
 
 button.desktop-item-ghost .desktop-item-label::after {
     display: none;
+}
+
+/* selection-lasso */
+
+.selection-lasso {
+    position: fixed;
+    z-index: 9999;
+    border: 1px dotted white;
+    mix-blend-mode: difference;
+    pointer-events: none;
 }
 
 /* scrollbar styles */

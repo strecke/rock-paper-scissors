@@ -1496,8 +1496,89 @@ const contextMenuManager = {
     closeMenu: function () {
         this.menuElement.classList.remove('open');
     },
-}
+};
 
 contextMenuManager.init();
+
+const selectionManager = {
+    box: null,
+    startX: 0,
+    startY: 0,
+
+    init: function () {
+        const content = document.querySelector('.content');
+        content.addEventListener('pointerdown', e => {
+            if (e.target.closest('.desktop-item') || e.target.closest('.window')) {
+                if (!e.target.closest('.desktop-item')) this.clearSelection();
+                return;
+            }
+            this.clearSelection();
+            this.startX = e.clientX;
+            this.startY = e.clientY;
+
+            this.box = document.createElement('div');
+            this.box.className = 'selection-lasso';
+            this.box.style.left = `${this.startX}px`;
+            this.box.style.top = `${this.startY}px`;
+            document.body.appendChild(this.box);
+
+            this._onMove = this.handleMove.bind(this);
+            this._onUp = this.handleUp.bind(this);
+
+            document.addEventListener('pointermove', this._onMove);
+            document.addEventListener('pointerup', this._onUp);
+        });
+    },
+
+    handleMove: function (e) {
+        const currentX = e.clientX;
+        const currentY = e.clientY;
+        const width = Math.abs(currentX - this.startX);
+        const height = Math.abs(currentY - this.startY);
+        const left = Math.min(currentX, this.startX);
+        const top = Math.min(currentY, this.startY);
+
+        this.box.style.width = `${width}px`;
+        this.box.style.height = `${height}px`;
+        this.box.style.left = `${left}px`;
+        this.box.style.top = `${top}px`;
+
+        this.checkIntersections(left, top, width, height);
+    },
+
+    handleUp: function () {
+        if (this.box) {
+            this.box.remove();
+            this.box = null;
+        }
+        document.removeEventListener('pointermove', this._onMove);
+        document.removeEventListener('pointerup', this._onUp);
+    },
+
+    checkIntersections: function (boxLeft, boxTop, boxWidth, boxHeight) {
+        const boxRight = boxLeft + boxWidth;
+        const boxBottom = boxTop + boxHeight;
+
+        document.querySelectorAll('.desktop-item').forEach(item => {
+            const rect = item.getBoundingClientRect();
+            const isOverlapping = !(
+                rect.right < boxLeft ||
+                rect.left > boxRight ||
+                rect.bottom < boxTop ||
+                rect.top > boxBottom
+            );
+            if (isOverlapping) item.classList.add('selected');
+            else item.classList.remove('selected');
+        });
+    },
+
+    clearSelection: function () {
+        document.querySelectorAll('.desktop-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+    }
+};
+
+selectionManager.init();
 
 appManager.open('rps');
