@@ -814,7 +814,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     box-sizing: border-box;
     height: 2px;
     margin: 4px 2px;
-    box-shadow: inset -1px -1px grey, inset 1px 1px #dfdfdf;
+    box-shadow: inset 0 -1px #dfdfdf, inset 0 1px grey;
 }
 
 /* context-menu */
@@ -838,10 +838,6 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     transform: scale(1);
     opacity: 1;
     pointer-events: auto;
-}
-
-.context-menu div.divider {
-    box-shadow: inset 0 -1px #dfdfdf, inset 0 1px grey;
 }
 
 .context-menu button.context-menu-item {
