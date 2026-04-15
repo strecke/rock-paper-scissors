@@ -740,22 +740,34 @@ const rpsGame = {
         });
 
         const roundWindow = document.querySelector('.round-window[data-app="rps"]');
-        const dialogWindow = document.querySelector('.window.dialog-window[data-app="rps"]');
         roundWindow.querySelector('button').addEventListener('click', e => {
             windowManager.close(roundWindow);
             if (this.state.isGameOver) {
                 this.saveToHistory();
                 if (this.isLocalStorageEnabled === null) {
                     e.stopPropagation();
-                    audioManager.play('error');
-                    windowManager.focus(dialogWindow);
-                    systemManager.showOverlay(dialogWindow);
-                    dialogWindow.querySelector('button[data-choice="yes"]').focus();
+                    const localStorageDialog = {
+                        title: 'Local Storage Warning',
+                        message: 'Do you want to save your game history on your local machine?',
+                        onClick: function (e) {
+                            e.stopPropagation();
+                            handleDialogClose(e.target.dataset.choice === 'yes');
+                        },
+                        dataChoices: ['yes', 'no'],
+                        dataApp: 'rps',
+                    }
+                    systemManager.showDialog(localStorageDialog);
                 } else {
                     this.renderFinalWindow();
                 }
             };
         });
+
+        const handleDialogClose = isYes => {
+            this.isLocalStorageEnabled = isYes;
+            if (isYes) this.persistToStorage();
+            this.renderFinalWindow();
+        };
 
         const finalWindow = document.querySelector('.final-window[data-app="rps"]');
         finalWindow.querySelector('button.new').addEventListener('click', () => {
@@ -803,21 +815,6 @@ const rpsGame = {
                 btn.focus();
                 btn.click();
             }
-        });
-
-        const handleDialogClose = isYes => {
-            this.isLocalStorageEnabled = isYes;
-            if (isYes) this.persistToStorage();
-            windowManager.close(dialogWindow);
-            systemManager.hideOverlay();
-            this.renderFinalWindow();
-        };
-
-        dialogWindow.querySelectorAll('button').forEach(b => {
-            b.addEventListener('click', e => {
-                e.stopPropagation();
-                handleDialogClose(b.dataset.choice === 'yes')
-            });
         });
     },
 
@@ -1268,7 +1265,7 @@ const systemManager = {
             overlay.addEventListener('mousedown', e => {
                 e.stopPropagation();
                 e.preventDefault();
-                audioManager.play('error');
+                audioManager.play('warning');
             });
             document.body.appendChild(overlay);
         }
@@ -1277,6 +1274,41 @@ const systemManager = {
     hideOverlay: function () {
         const overlay = document.querySelector('.shutdown-overlay');
         if (overlay) overlay.remove();
+    },
+
+    showDialog: function ({ title = 'Warning', message = '', type = 'warning', onClick, dataChoices = ['ok'], dataApp }) {
+        const dialogWindow = document.querySelector('.window.dialog-window');
+        const dialogButtonSection = dialogWindow.querySelector('.dialog-content section');
+
+        if (dataApp) dialogWindow.dataset.app = dataApp;
+        else delete dialogWindow.dataset.app;
+
+        dialogWindow.querySelector('.title-bar-text').textContent = title;
+        dialogWindow.querySelector('.dialog-content p').textContent = message;
+        dialogWindow.querySelector('.dialog-content .icon').className = `icon icon-emoji icon-${type}`;
+        dialogButtonSection.replaceChildren();
+
+        const closeDialog = e => {
+            windowManager.close(dialogWindow);
+            systemManager.hideOverlay();
+            dialogWindow.querySelectorAll('button').forEach(btn => btn.removeEventListener('click', closeDialog));
+            if (typeof onClick === 'function') onClick(e);
+        }
+
+        dataChoices.forEach(dataChoice => {
+            const btn = document.createElement('button');
+            btn.dataset.choice = dataChoice;
+            btn.textContent = dataChoice.charAt(0).toUpperCase() + dataChoice.slice(1);
+            dialogButtonSection.append(btn);
+        });
+
+        dialogWindow.querySelectorAll('button').forEach(btn => btn.addEventListener('click', closeDialog));
+
+        audioManager.play(type);
+        windowManager.focus(dialogWindow);
+        systemManager.showOverlay(dialogWindow);
+        const firstBtn = dialogButtonSection.querySelector('button');
+        if (firstBtn) firstBtn.focus();
     },
 
     groups: {
@@ -1360,7 +1392,7 @@ const audioManager = {
     init: function () {
         this.sounds = {
             click: new Audio('sounds/click.mp3'),
-            error: new Audio('sounds/error.wav'),
+            warning: new Audio('sounds/warning.wav'),
             login: new Audio('sounds/intro.mp3'),
             logoff: new Audio('sounds/outro_3.mp3'),
             explosion: new Audio('sounds/explosion.mp3'),
