@@ -55,18 +55,27 @@ document.addEventListener('mousedown', e => {
 });
 
 const clock = {
+    timeoutId: null,
+    intervalId: null,
+
     update: function () {
         const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         document.querySelector('.clock').textContent = timeStr;
     },
+
     init: function () {
         this.update();
         const currentSeconds = new Date().getSeconds();
         const delay = (60 - currentSeconds) * 1000;
-        setTimeout(() => {
+        this.timeoutId = setTimeout(() => {
             this.update();
-            setInterval(() => this.update(), 60000);
+            this.intervalId = setInterval(() => this.update(), 60000);
         }, delay);
+    },
+
+    stop: function() {
+        if (this.timeoutId) clearTimeout(this.timeoutId);
+        if (this.intervalId) clearInterval(this.intervalId);
     }
 }
 
@@ -1373,6 +1382,7 @@ const systemManager = {
         }
 
         await this.wait(400);
+        clock.stop();
         this.hide(this.groups.clock);
 
         for (const item of this.groups.desktopItems) {
