@@ -1,5 +1,6 @@
 // non-game-logic
 const startMenuManager = {
+    startMenuContainer: document.querySelector('.start-menu-container'),
     startMenuButton: document.querySelector('.start-menu-container .start-menu-button'),
     startMenu: document.querySelector('.start-menu-container .start-menu'),
     topLevelItems: document.querySelectorAll('.start-menu > .start-items > li'),
@@ -73,6 +74,18 @@ const startMenuManager = {
                 });
             });
         });
+
+        this.startMenu.addEventListener('focusin', () => {
+            if (!this.startMenu.classList.contains('open')) {
+                this.toggleStartMenu();
+            }
+        });
+
+        this.startMenuContainer.addEventListener('focusout', e => {
+            if (!this.startMenuContainer.contains(e.relatedTarget)) {
+                this.toggleStartMenu(true);
+            }
+        })
     },
 
     toggleStartMenu: function (forceClose) {
