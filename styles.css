@@ -401,7 +401,6 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .window-content .dimmed {
     opacity: 0.47;
-    /* color: #86878e; */
 }
 
 /* content app specific */
@@ -629,6 +628,11 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 .table table tbody tr * {
     height: 14px;
     padding: 0 6px;
+}
+
+.table table tbody tr.dimmed {
+    opacity: 1;
+    color: #86878e;
 }
 
 .table table tbody tr.highlighted {
