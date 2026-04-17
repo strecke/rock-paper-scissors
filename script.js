@@ -1,49 +1,111 @@
 // non-game-logic
-const startMenuButton = document.querySelector('.start-menu-container .start-menu-button');
-const startMenu = document.querySelector('.start-menu-container .start-menu');
-const startMenuItems = document.querySelectorAll('.start-menu-item');
+const startMenuManager = {
+    startMenuButton: document.querySelector('.start-menu-container .start-menu-button'),
+    startMenu: document.querySelector('.start-menu-container .start-menu'),
+    topLevelItems: document.querySelectorAll('.start-menu > .start-items > li'),
+    folderTimeout: null,
+    submenus: document.querySelectorAll('.has-submenu'),
 
-startMenuButton.addEventListener('click', (e) => {
-    startMenu.classList.toggle('open');
-    startMenuButton.classList.toggle('active');
-});
+    init: function () {
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Tab') this.isKeyboardNav = true;
+        });
 
-document.addEventListener("click", (e) => {
-    if (!startMenu.contains(e.target) && !startMenuButton.contains(e.target)) {
-        startMenu.classList.remove('open');
-        startMenuButton.classList.remove('active');
-    }
-});
+        document.addEventListener('pointerdown', () => {
+            this.isKeyboardNav = false;
+        });
 
-document.body.addEventListener('mousedown', () => {
+        this.startMenuButton.addEventListener('click', e => {
+            this.toggleStartMenu();
+        });
+
+        document.addEventListener("click", e => {
+            if (!this.startMenu.contains(e.target) && !this.startMenuButton.contains(e.target)) {
+                this.toggleStartMenu(true);
+            }
+        });
+
+        this.startMenu.addEventListener('click', e => {
+            const targetBtn = e.target.closest('a, button');
+            if (!targetBtn) return;
+            if (targetBtn.nextElementSibling
+                && targetBtn.nextElementSibling.classList.contains('submenu')) {
+                return;
+            }
+            this.toggleStartMenu(true);
+            if (targetBtn.dataset.app) appManager.open(targetBtn.dataset.app);
+        });
+
+        this.startMenu.addEventListener('transitionend', e => {
+            if (e.propertyName === 'max-height' && this.startMenu.classList.contains('open')) {
+                this.startMenu.style.overflow = 'visible';
+            }
+        });
+
+        this.topLevelItems.forEach(li => {
+            li.addEventListener('pointerenter', () => {
+                clearTimeout(this.folderTimeout);
+
+                this.folderTimeout = setTimeout(() => {
+                    this.topLevelItems.forEach(item => {
+                        if (item !== li) item.classList.remove('open');
+                    });
+                    const activeEl = document.activeElement;
+                    if (activeEl && this.startMenu.contains(activeEl) && !li.contains(activeEl)) {
+                        activeEl.blur();
+                    }
+
+                    if (li.classList.contains('has-submenu')) {
+                        li.classList.add('open');
+                    }
+                }, 250);
+            });
+
+            li.addEventListener('pointerleave', () => {
+                clearTimeout(this.folderTimeout);
+            });
+
+            li.addEventListener('focusin', () => {
+                clearTimeout(this.folderTimeout);
+
+                this.topLevelItems.forEach(item => {
+                    if (item !== li) item.classList.remove('open');
+                });
+
+                if (!document.body.classList.contains('using-mouse')) {
+                    this.startMenu.style.pointerEvents = 'none';
+                    setTimeout(() => this.startMenu.style.pointerEvents = '', 50);
+                }
+            });
+        });
+    },
+
+    toggleStartMenu: function (forceClose) {
+        this.startMenu.style.overflow = 'hidden';
+        if (forceClose || this.startMenu.classList.contains('open')) {
+            this.startMenu.classList.remove('open');
+            this.startMenuButton.classList.remove('active');
+            this.submenus.forEach(item => item.classList.remove('open'));
+        } else {
+            this.startMenu.classList.add('open');
+            this.startMenuButton.classList.add('active');
+        }
+    },
+};
+
+startMenuManager.init();
+
+document.addEventListener('mousemove', () => {
     document.body.classList.add('using-mouse');
-});
+}, { passive: true });
+
+document.addEventListener('touchstart', () => {
+    document.body.classList.remove('using-mouse');
+}, { passive: true });
 
 document.body.addEventListener('keydown', e => {
     if (e.key === 'Tab') {
         document.body.classList.remove('using-mouse');
-    }
-});
-
-startMenuItems.forEach(btn => {
-    btn.addEventListener('click', () => {
-        startMenu.classList.remove('open');
-        startMenuButton.classList.remove('active');
-    });
-    if (btn.dataset.app === 'about') {
-        btn.addEventListener('click', () => {
-            appManager.open('about');
-        });
-    }
-    if (btn.dataset.app === 'logoff') {
-        btn.addEventListener('click', () => {
-            appManager.open('logoff');
-        });
-    }
-    if (btn.dataset.app === 'shutdown') {
-        btn.addEventListener('click', () => {
-            appManager.open('shutdown');
-        });
     }
 });
 
@@ -1234,7 +1296,7 @@ const authApp = {
     },
 
     updateStartMenuText: function () {
-        const textSpan = document.querySelector('.start-menu-item .logoff-text');
+        const textSpan = document.querySelector('button[data-app="logoff"] .logoff-text');
         if (textSpan) {
             textSpan.textContent = `Log Off ${this.currentUser}...`;
         }
