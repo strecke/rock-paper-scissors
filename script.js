@@ -71,11 +71,6 @@ const startMenuManager = {
                 this.topLevelItems.forEach(item => {
                     if (item !== li) item.classList.remove('open');
                 });
-
-                if (!document.body.classList.contains('using-mouse')) {
-                    this.startMenu.style.pointerEvents = 'none';
-                    setTimeout(() => this.startMenu.style.pointerEvents = '', 50);
-                }
             });
         });
     },
