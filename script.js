@@ -1,4 +1,11 @@
 // non-game-logic
+const CONFIG = {
+    startMenuHoverDelay: 250,
+    dragSoundPreventionMs: 50,
+    doubleClickThreshold: 300,
+    pauseTimeAfterProgress: 300,
+};
+
 const startMenuManager = {
     startMenuContainer: document.querySelector('.start-menu-container'),
     startMenuButton: document.querySelector('.start-menu-container .start-menu-button'),
@@ -67,7 +74,7 @@ const startMenuManager = {
                     if (li.classList.contains('has-submenu')) {
                         li.classList.add('open');
                     }
-                }, 250);
+                }, CONFIG.startMenuHoverDelay);
             });
 
             li.addEventListener('pointerleave', () => {
@@ -229,7 +236,7 @@ function handleDesktopItemInteraction() {
                 } else {
                     const now = Date.now();
                     const timeSinceLastTap = now - lastTap;
-                    if (timeSinceLastTap < 300 && timeSinceLastTap > 0) {
+                    if (timeSinceLastTap < CONFIG.doubleClickThreshold && timeSinceLastTap > 0) {
                         appManager.open(dI.dataset.app);
                         lastTap = 0;
                     } else {
@@ -510,7 +517,7 @@ function makeDraggable(dragTarget, moveTarget, options = {}) {
         if (interaction.pointerId !== e.pointerId) return;
         if (interaction.moved) {
             dragTarget.setAttribute('data-just-dragged', 'true');
-            setTimeout(() => dragTarget.removeAttribute('data-just-dragged'), 50);
+            setTimeout(() => dragTarget.removeAttribute('data-just-dragged'), CONFIG.dragSoundPreventionMs);
         }
         interaction.active = false;
         dragTarget.releasePointerCapture(e.pointerId);
@@ -1004,7 +1011,6 @@ const rpsGame = {
 
         // const pauseTime = 1000 - thinkTime;
 
-        const pauseTime = 300;
         progressBar.offsetHeight;
 
 
@@ -1048,7 +1054,7 @@ const rpsGame = {
                 this.renderGameState();
 
                 confirmBtn.focus();
-            }, pauseTime);
+            }, CONFIG.pauseTimeAfterProgress);
         };
 
         progressBar.addEventListener('transitionend', e => {
@@ -1548,7 +1554,7 @@ const audioManager = {
 
         document.body.addEventListener('click', e => {
             if (e.target.closest('[data-just-dragged="true"]')) return;
-            
+
             const isClickable = e.target.closest('button, a');
             if (isClickable) this.play('click', 0.5);
         });
