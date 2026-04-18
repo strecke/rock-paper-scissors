@@ -38,6 +38,17 @@ const startMenuManager = {
             if (targetBtn.dataset.app) appManager.open(targetBtn.dataset.app);
         });
 
+        this.startMenu.addEventListener('pointerover', e => {
+            const hoveredItem = e.target.closest('a, button');
+            if (!hoveredItem) return;
+            const activeEl = document.activeElement;
+            if (activeEl && this.startMenu.contains(activeEl) && activeEl !== hoveredItem) {
+                this.isProgrammaticBlur = true;
+                activeEl.blur();
+                this.isProgrammaticBlur = false;
+            }
+        });
+
         this.startMenu.addEventListener('transitionend', e => {
             if (e.propertyName === 'max-height' && this.startMenu.classList.contains('open')) {
                 this.startMenu.style.overflow = 'visible';
@@ -52,12 +63,6 @@ const startMenuManager = {
                     this.topLevelItems.forEach(item => {
                         if (item !== li) item.classList.remove('open');
                     });
-                    const activeEl = document.activeElement;
-                    if (activeEl && this.startMenu.contains(activeEl) && !li.contains(activeEl)) {
-                        this.isProgrammaticBlur = true;
-                        activeEl.blur();
-                        this.isProgrammaticBlur = false;
-                    }
 
                     if (li.classList.contains('has-submenu')) {
                         li.classList.add('open');
