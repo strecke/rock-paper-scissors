@@ -53,7 +53,9 @@ const startMenuManager = {
                     });
                     const activeEl = document.activeElement;
                     if (activeEl && this.startMenu.contains(activeEl) && !li.contains(activeEl)) {
+                        this.isProgrammaticBlur = true;
                         activeEl.blur();
+                        this.isProgrammaticBlur = false;
                     }
 
                     if (li.classList.contains('has-submenu')) {
@@ -82,6 +84,7 @@ const startMenuManager = {
         });
 
         this.startMenuContainer.addEventListener('focusout', e => {
+            if (this.isProgrammaticBlur) return;
             if (!this.startMenuContainer.contains(e.relatedTarget)) {
                 this.toggleStartMenu(true);
             }
