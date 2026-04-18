@@ -5,6 +5,7 @@ const startMenuManager = {
     startMenu: document.querySelector('.start-menu-container .start-menu'),
     topLevelItems: document.querySelectorAll('.start-menu > .start-items > li'),
     folderTimeout: null,
+    isProgrammaticBlur: false,
     submenus: document.querySelectorAll('.has-submenu'),
 
     init: function () {
@@ -1661,6 +1662,7 @@ const selectionManager = {
                 if (!e.target.closest('.desktop-item')) this.clearSelection();
                 return;
             }
+            document.body.classList.add('is-lassoing');
             this.clearSelection();
             this.startX = e.clientX;
             this.startY = e.clientY;
@@ -1700,6 +1702,7 @@ const selectionManager = {
             this.box.remove();
             this.box = null;
         }
+        document.body.classList.remove('is-lassoing');
         document.removeEventListener('pointermove', this._onMove);
         document.removeEventListener('pointerup', this._onUp);
     },

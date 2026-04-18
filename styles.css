@@ -105,6 +105,10 @@ body.is-turned-off::after {
     }
 }
 
+body.is-lassoing * {
+    user-select: none;
+}
+
 .boot-hidden {
     visibility: hidden;
 }
