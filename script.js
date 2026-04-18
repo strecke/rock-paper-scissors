@@ -21,9 +21,9 @@ const startMenuManager = {
             this.toggleStartMenu();
         });
 
-        document.addEventListener("click", e => {
+        document.addEventListener('pointerdown', e => {
             if (!this.startMenu.contains(e.target) && !this.startMenuButton.contains(e.target)) {
-                this.toggleStartMenu(true);
+                if (this.startMenu.classList.contains('open')) this.toggleStartMenu(true);
             }
         });
 
