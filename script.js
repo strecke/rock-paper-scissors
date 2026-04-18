@@ -88,7 +88,11 @@ const startMenuManager = {
             if (!this.startMenuContainer.contains(e.relatedTarget)) {
                 this.toggleStartMenu(true);
             }
-        })
+        });
+
+        this.startMenu.addEventListener('scroll', () => {
+            this.startMenu.scrollTop = 0;
+        });
     },
 
     toggleStartMenu: function (forceClose) {
