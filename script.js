@@ -110,6 +110,8 @@ const startMenuManager = {
         } else {
             this.startMenu.classList.add('open');
             this.startMenuButton.classList.add('active');
+            windowManager.stack.forEach(w => w.classList.remove('active'));
+            taskbarManager.setActiveApp(null);
         }
     },
 };
@@ -506,7 +508,10 @@ function makeDraggable(dragTarget, moveTarget, options = {}) {
 
     const handleDragEnd = e => {
         if (interaction.pointerId !== e.pointerId) return;
-
+        if (interaction.moved) {
+            dragTarget.setAttribute('data-just-dragged', 'true');
+            setTimeout(() => dragTarget.removeAttribute('data-just-dragged'), 50);
+        }
         interaction.active = false;
         dragTarget.releasePointerCapture(e.pointerId);
         interaction.pointerId = null;
@@ -1542,6 +1547,8 @@ const audioManager = {
         document.addEventListener('keydown', activateAudio);
 
         document.body.addEventListener('click', e => {
+            if (e.target.closest('[data-just-dragged="true"]')) return;
+            
             const isClickable = e.target.closest('button, a');
             if (isClickable) this.play('click', 0.5);
         });
