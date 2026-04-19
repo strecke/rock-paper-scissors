@@ -777,11 +777,21 @@ const rpsGame = {
     state: {},
     globalHistory: [],
     isLocalStorageEnabled: null,
+    ui: {},
 
     init: function () {
+        this.cacheDOM();
         this.initStorage();
         this.bindEvents();
         this.reset();
+    },
+
+    cacheDOM: function () {
+        this.ui.gameWindow = document.querySelector('.game-window[data-app="rps"]');
+        this.ui.roundWindow = document.querySelector('.round-window[data-app="rps"]');
+        this.ui.finalWindow = document.querySelector('.final-window[data-app="rps"]');
+        this.ui.historyWindow = document.querySelector('.window.history-window[data-app="rps"]');
+        this.ui.rpsButtons = document.querySelectorAll('.game-window[data-app="rps"] .game-content section button');
     },
 
     renderEmptyHistory: function (tBody) {
@@ -850,16 +860,12 @@ const rpsGame = {
     },
 
     bindEvents: function () {
-        const gameWindow = document.querySelector('.game-window[data-app="rps"]');
-        const rpsButtons = gameWindow.querySelectorAll('.game-content section button');
-
-        rpsButtons.forEach(b => {
+        this.ui.rpsButtons.forEach(b => {
             b.addEventListener('click', () => this.handleUserChoice(b.dataset.choice));
         });
 
-        const roundWindow = document.querySelector('.round-window[data-app="rps"]');
-        roundWindow.querySelector('button').addEventListener('click', e => {
-            windowManager.close(roundWindow);
+        this.ui.roundWindow.querySelector('button').addEventListener('click', e => {
+            windowManager.close(this.ui.roundWindow);
             if (this.state.isGameOver) {
                 this.saveToHistory();
                 if (this.isLocalStorageEnabled === null) {
@@ -887,38 +893,36 @@ const rpsGame = {
             this.renderFinalWindow();
         };
 
-        const finalWindow = document.querySelector('.final-window[data-app="rps"]');
-        finalWindow.querySelector('button.new').addEventListener('click', () => {
+        this.ui.finalWindow.querySelector('button.new').addEventListener('click', () => {
             this.reset();
-            windowManager.close(finalWindow);
-            windowManager.focus(gameWindow);
+            windowManager.close(this.ui.finalWindow);
+            windowManager.focus(this.ui.gameWindow);
         });
 
-        finalWindow.querySelector('button.exit').addEventListener('click', () => {
+        this.ui.finalWindow.querySelector('button.exit').addEventListener('click', () => {
             this.reset();
             appManager.close('rps');
         });
 
-        const historyWindow = document.querySelector('.window.history-window[data-app="rps"]');
-        finalWindow.querySelector('button.history').addEventListener('click', () => {
-            windowManager.focus(historyWindow);
-            historyWindow.querySelector('.history-content section .close-history').focus();
+        this.ui.finalWindow.querySelector('button.history').addEventListener('click', () => {
+            windowManager.focus(this.ui.historyWindow);
+            this.ui.historyWindow.querySelector('.history-content section .close-history').focus();
         });
 
-        historyWindow.querySelectorAll('button.close-history').forEach(b => {
-            b.addEventListener('click', () => windowManager.close(historyWindow));
+        this.ui.historyWindow.querySelectorAll('button.close-history').forEach(b => {
+            b.addEventListener('click', () => windowManager.close(this.ui.historyWindow));
         });
 
-        historyWindow.querySelector('button.clear-history').addEventListener('click', () => {
+        this.ui.historyWindow.querySelector('button.clear-history').addEventListener('click', () => {
             this.globalHistory = [];
             localStorage.removeItem('rps_history');
             this.isLocalStorageEnabled = null;
-            const tBody = historyWindow.querySelector('tbody');
+            const tBody = this.ui.historyWindow.querySelector('tbody');
             this.renderEmptyHistory(tBody);
         });
 
         document.addEventListener('keydown', e => {
-            if (!gameWindow.classList.contains('active')) return;
+            if (!this.ui.gameWindow.classList.contains('active')) return;
             const keyMap = {
                 '1': 'rock',
                 '2': 'paper',
@@ -928,7 +932,7 @@ const rpsGame = {
             const choice = keyMap[e.key];
             if (!choice) return;
 
-            const btn = gameWindow.querySelector(`button[data-choice="${choice}"]`);
+            const btn = this.ui.gameWindow.querySelector(`button[data-choice="${choice}"]`);
             if (btn && !btn.disabled) {
                 btn.focus();
                 btn.click();
@@ -937,8 +941,7 @@ const rpsGame = {
     },
 
     renderHistoryWindow: function () {
-        const historyWindow = document.querySelector('.window.history-window[data-app="rps"]');
-        const tBody = historyWindow.querySelector('tbody');
+        const tBody = this.ui.historyWindow.querySelector('tbody');
 
         if (!this.globalHistory.length) {
             this.renderEmptyHistory(tBody);
@@ -964,22 +967,18 @@ const rpsGame = {
     },
 
     handleUserChoice: function (userChoice) {
-        const gameWindow = document.querySelector('.game-window[data-app="rps"]');
-        const rpsButtons = gameWindow.querySelectorAll('.game-content section button');
-        const roundWindow = document.querySelector('.round-window[data-app="rps"]');
+        const calcState = this.ui.roundWindow.querySelector('.calculating-state');
+        const resultState = this.ui.roundWindow.querySelector('.result-state');
+        const progressBar = this.ui.roundWindow.querySelector('.step-progress-bar');
+        const confirmBtn = this.ui.roundWindow.querySelector('button');
+        const indicatorContainer = this.ui.roundWindow.querySelector('.progress-indicator');
 
-        const calcState = roundWindow.querySelector('.calculating-state');
-        const resultState = roundWindow.querySelector('.result-state');
-        const progressBar = roundWindow.querySelector('.step-progress-bar');
-        const confirmBtn = roundWindow.querySelector('button');
-        const indicatorContainer = roundWindow.querySelector('.progress-indicator');
-
-        const titleBarText = roundWindow.querySelector('.title-bar-text');
+        const titleBarText = this.ui.roundWindow.querySelector('.title-bar-text');
         titleBarText.textContent = `Loading Round ${this.state.roundCounter}...`;
 
-        gameWindow.style.cursor = 'wait';
-        roundWindow.style.cursor = 'wait';
-        rpsButtons.forEach(b => {
+        this.ui.gameWindow.style.cursor = 'wait';
+        this.ui.roundWindow.style.cursor = 'wait';
+        this.ui.rpsButtons.forEach(b => {
             b.disabled = true;
             b.style.cursor = 'wait';
         });
@@ -991,14 +990,14 @@ const rpsGame = {
         progressBar.style.width = '0%';
 
         appManager.open('rps');
-        windowManager.focus(roundWindow);
+        windowManager.focus(this.ui.roundWindow);
 
-        if (window.getComputedStyle(roundWindow).transform !== 'none') {
-            const rect = roundWindow.getBoundingClientRect();
+        if (window.getComputedStyle(this.ui.roundWindow).transform !== 'none') {
+            const rect = this.ui.roundWindow.getBoundingClientRect();
 
-            roundWindow.style.left = `${rect.left}px`;
-            roundWindow.style.right = `${rect.top}px`;
-            roundWindow.style.transform = 'none';
+            this.ui.roundWindow.style.left = `${rect.left}px`;
+            this.ui.roundWindow.style.right = `${rect.top}px`;
+            this.ui.roundWindow.style.transform = 'none';
         }
 
         const maxContainerWidth = indicatorContainer.clientWidth - 1;
@@ -1022,9 +1021,9 @@ const rpsGame = {
             if (isRoundProcessed) return;
             isRoundProcessed = true;
             setTimeout(() => {
-                gameWindow.style.cursor = '';
-                roundWindow.style.cursor = '';
-                rpsButtons.forEach(b => b.style.cursor = '');
+                this.ui.gameWindow.style.cursor = '';
+                this.ui.roundWindow.style.cursor = '';
+                this.ui.rpsButtons.forEach(b => b.style.cursor = '');
 
                 calcState.classList.add('hidden');
                 resultState.classList.remove('hidden');
@@ -1069,15 +1068,14 @@ const rpsGame = {
 
     renderRound: function () {
         const round = this.state.lastRound;
-        const roundWindow = document.querySelector('.round-window[data-app="rps"]');
-        const confirmBtn = roundWindow.querySelector('button');
+        const confirmBtn = this.ui.roundWindow.querySelector('button');
 
-        roundWindow.querySelector('.title-bar-text').textContent = `Results Round ${round.round}`;
-        roundWindow.querySelector('p.user-selection').textContent = `${round.userLabel}`;
-        roundWindow.querySelector('p.computer-selection').textContent = `${round.computerLabel}`;
+        this.ui.roundWindow.querySelector('.title-bar-text').textContent = `Results Round ${round.round}`;
+        this.ui.roundWindow.querySelector('p.user-selection').textContent = `${round.userLabel}`;
+        this.ui.roundWindow.querySelector('p.computer-selection').textContent = `${round.computerLabel}`;
 
-        const userSelectionIcon = roundWindow.querySelector('span.icon.user-selection');
-        const computerSelectionIcon = roundWindow.querySelector('span.icon.computer-selection');
+        const userSelectionIcon = this.ui.roundWindow.querySelector('span.icon.user-selection');
+        const computerSelectionIcon = this.ui.roundWindow.querySelector('span.icon.computer-selection');
 
         [userSelectionIcon, computerSelectionIcon].forEach(icon => {
             icon.classList.remove('icon-rock', 'icon-paper', 'icon-scissors');
@@ -1086,10 +1084,10 @@ const rpsGame = {
         userSelectionIcon.classList.add(`icon-${round.userLabel.toLowerCase()}`);
         computerSelectionIcon.classList.add(`icon-${round.computerLabel.toLowerCase()}`);
 
-        const resultMessage = roundWindow.querySelector('.result-message');
+        const resultMessage = this.ui.roundWindow.querySelector('.result-message');
 
-        const userFieldset = roundWindow.querySelector('fieldset:nth-child(1)');
-        const computerFieldset = roundWindow.querySelector('fieldset:nth-child(2)');
+        const userFieldset = this.ui.roundWindow.querySelector('fieldset:nth-child(1)');
+        const computerFieldset = this.ui.roundWindow.querySelector('fieldset:nth-child(2)');
 
         [userFieldset, computerFieldset].forEach(fieldset => fieldset.classList.remove('winner', 'dimmed'));
 
@@ -1113,17 +1111,14 @@ const rpsGame = {
     },
 
     renderGameState: function () {
-        const gameWindow = document.querySelector('.game-window[data-app="rps"]');
-        const roundWindow = document.querySelector('.round-window[data-app="rps"]');
-
         const highestPoints = Math.max(this.state.userScore, this.state.computerScore);
         const progressPercent = Math.min((highestPoints / this.WIN_SCORE) * 100, 100);
 
-        gameWindow.querySelector('.progress-indicator-bar').style.width = progressPercent + '%';
-        roundWindow.querySelector('.users-points').textContent = `You: ${this.state.userScore}`;
-        roundWindow.querySelector('.computers-points').textContent = `Computer: ${this.state.computerScore}`;
+        this.ui.gameWindow.querySelector('.progress-indicator-bar').style.width = progressPercent + '%';
+        this.ui.roundWindow.querySelector('.users-points').textContent = `You: ${this.state.userScore}`;
+        this.ui.roundWindow.querySelector('.computers-points').textContent = `Computer: ${this.state.computerScore}`;
 
-        gameWindow.querySelectorAll('.game-content section button').forEach(b => {
+        this.ui.rpsButtons.forEach(b => {
             b.disabled = this.state.isGameOver;
         });
     },
@@ -1132,16 +1127,15 @@ const rpsGame = {
     EMOJI_LOST: ['sad', 'nervous', 'melting'],
 
     renderFinalWindow: function () {
-        const finalWindow = document.querySelector('.window.final-window[data-app="rps"]');
-        const tBody = finalWindow.querySelector('.table table tbody');
-        const tHeadUserName = finalWindow.querySelector('.table table thead .current-user');
+        const tBody = this.ui.finalWindow.querySelector('.table table tbody');
+        const tHeadUserName = this.ui.finalWindow.querySelector('.table table thead .current-user');
         tHeadUserName.textContent = authApp.currentUser;
 
         const isUserWinner = this.state.userScore > this.state.computerScore;
 
-        finalWindow.querySelector('.final-result').textContent = `${isUserWinner ? authApp.currentUser : 'Computer'}`;
+        this.ui.finalWindow.querySelector('.final-result').textContent = `${isUserWinner ? authApp.currentUser : 'Computer'}`;
 
-        const finalEmoji = finalWindow.querySelector('.flex-container .icon-emoji');
+        const finalEmoji = this.ui.finalWindow.querySelector('.flex-container .icon-emoji');
         const currentState = finalEmoji.dataset.state ?? null;
         let availableStates = isUserWinner ? this.EMOJI_WON : this.EMOJI_LOST;
         availableStates = availableStates.filter(state => state !== currentState);
@@ -1151,7 +1145,7 @@ const rpsGame = {
         finalEmoji.classList.add(`icon-${newState}`);
         finalEmoji.dataset.state = newState;
 
-        const winnerIcon = finalWindow.querySelector('.winner-text .icon');
+        const winnerIcon = this.ui.finalWindow.querySelector('.winner-text .icon');
         winnerIcon.classList.remove('icon-user', 'icon-computer');
         winnerIcon.classList.add(isUserWinner ? 'icon-user' : 'icon-computer');
 
@@ -1164,7 +1158,7 @@ const rpsGame = {
         };
 
         Object.entries(finalStats).forEach(([stat, value]) => {
-            finalWindow.querySelector(`.stats-box .stat-${stat}`).textContent = value;
+            this.ui.finalWindow.querySelector(`.stats-box .stat-${stat}`).textContent = value;
         });
 
         tBody.replaceChildren();
@@ -1185,8 +1179,8 @@ const rpsGame = {
         if (isUserWinner) audioManager.play('levelup');
         else audioManager.play('explosion');
 
-        windowManager.focus(finalWindow);
-        finalWindow.querySelector('button.new').focus();
+        windowManager.focus(this.ui.finalWindow);
+        this.ui.finalWindow.querySelector('button.new').focus();
     },
 };
 
