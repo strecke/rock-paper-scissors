@@ -691,6 +691,12 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     text-overflow: ellipsis;
 }
 
+.footer .taskbar-items .taskbar-item .icon {
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+}
+
 .footer .taskbar-items .taskbar-item.active {
     box-shadow:
         inset -1px -1px #fff,
@@ -701,6 +707,12 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     font-weight: 700;
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='2' height='2' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M1 0H0v1h1v1h1V1H1V0z' fill='silver'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 0H1v1H0v1h1V1h1V0z' fill='%23fff'/%3E%3C/svg%3E");
     background-position-y: 1px;
+    text-shadow: 1px 1px black;
+}
+
+.footer .taskbar-items .taskbar-item.active .icon,
+.footer .taskbar-items .taskbar-item:active .icon {
+    transform: translate(1px, 1px);
 }
 
 .footer .taskbar-items .taskbar-item.active:not(:focus-visible) {
@@ -1005,7 +1017,8 @@ body.using-mouse .start-menu-container .start-items li button:hover {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' height='32' width='32'%3E%3Cdesc%3EContent Files Notepad Streamline Icon: https://streamlinehq.com%3C/desc%3E%3Ctitle%3Econtent-files-notepad%3C/title%3E%3Cpath d='M12.955 0v1.52h-3.05v1.53h3.05v1.52h1.52V3.05h3.05v1.52h1.52V3.05h3.05v1.52h1.53V3.05h1.52V6.1h1.52V4.57h1.53v25.91h-16.76V32h18.28v-1.52h1.52V4.57h-1.52V3.05h-1.52V1.52h-4.57V0h-1.53v1.52h-3.05V0h-1.52v1.52h-3.05V0z'/%3E%3Cpath d='M23.625 6.1h1.52v3.04h-1.52Zm-1.53 6.09h4.57v-1.52h-3.04V9.14h-1.53z'/%3E%3Cpath d='M20.575 15.24h-1.53v3.05h1.53v-1.53h6.09v-1.52h-4.57v-3.05h-1.52zm-3.05 6.09h9.14v-1.52h-7.62v-1.52h-1.52zm-1.52-9.14h1.52v1.53h-1.52Zm0-3.05h1.52v1.53h-1.52Zm-3.05 15.24h13.71v1.53h-13.71Zm-1.52-10.66h4.57v1.52h-4.57Zm0-4.58h1.52v1.53h-1.52Z'/%3E%3Cpath d='M11.435 22.86h6.09v-1.53H2.285v1.53h7.62v7.62h1.53zm-1.53-10.67h1.53v1.53h-1.53Zm-1.52-9.14h1.52V6.1h-1.52ZM6.855 6.1h1.53v3.04h-1.53Zm-1.52 3.04h1.52v3.05h-1.52Zm-1.52 3.05h1.52v3.05h-1.52Zm-1.53 3.05h1.53v3.05h-1.53Zm-1.52 3.05h1.52v3.04H.765Z'/%3E%3C/svg%3E");
 }
 
-.icon.icon-scissors {
+.icon.icon-scissors,
+.icon.icon-rps {
     background-image: url("hand.svg");
 }
 
