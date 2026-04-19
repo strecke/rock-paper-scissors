@@ -16,14 +16,6 @@ const startMenuManager = {
     submenus: document.querySelectorAll('.has-submenu'),
 
     init: function () {
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Tab') this.isKeyboardNav = true;
-        });
-
-        document.addEventListener('pointerdown', () => {
-            this.isKeyboardNav = false;
-        });
-
         this.startMenuButton.addEventListener('click', e => {
             this.toggleStartMenu();
         });
@@ -37,23 +29,25 @@ const startMenuManager = {
         this.startMenu.addEventListener('click', e => {
             const targetBtn = e.target.closest('a, button');
             if (!targetBtn) return;
-            if (targetBtn.nextElementSibling
-                && targetBtn.nextElementSibling.classList.contains('submenu')) {
+            const parentLi = targetBtn.closest('li');
+            if (parentLi && parentLi.classList.contains('has-submenu')) {
+                clearTimeout(this.folderTimeout);
+                const activeEl = document.activeElement;
+                if (activeEl && this.startMenu.contains(activeEl) && !parentLi.contains(activeEl)) {
+                    this.isProgrammaticBlur = true;
+                    activeEl.blur();
+                    this.isProgrammaticBlur = false;
+                }
+
+                this.topLevelItems.forEach(item => {
+                    if (item !==parentLi) item.classList.remove('open');
+                });
+                parentLi.classList.add('open');
                 return;
             }
+
             this.toggleStartMenu(true);
             if (targetBtn.dataset.app) appManager.open(targetBtn.dataset.app);
-        });
-
-        this.startMenu.addEventListener('pointerover', e => {
-            const hoveredItem = e.target.closest('a, button');
-            if (!hoveredItem) return;
-            const activeEl = document.activeElement;
-            if (activeEl && this.startMenu.contains(activeEl) && activeEl !== hoveredItem) {
-                this.isProgrammaticBlur = true;
-                activeEl.blur();
-                this.isProgrammaticBlur = false;
-            }
         });
 
         this.startMenu.addEventListener('transitionend', e => {
@@ -67,6 +61,13 @@ const startMenuManager = {
                 clearTimeout(this.folderTimeout);
 
                 this.folderTimeout = setTimeout(() => {
+                    const activeEl = document.activeElement;
+                    if (activeEl && this.startMenu.contains(activeEl) && !li.contains(activeEl)) {
+                        this.isProgrammaticBlur = true;
+                        activeEl.blur();
+                        this.isProgrammaticBlur = false;
+                    }
+
                     this.topLevelItems.forEach(item => {
                         if (item !== li) item.classList.remove('open');
                     });
@@ -87,6 +88,7 @@ const startMenuManager = {
                 this.topLevelItems.forEach(item => {
                     if (item !== li) item.classList.remove('open');
                 });
+                if (li.classList.contains('has-submenu')) li.classList.add('open');
             });
         });
 
@@ -140,7 +142,9 @@ document.body.addEventListener('keydown', e => {
 });
 
 document.addEventListener('pointerdown', e => {
-    if (!e.target.closest('.window') && !e.target.closest('.taskbar-item')) {
+    if (!e.target.closest('.window') &&
+        !e.target.closest('.taskbar-item') &&
+        !e.target.closest('.start-menu-container')) {
         windowManager.stack.forEach(w => w.classList.remove('active'));
         taskbarManager.setActiveApp(null);
     }
