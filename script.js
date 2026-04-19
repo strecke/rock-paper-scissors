@@ -1231,21 +1231,22 @@ aboutApp.init();
 
 const authApp = {
     currentUser: 'User',
+    ui: {},
     init: function () {
-        const logoffWindow = document.querySelector('.logoff-window');
-        const loginWindow = document.querySelector('.login-window');
-        const usernameInput = loginWindow.querySelector('#username');
-        const passwordInput = loginWindow.querySelector('#password');
+        this.ui.logoffWindow = document.querySelector('.logoff-window');
+        this.ui.loginWindow = document.querySelector('.login-window');
+        this.ui.usernameInput = this.ui.loginWindow.querySelector('#username');
+        this.ui.passwordInput = this.ui.loginWindow.querySelector('#password');
 
-        usernameInput.addEventListener('input', e => {
+        this.ui.usernameInput.addEventListener('input', e => {
             e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
         });
 
-        passwordInput.addEventListener('input', e => {
-            const cursorPosition = passwordInput.selectionStart;
-            const currentLength = passwordInput.value.length;
-            passwordInput.value = '*'.repeat(currentLength);
-            passwordInput.setSelectionRange(cursorPosition, cursorPosition);
+        this.ui.passwordInput.addEventListener('input', e => {
+            const cursorPosition = this.ui.passwordInput.selectionStart;
+            const currentLength = this.ui.passwordInput.value.length;
+            this.ui.passwordInput.value = '*'.repeat(currentLength);
+            this.ui.passwordInput.setSelectionRange(cursorPosition, cursorPosition);
         });
 
         appRegistry.register('login', {
@@ -1254,13 +1255,13 @@ const authApp = {
             }
         });
 
-        const btnYes = logoffWindow.querySelector('button[data-choice="yes"]');
-        const btnNo = logoffWindow.querySelector('button[data-choice="no"]');
+        const btnYes = this.ui.logoffWindow.querySelector('button[data-choice="yes"]');
+        const btnNo = this.ui.logoffWindow.querySelector('button[data-choice="no"]');
 
         appRegistry.register('logoff', {
             onOpen: () => {
                 btnYes.focus();
-                systemManager.showOverlay(logoffWindow);
+                systemManager.showOverlay(this.ui.logoffWindow);
             },
             onClose: () => {
                 systemManager.hideOverlay();
@@ -1280,15 +1281,15 @@ const authApp = {
             this.renderLogin();
         });
 
-        const btnOk = loginWindow.querySelector('button[data-choice="ok"]');
-        const btnCancel = loginWindow.querySelector('button[data-choice="cancel"]');
+        const btnOk = this.ui.loginWindow.querySelector('button[data-choice="ok"]');
+        const btnCancel = this.ui.loginWindow.querySelector('button[data-choice="cancel"]');
 
         btnCancel.addEventListener('click', () => {
             this.cancelLogin();
         });
 
         btnOk.addEventListener('click', () => {
-            let newName = usernameInput.value.trim();
+            let newName = this.ui.usernameInput.value.trim();
             const isValidName = /^[a-zA-Z0-9]+$/.test(newName) && newName.length > 0 && newName.length <= 10;
 
             if (!isValidName) newName = this.currentUser;
@@ -1297,7 +1298,7 @@ const authApp = {
             this.cancelLogin();
         });
 
-        [usernameInput, passwordInput].forEach(input => {
+        [this.ui.usernameInput, this.ui.passwordInput].forEach(input => {
             input.addEventListener('keydown', e => {
                 if (e.key === 'Enter') btnOk.click();
             });
@@ -1309,12 +1310,10 @@ const authApp = {
     renderLogin: function () {
         document.body.classList.add('is-logged-off');
 
-        const usernameInput = document.querySelector('.login-window #username');
-        const passwordInput = document.querySelector('.login-window #password');
-        usernameInput.value = this.currentUser;
-        passwordInput.value = '';
+        this.ui.usernameInput.value = this.currentUser;
+        this.ui.passwordInput.value = '';
         appManager.open('login');
-        setTimeout(() => usernameInput.focus(), 50);
+        setTimeout(() => this.ui.usernameInput.focus(), 50);
     },
 
     cancelLogin: function () {
