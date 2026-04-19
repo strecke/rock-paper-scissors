@@ -880,7 +880,7 @@ body.using-mouse .start-menu-container .start-items li button:hover {
 
 .start-menu-container .start-items .has-submenu.open > .submenu,
 .start-menu-container .start-items .has-submenu:focus-within > .submenu {
-    width: 200px;
+    width: 170px;
     opacity: 1;
     pointer-events: auto;
     overflow: hidden;
