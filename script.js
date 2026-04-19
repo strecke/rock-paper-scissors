@@ -1730,6 +1730,7 @@ const selectionManager = {
 
             document.addEventListener('pointermove', this._onMove);
             document.addEventListener('pointerup', this._onUp);
+            document.addEventListener('lostpointercapture', this._onUp);
         });
     },
 
@@ -1757,6 +1758,7 @@ const selectionManager = {
         document.body.classList.remove('is-lassoing');
         document.removeEventListener('pointermove', this._onMove);
         document.removeEventListener('pointerup', this._onUp);
+        document.removeEventListener('lostpointercapture', this._onUp);
     },
 
     checkIntersections: function (boxLeft, boxTop, boxWidth, boxHeight) {

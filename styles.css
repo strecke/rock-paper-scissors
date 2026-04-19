@@ -139,6 +139,7 @@ body.is-lassoing * {
     display: flex;
     flex-direction: column;
     flex: 1 0;
+    touch-action: none;
 }
 
 .window button,
