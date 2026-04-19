@@ -139,7 +139,7 @@ document.body.addEventListener('keydown', e => {
     }
 });
 
-document.addEventListener('mousedown', e => {
+document.addEventListener('pointerdown', e => {
     if (!e.target.closest('.window') && !e.target.closest('.taskbar-item')) {
         windowManager.stack.forEach(w => w.classList.remove('active'));
         taskbarManager.setActiveApp(null);
