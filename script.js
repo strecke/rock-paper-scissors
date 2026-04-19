@@ -40,7 +40,7 @@ const startMenuManager = {
                 }
 
                 this.topLevelItems.forEach(item => {
-                    if (item !==parentLi) item.classList.remove('open');
+                    if (item !== parentLi) item.classList.remove('open');
                 });
                 parentLi.classList.add('open');
                 return;
@@ -1560,27 +1560,36 @@ systemManager.init();
 const audioManager = {
     sounds: {},
     isActivated: false,
-    init: function () {
-        this.sounds = {
-            click: new Audio('sounds/click.mp3'),
-            warning: new Audio('sounds/warning.wav'),
-            login: new Audio('sounds/intro.mp3'),
-            logoff: new Audio('sounds/outro_3.mp3'),
-            explosion: new Audio('sounds/explosion.mp3'),
-            levelup: new Audio('sounds/levelup.mp3'),
+    init: async function () {
+        const soundFiles = {
+            click: 'sounds/click.mp3',
+            warning: 'sounds/warning.wav',
+            login: 'sounds/intro.mp3',
+            logoff: 'sounds/outro_3.mp3',
+            explosion: 'sounds/explosion.mp3',
+            levelup: 'sounds/levelup.mp3',
         };
 
-        Object.values(this.sounds).forEach(audio => {
-            audio.preload = 'audio';
-        });
+        for (const [name, path] of Object.entries(soundFiles)) {
+            try {
+                const response = await fetch(path);
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                this.sounds[name] = new Audio(blobUrl);
+            } catch (e) {
+                console.warn(`Sound ${name} not found.`, e);
+            }
+        }
 
         const activateAudio = () => {
             if (this.isActivated) return;
             this.isActivated = true;
 
-            const silentPlay = this.sounds.click.cloneNode();
-            silentPlay.volume = 0;
-            silentPlay.play().catch(() => { });
+            if (this.sounds.click) {
+                const silentPlay = this.sounds.click.cloneNode();
+                silentPlay.volume = 0;
+                silentPlay.play().catch(() => { });
+            }
 
             document.removeEventListener('pointerdown', activateAudio);
             document.removeEventListener('keydown', activateAudio);
