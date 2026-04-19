@@ -1362,9 +1362,22 @@ shutdownApp.init();
 // system-manager
 
 const systemManager = {
+    groups: {},
+    ui: {},
     wait: ms => new Promise(resolve => setTimeout(resolve, Math.random() * 200 + ms)),
     show: elements => elements.forEach(e => e.classList.remove('boot-hidden')),
     hide: elements => elements.forEach(e => e.classList.add('boot-hidden')),
+
+    init: function () {
+        this.groups.desktopItems = document.querySelectorAll('.desktop-item');
+        this.groups.footer = document.querySelectorAll('.footer');
+        this.groups.clock = document.querySelectorAll('.clock');
+        this.groups.taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
+        
+        this.ui.dialogWindow = document.querySelector('.window.dialog-window');
+        this.ui.dialogButtonSection = this.ui.dialogWindow.querySelector('.dialog-content section');
+
+    },
 
     showOverlay: function (targetWindow) {
         if (!document.querySelector('.shutdown-overlay')) {
@@ -1400,21 +1413,18 @@ const systemManager = {
     },
 
     showDialog: function ({ title = 'Warning', message = '', type = 'warning', onClick, dataChoices = ['ok'], dataApp }) {
-        const dialogWindow = document.querySelector('.window.dialog-window');
-        const dialogButtonSection = dialogWindow.querySelector('.dialog-content section');
+        if (dataApp) this.ui.dialogWindow.dataset.app = dataApp;
+        else delete this.ui.dialogWindow.dataset.app;
 
-        if (dataApp) dialogWindow.dataset.app = dataApp;
-        else delete dialogWindow.dataset.app;
-
-        dialogWindow.querySelector('.title-bar-text').textContent = title;
-        dialogWindow.querySelector('.dialog-content p').textContent = message;
-        dialogWindow.querySelector('.dialog-content .icon').className = `icon icon-emoji icon-${type}`;
-        dialogButtonSection.replaceChildren();
+        this.ui.dialogWindow.querySelector('.title-bar-text').textContent = title;
+        this.ui.dialogWindow.querySelector('.dialog-content p').textContent = message;
+        this.ui.dialogWindow.querySelector('.dialog-content .icon').className = `icon icon-emoji icon-${type}`;
+        this.ui.dialogButtonSection.replaceChildren();
 
         const closeDialog = e => {
-            windowManager.close(dialogWindow);
+            windowManager.close(this.ui.dialogWindow);
             systemManager.hideOverlay();
-            dialogWindow.querySelectorAll('button').forEach(btn => btn.removeEventListener('click', closeDialog));
+            this.ui.dialogWindow.querySelectorAll('button').forEach(btn => btn.removeEventListener('click', closeDialog));
             if (typeof onClick === 'function') onClick(e);
         }
 
@@ -1422,23 +1432,16 @@ const systemManager = {
             const btn = document.createElement('button');
             btn.dataset.choice = dataChoice;
             btn.textContent = dataChoice.charAt(0).toUpperCase() + dataChoice.slice(1);
-            dialogButtonSection.append(btn);
+            this.ui.dialogButtonSection.append(btn);
         });
 
-        dialogWindow.querySelectorAll('button').forEach(btn => btn.addEventListener('click', closeDialog));
+        this.ui.dialogWindow.querySelectorAll('button').forEach(btn => btn.addEventListener('click', closeDialog));
 
         audioManager.play(type);
-        windowManager.focus(dialogWindow);
-        systemManager.showOverlay(dialogWindow);
-        const firstBtn = dialogButtonSection.querySelector('button');
+        windowManager.focus(this.ui.dialogWindow);
+        systemManager.showOverlay(this.ui.dialogWindow);
+        const firstBtn = this.ui.dialogButtonSection.querySelector('button');
         if (firstBtn) firstBtn.focus();
-    },
-
-    groups: {
-        desktopItems: document.querySelectorAll('.desktop-item'),
-        footer: document.querySelectorAll('.footer'),
-        clock: document.querySelectorAll('.clock'),
-        taskbarItems: document.querySelectorAll('.taskbar-items .taskbar-item'),
     },
 
     bootSequence: async function () {
@@ -1512,6 +1515,8 @@ const systemManager = {
         location.reload();
     }
 };
+
+systemManager.init();
 
 const audioManager = {
     sounds: {},
