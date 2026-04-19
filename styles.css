@@ -15,6 +15,7 @@
     font-weight: 400;
     font-style: normal;
     font-size: 15px;
+    -webkit-tap-highlight-color: transparent;
     /* outline: 1px solid red; */
 }
 
