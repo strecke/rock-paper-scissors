@@ -209,7 +209,7 @@ function handleDesktopItemInteraction() {
                 if (!interaction.ghost) {
                     interaction.ghost = dI.cloneNode(true);
                     interaction.ghost.classList.add('desktop-item-ghost', 'dimmed');
-                    interaction.ghost.style.zIndex = windows.length + 1;
+                    interaction.ghost.style.zIndex = zIndexManager.LAYERS.GHOSTS;
                     document.body.appendChild(interaction.ghost);
                 }
                 moveElement(interaction.ghost, x, y, interaction);
@@ -217,7 +217,6 @@ function handleDesktopItemInteraction() {
                 dI.style.cursor = isOverWindow ? 'no-drop' : '';
             },
             onEnd: (e, interaction) => {
-                dI.style.zIndex = '';
                 dI.style.cursor = '';
 
                 if (interaction.moved) {
@@ -348,7 +347,7 @@ function handleWindowInteraction() {
                 if (!interaction.ghost) {
                     interaction.ghost = document.createElement('div');
                     interaction.ghost.className = 'window-drag-ghost';
-                    interaction.ghost.style.zIndex = windows.length + 1;
+                    interaction.ghost.style.zIndex = zIndexManager.LAYERS.GHOSTS;
 
 
                     interaction.ghost.style.width = interaction.dimensions.x + 'px';
@@ -370,6 +369,42 @@ function handleWindowInteraction() {
 }
 
 handleWindowInteraction();
+
+const zIndexManager = {
+    LAYERS: {
+        DESKTOP: 0,
+        WINDOW_BASE: 10,
+        TASKBAR: 1000,
+        START_MENU: 2000,
+        SUBMENU: 2010,
+        GHOSTS: 3000,
+        LASSO: 4000,
+        CONTEXT_MENU: 5000,
+        OVERLAY: 8000,
+        DIALOG: 9000,
+    },
+
+    init: function () {
+        const taskbar = document.querySelector('.footer');
+        if (taskbar) taskbar.style.zIndex = this.LAYERS.TASKBAR;
+        const startMenu = document.querySelector('.start-menu');
+        if (startMenu) startMenu.style.zIndex = this.LAYERS.START_MENU;
+        document.querySelectorAll('.submenu').forEach(submenu => {
+            submenu.style.zIndex = this.LAYERS.SUBMENU;
+        });
+
+        const contextMenu = document.querySelector('.context-menu');
+        if (contextMenu) contextMenu.style.zIndex = this.LAYERS.CONTEXT_MENU;
+    },
+
+    applyWindowStack: function (stack) {
+        stack.forEach((win, i) => {
+            win.style.zIndex = this.LAYERS.WINDOW_BASE + i;
+        });
+    },
+};
+
+zIndexManager.init();
 
 function moveElement(element, x, y, drag) {
     const newPos = getPosBoundaryCheck(x, y, drag.dimensions);
@@ -430,10 +465,8 @@ const windowManager = {
 
         this.stack = this.stack.filter(w => w !== win);
         this.stack.push(win);
-        this.stack.forEach((w, i) => {
-            w.style.zIndex = i + 1;
-            w.classList.remove('active');
-        });
+        this.stack.forEach((w, i) => w.classList.remove('active'));
+        zIndexManager.applyWindowStack(this.stack);
         win.classList.add('active');
         win.classList.remove('close');
         win.focus();
@@ -609,7 +642,7 @@ const appManager = {
             ghostTitleBar.style.height = `${startRect.height}px`;
             ghostTitleBar.style.transition = `all ${duration}ms linear`;
 
-            ghostTitleBar.style.zIndex = windows.length + 1;
+            ghostTitleBar.style.zIndex = zIndexManager.LAYERS.GHOSTS;
 
             taskbarButton.style.pointerEvents = 'none';
 
@@ -678,7 +711,7 @@ const appManager = {
 
             taskbarButton.style.pointerEvents = 'none';
 
-            ghostTitleBar.style.zIndex = windows.length + 1;
+            ghostTitleBar.style.zIndex = zIndexManager.LAYERS.GHOSTS;
 
             document.body.appendChild(ghostTitleBar);
 
@@ -1261,6 +1294,7 @@ const authApp = {
         appRegistry.register('logoff', {
             onOpen: () => {
                 btnYes.focus();
+                this.ui.logoffWindow.style.zIndex = zIndexManager.LAYERS.DIALOG;
                 systemManager.showOverlay(this.ui.logoffWindow);
             },
             onClose: () => {
@@ -1337,6 +1371,7 @@ const shutdownApp = {
         appRegistry.register('shutdown', {
             onOpen: () => {
                 shutdownWindow.querySelector('button[data-choice="yes"]').focus();
+                shutdownWindow.style.zIndex = zIndexManager.LAYERS.DIALOG;
                 systemManager.showOverlay(shutdownWindow);
             },
 
@@ -1373,7 +1408,7 @@ const systemManager = {
         this.groups.footer = document.querySelectorAll('.footer');
         this.groups.clock = document.querySelectorAll('.clock');
         this.groups.taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
-        
+
         this.ui.dialogWindow = document.querySelector('.window.dialog-window');
         this.ui.dialogButtonSection = this.ui.dialogWindow.querySelector('.dialog-content section');
 
@@ -1383,7 +1418,7 @@ const systemManager = {
         if (!document.querySelector('.shutdown-overlay')) {
             const overlay = document.createElement('div');
             overlay.className = 'shutdown-overlay';
-            overlay.style.zIndex = targetWindow.style.zIndex - 1;
+            overlay.style.zIndex = zIndexManager.LAYERS.OVERLAY;
 
             overlay.addEventListener('mousedown', e => {
                 e.stopPropagation();
@@ -1439,6 +1474,7 @@ const systemManager = {
 
         audioManager.play(type);
         windowManager.focus(this.ui.dialogWindow);
+        this.ui.dialogWindow.style.zIndex = zIndexManager.LAYERS.DIALOG;
         systemManager.showOverlay(this.ui.dialogWindow);
         const firstBtn = this.ui.dialogButtonSection.querySelector('button');
         if (firstBtn) firstBtn.focus();
@@ -1457,7 +1493,6 @@ const systemManager = {
             await this.wait(150);
             this.show([item]);
         }
-
 
         await this.wait(400);
         this.show(this.groups.clock);
@@ -1685,6 +1720,7 @@ const selectionManager = {
 
             this.box = document.createElement('div');
             this.box.className = 'selection-lasso';
+            this.box.style.zIndex = zIndexManager.LAYERS.LASSO;
             this.box.style.left = `${this.startX}px`;
             this.box.style.top = `${this.startY}px`;
             document.body.appendChild(this.box);
