@@ -4,6 +4,7 @@ const CONFIG = {
     dragSoundPreventionMs: 50,
     doubleClickThreshold: 300,
     pauseTimeAfterProgress: 300,
+    dragThreshold: 4,
 };
 
 const startMenuManager = {
@@ -301,76 +302,79 @@ const interactionManager = {
 
 interactionManager.init();
 
-function handleDesktopItemInteraction() {
-    const DRAG_THRESHOLD = 4;
+const desktopManager = {
+    items: [],
 
-    function detectDropTargetIsWindow(e, dI) {
+    init: function () {
+        this.items = document.querySelectorAll('.desktop-item');
+        this.bindEvents();
+    },
+
+    detectDropTargetIsWindow: function (e, dI) {
         dI.style.pointerEvents = 'none';
         const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
         dI.style.pointerEvents = '';
         return !!elementBelow?.closest('.window');
-    }
+    },
 
-    desktopItems.forEach(dI => {
-        let startPos = { x: 0, y: 0 };
-        let isOverWindow = false;
-        let initialTarget = null;
-        let initialActiveElement = null;
-        let lastTap = 0;
+    bindEvents: function () {
+        this.items.forEach(dI => {
+            let startPos = { x: 0, y: 0 };
+            let isOverWindow = false;
+            let initialTarget = null;
+            let initialActiveElement = null;
+            let lastTap = 0;
 
-        interactionManager.makeDraggable(dI, dI, {
-            threshold: DRAG_THRESHOLD,
-            ignoreSelectors: '.desktop-item-label-editor',
-            onStart: e => {
-                const rect = dI.getBoundingClientRect();
-                startPos = { x: rect.left, y: rect.top };
-                initialTarget = e.target;
-                initialActiveElement = document.activeElement;
-            },
-            onMove: (e, interaction, x, y) => {
-                if (!interaction.ghost) {
-                    interaction.ghost = dI.cloneNode(true);
-                    interaction.ghost.classList.add('desktop-item-ghost', 'dimmed');
-                    interaction.ghost.style.zIndex = zIndexManager.LAYERS.GHOSTS;
-                    document.body.appendChild(interaction.ghost);
-                }
-                interactionManager.moveElement(interaction.ghost, x, y, interaction);
-                isOverWindow = detectDropTargetIsWindow(e, dI);
-                dI.style.cursor = isOverWindow ? 'no-drop' : '';
-            },
-            onEnd: (e, interaction) => {
-                dI.style.cursor = '';
+            interactionManager.makeDraggable(dI, dI, {
+                threshold: CONFIG.dragThreshold,
+                ignoreSelectors: '.desktop-item-label-editor',
+                onStart: e => {
+                    const rect = dI.getBoundingClientRect();
+                    startPos = { x: rect.left, y: rect.top };
+                    initialTarget = e.target;
+                    initialActiveElement = document.activeElement;
+                },
+                onMove: (e, interaction, x, y) => {
+                    if (!interaction.ghost) {
+                        interaction.ghost = dI.cloneNode(true);
+                        interaction.ghost.classList.add('desktop-item-ghost', 'dimmed');
+                        interaction.ghost.style.zIndex = zIndexManager.LAYERS.GHOSTS;
+                        document.body.appendChild(interaction.ghost);
+                    }
+                    interactionManager.moveElement(interaction.ghost, x, y, interaction);
+                    isOverWindow = this.detectDropTargetIsWindow(e, dI);
+                    dI.style.cursor = isOverWindow ? 'no-drop' : '';
+                },
+                onEnd: (e, interaction) => {
+                    dI.style.cursor = '';
 
-                if (interaction.moved) {
-                    if (interaction.ghost) {
-                        if (!isOverWindow) {
-                            dI.style.left = interaction.ghost.style.left;
-                            dI.style.top = interaction.ghost.style.top;
+                    if (interaction.moved) {
+                        if (interaction.ghost) {
+                            if (!isOverWindow) {
+                                dI.style.left = interaction.ghost.style.left;
+                                dI.style.top = interaction.ghost.style.top;
+                            }
+                            interaction.ghost.remove();
+                            interaction.ghost = undefined;
                         }
-                        // else {
-                        //     dI.style.left = startPos.x + 'px';
-                        //     dI.style.top = startPos.y + 'px';
-                        // }
-                        interaction.ghost.remove();
-                        interaction.ghost = undefined;
-                    }
-                } else {
-                    const now = Date.now();
-                    const timeSinceLastTap = now - lastTap;
-                    if (timeSinceLastTap < CONFIG.doubleClickThreshold && timeSinceLastTap > 0) {
-                        appManager.open(dI.dataset.app);
-                        lastTap = 0;
                     } else {
-                        lastTap = now;
-                        handleRenameLabel(dI, initialTarget, initialActiveElement);
+                        const now = Date.now();
+                        const timeSinceLastTap = now - lastTap;
+                        if (timeSinceLastTap < CONFIG.doubleClickThreshold && timeSinceLastTap > 0) {
+                            appManager.open(dI.dataset.app);
+                            lastTap = 0;
+                        } else {
+                            lastTap = now;
+                            handleRenameLabel(dI, initialTarget, initialActiveElement);
+                        }
                     }
                 }
-            }
+            });
         });
-    });
-}
+    },
+};
 
-handleDesktopItemInteraction();
+desktopManager.init();
 
 function handleRenameLabel(dI, target, element) {
     const dILabel = dI.querySelector('.desktop-item-label');
