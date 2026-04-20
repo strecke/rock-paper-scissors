@@ -436,62 +436,6 @@ function handleRenameLabel(dI, target, element) {
 
 // window-logic
 
-function handleWindowInteraction() {
-    windows.forEach(win => {
-        const titleBar = win.querySelector('.title-bar');
-
-        win.addEventListener('pointerdown', () => {
-            windowManager.focus(win);
-        });
-
-        titleBar.addEventListener('click', e => {
-            const btn = e.target.closest('button[data-action]');
-            if (!btn) return;
-
-            e.stopPropagation();
-            audioManager.play('click', 0.5);
-
-            const appId = win.dataset.app;
-            const action = btn.dataset.action;
-            if (action === 'close') appManager.close(appId);
-            else if (action === 'minimize') appManager.minimize(appId);
-        });
-
-        interactionManager.makeDraggable(titleBar, win, {
-            ignoreSelectors: 'button',
-            onStart: () => {
-                const rect = win.getBoundingClientRect();
-                win.style.transform = 'none';
-                win.style.left = rect.left + 'px';
-                win.style.top = rect.top + 'px';
-            },
-            onMove: (e, interaction, x, y) => {
-                if (!interaction.ghost) {
-                    interaction.ghost = document.createElement('div');
-                    interaction.ghost.className = 'window-drag-ghost';
-                    interaction.ghost.style.zIndex = zIndexManager.LAYERS.GHOSTS;
-
-
-                    interaction.ghost.style.width = interaction.dimensions.x + 'px';
-                    interaction.ghost.style.height = interaction.dimensions.y + 'px';
-                    document.body.appendChild(interaction.ghost);
-                }
-                interactionManager.moveElement(interaction.ghost, x, y, interaction);
-            },
-            onEnd: (e, interaction) => {
-                if (interaction.ghost) {
-                    win.style.left = interaction.ghost.style.left;
-                    win.style.top = interaction.ghost.style.top;
-                    interaction.ghost.remove();
-                    interaction.ghost = undefined;
-                }
-            },
-        });
-    });
-}
-
-handleWindowInteraction();
-
 const zIndexManager = {
     LAYERS: {
         DESKTOP: 0,
@@ -531,8 +475,60 @@ zIndexManager.init();
 const windowManager = {
     stack: [],
 
-    init: function (allWindows) {
+    init: function () {
+        const allWindows = document.querySelectorAll('.window');
         this.stack = [...allWindows];
+        this.bindEvents(allWindows);
+    },
+
+    bindEvents: function (allWindows) {
+        windows.forEach(win => {
+            const titleBar = win.querySelector('.title-bar');
+
+            win.addEventListener('pointerdown', () => this.focus(win));
+
+            titleBar.addEventListener('click', e => {
+                const btn = e.target.closest('button[data-action]');
+                if (!btn) return;
+
+                e.stopPropagation();
+                audioManager.play('click', 0.5);
+
+                const appId = win.dataset.app;
+                const action = btn.dataset.action;
+                if (action === 'close') appManager.close(appId);
+                else if (action === 'minimize') appManager.minimize(appId);
+            });
+
+            interactionManager.makeDraggable(titleBar, win, {
+                ignoreSelectors: 'button',
+                onStart: () => {
+                    const rect = win.getBoundingClientRect();
+                    win.style.transform = 'none';
+                    win.style.left = rect.left + 'px';
+                    win.style.top = rect.top + 'px';
+                },
+                onMove: (e, interaction, x, y) => {
+                    if (!interaction.ghost) {
+                        interaction.ghost = document.createElement('div');
+                        interaction.ghost.className = 'window-drag-ghost';
+                        interaction.ghost.style.zIndex = zIndexManager.LAYERS.GHOSTS;
+                        interaction.ghost.style.width = interaction.dimensions.x + 'px';
+                        interaction.ghost.style.height = interaction.dimensions.y + 'px';
+                        document.body.appendChild(interaction.ghost);
+                    }
+                    interactionManager.moveElement(interaction.ghost, x, y, interaction);
+                },
+                onEnd: (e, interaction) => {
+                    if (interaction.ghost) {
+                        win.style.left = interaction.ghost.style.left;
+                        win.style.top = interaction.ghost.style.top;
+                        interaction.ghost.remove();
+                        interaction.ghost = undefined;
+                    }
+                },
+            });
+        });
     },
 
     getFocusedAppId: function () {
@@ -573,7 +569,7 @@ const windowManager = {
     },
 };
 
-windowManager.init(windows);
+windowManager.init();
 
 // application-logic
 
