@@ -126,29 +126,6 @@ const startMenuManager = {
     },
 };
 
-document.addEventListener('mousemove', () => {
-    document.body.classList.add('using-mouse');
-}, { passive: true });
-
-document.addEventListener('touchstart', () => {
-    document.body.classList.remove('using-mouse');
-}, { passive: true });
-
-document.body.addEventListener('keydown', e => {
-    if (e.key === 'Tab') {
-        document.body.classList.remove('using-mouse');
-    }
-});
-
-document.addEventListener('pointerdown', e => {
-    if (!e.target.closest('.window') &&
-        !e.target.closest('.taskbar-item') &&
-        !e.target.closest('.start-menu-container')) {
-        windowManager.stack.forEach(w => w.classList.remove('active'));
-        taskbarManager.setActiveApp(null);
-    }
-});
-
 const clock = {
     timeoutId: null,
     intervalId: null,
@@ -1388,6 +1365,22 @@ const systemManager = {
         this.ui.dialogWindow = document.querySelector('.window.dialog-window');
         this.ui.dialogButtonSection = this.ui.dialogWindow.querySelector('.dialog-content section');
 
+        document.addEventListener('mousemove', () => document.body.classList.add('using-mouse'), { passive: true });
+
+        document.addEventListener('touchstart', () => document.body.classList.remove('using-mouse'), { passive: true });
+
+        document.body.addEventListener('keydown', e => {
+            if (e.key === 'Tab') document.body.classList.remove('using-mouse');
+        });
+
+        document.addEventListener('pointerdown', e => {
+            if (!e.target.closest('.window') &&
+                !e.target.closest('.taskbar-item') &&
+                !e.target.closest('.start-menu-container')) {
+                windowManager.stack.forEach(w => w.classList.remove('active'));
+                taskbarManager.setActiveApp(null);
+            }
+        });
     },
 
     showOverlay: function (targetWindow) {
