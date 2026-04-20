@@ -183,6 +183,124 @@ const content = document.querySelector('.content');
 const windows = content.querySelectorAll('.window');
 const desktopItems = content.querySelectorAll('.desktop-item');
 
+const interactionManager = {
+    contentContainer: null,
+
+    init: function () {
+        this.contentContainer = document.querySelector('.content');
+        window.addEventListener('resize', () => this.enforceBoundariesOnResize());
+    },
+
+    moveElement: function (element, x, y, drag) {
+        const newPos = this.getPosBoundaryCheck(x, y, drag.dimensions);
+        element.style.left = newPos.x + 'px';
+        element.style.top = newPos.y + 'px';
+    },
+
+    makeDraggable: function (dragTarget, moveTarget, options = {}) {
+        let interaction = {
+            pointerId: null,
+            active: false,
+            moved: false,
+            startX: 0,
+            startY: 0,
+            offsetX: 0,
+            offsetY: 0,
+            dimensions: { x: 0, y: 0 },
+        };
+
+        const threshold = options.threshold || 0;
+
+        dragTarget.addEventListener('pointerdown', e => {
+            if (options.ignoreSelectors && e.target.closest(options.ignoreSelectors)) return;
+
+            interaction.pointerId = e.pointerId;
+            interaction.active = false;
+            interaction.moved = false;
+            interaction.startX = e.clientX;
+            interaction.startY = e.clientY;
+
+            const rect = moveTarget.getBoundingClientRect();
+            interaction.dimensions = { x: rect.width, y: rect.height };
+            interaction.offsetX = e.clientX - rect.left;
+            interaction.offsetY = e.clientY - rect.top;
+
+            dragTarget.setPointerCapture(e.pointerId);
+
+            if (options.onStart) options.onStart(e, interaction);
+        });
+
+        dragTarget.addEventListener('pointermove', e => {
+            if (interaction.pointerId !== e.pointerId) return;
+
+            const dx = e.clientX - interaction.startX;
+            const dy = e.clientY - interaction.startY;
+            const distance = Math.hypot(dx, dy);
+
+            if (!interaction.active && distance >= threshold) {
+                interaction.active = true;
+                interaction.moved = true;
+            }
+
+            if (!interaction.active) return;
+
+            const x = e.clientX - interaction.offsetX;
+            const y = e.clientY - interaction.offsetY;
+
+            if (options.onMove) {
+                options.onMove(e, interaction, x, y);
+            } else {
+                interactionManager.moveElement(moveTarget, x, y, interaction);
+            }
+        });
+
+        const handleDragEnd = e => {
+            if (interaction.pointerId !== e.pointerId) return;
+            if (interaction.moved) {
+                dragTarget.setAttribute('data-just-dragged', 'true');
+                setTimeout(() => dragTarget.removeAttribute('data-just-dragged'), CONFIG.dragSoundPreventionMs);
+            }
+            interaction.active = false;
+            dragTarget.releasePointerCapture(e.pointerId);
+            interaction.pointerId = null;
+
+            if (options.onEnd) options.onEnd(e, interaction);
+        };
+
+        dragTarget.addEventListener('pointerup', handleDragEnd);
+        //dragTarget.addEventListener('pointercancel', handleDragEnd);
+        dragTarget.addEventListener('lostpointercapture', handleDragEnd);
+    },
+
+    getPosBoundaryCheck: function (x, y, dimensions) {
+        const contentRect = this.contentContainer.getBoundingClientRect();
+        let newPosLeft = x;
+        let newPosTop = y;
+        newPosLeft = newPosLeft < 0
+            ? 0 : newPosLeft + dimensions.x > contentRect.right
+                ? contentRect.right - dimensions.x : newPosLeft;
+
+        newPosTop = newPosTop < 0
+            ? 0 : newPosTop + dimensions.y > contentRect.bottom
+                ? contentRect.bottom - dimensions.y : newPosTop;
+        return { x: newPosLeft, y: newPosTop };
+    },
+
+    enforceBoundariesOnResize: function () {
+        const movableElements = document.querySelectorAll('.window[style*="left"], .desktop-item[style*="left"');
+
+        movableElements.forEach(el => {
+            const rect = el.getBoundingClientRect();
+            let currentLeft = parseFloat(el.style.left);
+            let currentTop = parseFloat(el.style.top);
+
+            interactionManager.moveElement(el, currentLeft, currentTop, { dimensions: { x: rect.width, y: rect.height } });
+        });
+    }
+};
+
+interactionManager.init();
+
 function handleDesktopItemInteraction() {
     const DRAG_THRESHOLD = 4;
 
@@ -200,7 +318,7 @@ function handleDesktopItemInteraction() {
         let initialActiveElement = null;
         let lastTap = 0;
 
-        makeDraggable(dI, dI, {
+        interactionManager.makeDraggable(dI, dI, {
             threshold: DRAG_THRESHOLD,
             ignoreSelectors: '.desktop-item-label-editor',
             onStart: e => {
@@ -216,7 +334,7 @@ function handleDesktopItemInteraction() {
                     interaction.ghost.style.zIndex = zIndexManager.LAYERS.GHOSTS;
                     document.body.appendChild(interaction.ghost);
                 }
-                moveElement(interaction.ghost, x, y, interaction);
+                interactionManager.moveElement(interaction.ghost, x, y, interaction);
                 isOverWindow = detectDropTargetIsWindow(e, dI);
                 dI.style.cursor = isOverWindow ? 'no-drop' : '';
             },
@@ -339,7 +457,7 @@ function handleWindowInteraction() {
             else if (action === 'minimize') appManager.minimize(appId);
         });
 
-        makeDraggable(titleBar, win, {
+        interactionManager.makeDraggable(titleBar, win, {
             ignoreSelectors: 'button',
             onStart: () => {
                 const rect = win.getBoundingClientRect();
@@ -358,7 +476,7 @@ function handleWindowInteraction() {
                     interaction.ghost.style.height = interaction.dimensions.y + 'px';
                     document.body.appendChild(interaction.ghost);
                 }
-                moveElement(interaction.ghost, x, y, interaction);
+                interactionManager.moveElement(interaction.ghost, x, y, interaction);
             },
             onEnd: (e, interaction) => {
                 if (interaction.ghost) {
@@ -410,40 +528,6 @@ const zIndexManager = {
 
 zIndexManager.init();
 
-function moveElement(element, x, y, drag) {
-    const newPos = getPosBoundaryCheck(x, y, drag.dimensions);
-    element.style.left = newPos.x + 'px';
-    element.style.top = newPos.y + 'px';
-}
-
-function getPosBoundaryCheck(x, y, dimensions) {
-    const contentRect = content.getBoundingClientRect();
-    let newPosLeft = x;
-    let newPosTop = y;
-    newPosLeft = newPosLeft < 0
-        ? 0 : newPosLeft + dimensions.x > contentRect.right
-            ? contentRect.right - dimensions.x : newPosLeft;
-
-    newPosTop = newPosTop < 0
-        ? 0 : newPosTop + dimensions.y > contentRect.bottom
-            ? contentRect.bottom - dimensions.y : newPosTop;
-    return { x: newPosLeft, y: newPosTop };
-}
-
-function enforceBoundariesOnResize() {
-    const movableElements = document.querySelectorAll('.window[style*="left"], .desktop-item[style*="left"');
-
-    movableElements.forEach(el => {
-        const rect = el.getBoundingClientRect();
-        let currentLeft = parseFloat(el.style.left);
-        let currentTop = parseFloat(el.style.top);
-
-        moveElement(el, currentLeft, currentTop, { dimensions: { x: rect.width, y: rect.height } });
-    });
-}
-
-window.addEventListener('resize', enforceBoundariesOnResize);
-
 const windowManager = {
     stack: [],
 
@@ -490,83 +574,6 @@ const windowManager = {
 };
 
 windowManager.init(windows);
-
-// drag-and-drop-logic
-
-function makeDraggable(dragTarget, moveTarget, options = {}) {
-    let interaction = {
-        pointerId: null,
-        active: false,
-        moved: false,
-        startX: 0,
-        startY: 0,
-        offsetX: 0,
-        offsetY: 0,
-        dimensions: { x: 0, y: 0 },
-    };
-
-    const threshold = options.threshold || 0;
-
-    dragTarget.addEventListener('pointerdown', e => {
-        if (options.ignoreSelectors && e.target.closest(options.ignoreSelectors)) return;
-
-        interaction.pointerId = e.pointerId;
-        interaction.active = false;
-        interaction.moved = false;
-        interaction.startX = e.clientX;
-        interaction.startY = e.clientY;
-
-        const rect = moveTarget.getBoundingClientRect();
-        interaction.dimensions = { x: rect.width, y: rect.height };
-        interaction.offsetX = e.clientX - rect.left;
-        interaction.offsetY = e.clientY - rect.top;
-
-        dragTarget.setPointerCapture(e.pointerId);
-
-        if (options.onStart) options.onStart(e, interaction);
-    });
-
-    dragTarget.addEventListener('pointermove', e => {
-        if (interaction.pointerId !== e.pointerId) return;
-
-        const dx = e.clientX - interaction.startX;
-        const dy = e.clientY - interaction.startY;
-        const distance = Math.hypot(dx, dy);
-
-        if (!interaction.active && distance >= threshold) {
-            interaction.active = true;
-            interaction.moved = true;
-        }
-
-        if (!interaction.active) return;
-
-        const x = e.clientX - interaction.offsetX;
-        const y = e.clientY - interaction.offsetY;
-
-        if (options.onMove) {
-            options.onMove(e, interaction, x, y);
-        } else {
-            moveElement(moveTarget, x, y, interaction);
-        }
-    });
-
-    const handleDragEnd = e => {
-        if (interaction.pointerId !== e.pointerId) return;
-        if (interaction.moved) {
-            dragTarget.setAttribute('data-just-dragged', 'true');
-            setTimeout(() => dragTarget.removeAttribute('data-just-dragged'), CONFIG.dragSoundPreventionMs);
-        }
-        interaction.active = false;
-        dragTarget.releasePointerCapture(e.pointerId);
-        interaction.pointerId = null;
-
-        if (options.onEnd) options.onEnd(e, interaction);
-    };
-
-    dragTarget.addEventListener('pointerup', handleDragEnd);
-    //dragTarget.addEventListener('pointercancel', handleDragEnd);
-    dragTarget.addEventListener('lostpointercapture', handleDragEnd);
-}
 
 // application-logic
 
