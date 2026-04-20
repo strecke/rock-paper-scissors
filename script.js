@@ -1583,9 +1583,10 @@ const audioManager = {
 };
 
 const contextMenuManager = {
-    menuElement: document.querySelector('.context-menu'),
+    menuElement: null,
 
     init: function () {
+        this.menuElement = document.querySelector('.context-menu');
         document.addEventListener('contextmenu', e => {
             e.preventDefault();
             if (!e.target.closest('.content') && !e.target.closest('.desktop-item') || e.target.closest('.window')) return;
