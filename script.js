@@ -8,18 +8,22 @@ const CONFIG = {
 };
 
 const startMenuManager = {
-    startMenuContainer: document.querySelector('.start-menu-container'),
-    startMenuButton: document.querySelector('.start-menu-container .start-menu-button'),
-    startMenu: document.querySelector('.start-menu-container .start-menu'),
-    topLevelItems: document.querySelectorAll('.start-menu > .start-items > li'),
+    startMenuContainer: null,
+    startMenuButton: null,
+    startMenu: null,
+    topLevelItems: null,
+    submenus: null,
     folderTimeout: null,
     isProgrammaticBlur: false,
-    submenus: document.querySelectorAll('.has-submenu'),
 
     init: function () {
-        this.startMenuButton.addEventListener('click', e => {
-            this.toggleStartMenu();
-        });
+        this.startMenuContainer = document.querySelector('.start-menu-container');
+        this.startMenuButton = document.querySelector('.start-menu-container .start-menu-button');
+        this.startMenu = document.querySelector('.start-menu-container .start-menu');
+        this.topLevelItems = document.querySelectorAll('.start-menu > .start-items > li');
+        this.submenus = document.querySelectorAll('.has-submenu');
+
+        this.startMenuButton.addEventListener('click', e => this.toggleStartMenu());
 
         document.addEventListener('pointerdown', e => {
             if (!this.startMenu.contains(e.target) && !this.startMenuButton.contains(e.target)) {
