@@ -801,6 +801,12 @@ const rpsGame = {
         this.initStorage();
         this.bindEvents();
         this.reset();
+
+        appRegistry.register('rps', {
+            onClose: () => {
+                rpsGame.reset();
+            }
+        });
     },
 
     cacheDOM: function () {
@@ -1200,12 +1206,6 @@ const rpsGame = {
         this.ui.finalWindow.querySelector('button.new').focus();
     },
 };
-
-appRegistry.register('rps', {
-    onClose: () => {
-        rpsGame.reset();
-    }
-});
 
 // about-app
 
