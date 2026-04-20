@@ -365,78 +365,67 @@ const desktopManager = {
                             lastTap = 0;
                         } else {
                             lastTap = now;
-                            handleRenameLabel(dI, initialTarget, initialActiveElement);
+                            this.handleRenameLabel(dI, initialTarget, initialActiveElement);
                         }
                     }
                 }
             });
         });
     },
+
+    handleRenameLabel: function (dI, target, element) {
+        const dILabel = dI.querySelector('.desktop-item-label');
+        if (!(target === dILabel && element === dI)) return;
+
+        const oldText = dILabel.textContent;
+        const editor = document.createElement('textarea');
+        editor.className = 'desktop-item-label-editor';
+        editor.value = oldText;
+        editor.maxLength = 32;
+
+        const newDILabel = document.createElement('span');
+        newDILabel.className = 'desktop-item-label';
+
+        let finished = false;
+
+        const finishRename = commit => {
+            if (finished) return;
+            finished = true;
+            newDILabel.textContent = commit && editor.value.length > 0 ? editor.value : oldText;
+            editor.replaceWith(newDILabel);
+            dI.focus();
+        };
+
+        dILabel.replaceWith(editor);
+        editor.focus();
+        editor.select();
+        editor.style.height = editor.scrollHeight + 'px';
+
+        editor.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                finishRename(true);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                finishRename(false);
+            }
+        });
+
+        editor.addEventListener('blur', () => finishRename(true));
+
+        editor.addEventListener('pointerdown', e => e.stopPropagation());
+        editor.addEventListener('dblclick', e => e.stopPropagation());
+        editor.addEventListener('click', e => e.stopPropagation());
+
+        editor.addEventListener('input', e => {
+            editor.style.height = 'auto';
+            editor.style.height = editor.scrollHeight + 'px';
+        });
+
+    },
 };
 
 desktopManager.init();
-
-function handleRenameLabel(dI, target, element) {
-    const dILabel = dI.querySelector('.desktop-item-label');
-    if (!(target === dILabel && element === dI)) return;
-
-    //dI.classList.add('is-renaming');
-    const oldText = dILabel.textContent;
-    const editor = document.createElement('textarea');
-    editor.className = 'desktop-item-label-editor';
-    editor.value = oldText;
-    editor.maxLength = 32;
-
-    const newDILabel = document.createElement('span');
-    newDILabel.className = 'desktop-item-label';
-
-    let finished = false;
-
-    const finishRename = commit => {
-        if (finished) return;
-        finished = true;
-        newDILabel.textContent = commit && editor.value.length > 0 ? editor.value : oldText;
-        editor.replaceWith(newDILabel);
-        dI.focus();
-        //dI.classList.remove('is-renaming');
-    };
-
-    dILabel.replaceWith(editor);
-    editor.focus();
-    editor.select();
-    editor.style.height = editor.scrollHeight + 'px';
-
-    editor.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            finishRename(true);
-        } else if (e.key === 'Escape') {
-            e.preventDefault();
-            finishRename(false);
-        }
-    });
-
-    editor.addEventListener('blur', () => {
-        finishRename(true);
-    });
-
-    editor.addEventListener('pointerdown', e => {
-        e.stopPropagation();
-    });
-
-    editor.addEventListener('input', e => {
-        editor.style.height = 'auto';
-        editor.style.height = editor.scrollHeight + 'px';
-    });
-
-    editor.addEventListener('dblclick', e => {
-        e.stopPropagation()
-    });
-
-    editor.addEventListener('click', e => {
-        e.stopPropagation();
-    })
-}
 
 // window-logic
 
@@ -1647,7 +1636,7 @@ const contextMenuManager = {
                 menuItems = [
                     { label: 'Open', action: () => appManager.open(targetDesktopItem.dataset.app) },
                     { divider: true },
-                    { label: 'Rename', action: () => handleRenameLabel(targetDesktopItem, targetDesktopItem.querySelector('.desktop-item-label'), targetDesktopItem) },
+                    { label: 'Rename', action: () => desktopManager.handleRenameLabel(targetDesktopItem, targetDesktopItem.querySelector('.desktop-item-label'), targetDesktopItem) },
                     { label: 'Delete', action: () => targetDesktopItem.remove() },
                 ];
             } else {
