@@ -7,6 +7,14 @@ const CONFIG = {
     dragThreshold: 4,
 };
 
+const UI_STATE = {
+    active: 'active',
+    closed: 'close',
+    minimized: 'minimized',
+    hidden: 'hidden',
+    open: 'open',
+};
+
 const startMenuManager = {
     startMenuContainer: null,
     startMenuButton: null,
@@ -27,7 +35,7 @@ const startMenuManager = {
 
         document.addEventListener('pointerdown', e => {
             if (!this.startMenu.contains(e.target) && !this.startMenuButton.contains(e.target)) {
-                if (this.startMenu.classList.contains('open')) this.toggleStartMenu(true);
+                if (this.startMenu.classList.contains(UI_STATE.open)) this.toggleStartMenu(true);
             }
         });
 
@@ -45,9 +53,9 @@ const startMenuManager = {
                 }
 
                 this.topLevelItems.forEach(item => {
-                    if (item !== parentLi) item.classList.remove('open');
+                    if (item !== parentLi) item.classList.remove(UI_STATE.open);
                 });
-                parentLi.classList.add('open');
+                parentLi.classList.add(UI_STATE.open);
                 return;
             }
 
@@ -56,7 +64,7 @@ const startMenuManager = {
         });
 
         this.startMenu.addEventListener('transitionend', e => {
-            if (e.propertyName === 'max-height' && this.startMenu.classList.contains('open')) {
+            if (e.propertyName === 'max-height' && this.startMenu.classList.contains(UI_STATE.open)) {
                 this.startMenu.style.overflow = 'visible';
             }
         });
@@ -74,11 +82,11 @@ const startMenuManager = {
                     }
 
                     this.topLevelItems.forEach(item => {
-                        if (item !== li) item.classList.remove('open');
+                        if (item !== li) item.classList.remove(UI_STATE.open);
                     });
 
                     if (li.classList.contains('has-submenu')) {
-                        li.classList.add('open');
+                        li.classList.add(UI_STATE.open);
                     }
                 }, CONFIG.startMenuHoverDelay);
             });
@@ -91,14 +99,14 @@ const startMenuManager = {
                 clearTimeout(this.folderTimeout);
 
                 this.topLevelItems.forEach(item => {
-                    if (item !== li) item.classList.remove('open');
+                    if (item !== li) item.classList.remove(UI_STATE.open);
                 });
-                if (li.classList.contains('has-submenu')) li.classList.add('open');
+                if (li.classList.contains('has-submenu')) li.classList.add(UI_STATE.open);
             });
         });
 
         this.startMenu.addEventListener('focusin', () => {
-            if (!this.startMenu.classList.contains('open')) {
+            if (!this.startMenu.classList.contains(UI_STATE.open)) {
                 this.toggleStartMenu();
             }
         });
@@ -117,14 +125,14 @@ const startMenuManager = {
 
     toggleStartMenu: function (forceClose) {
         this.startMenu.style.overflow = 'hidden';
-        if (forceClose || this.startMenu.classList.contains('open')) {
-            this.startMenu.classList.remove('open');
-            this.startMenuButton.classList.remove('active');
-            this.submenus.forEach(item => item.classList.remove('open'));
+        if (forceClose || this.startMenu.classList.contains(UI_STATE.open)) {
+            this.startMenu.classList.remove(UI_STATE.open);
+            this.startMenuButton.classList.remove(UI_STATE.active);
+            this.submenus.forEach(item => item.classList.remove(UI_STATE.open));
         } else {
-            this.startMenu.classList.add('open');
-            this.startMenuButton.classList.add('active');
-            windowManager.stack.forEach(w => w.classList.remove('active'));
+            this.startMenu.classList.add(UI_STATE.open);
+            this.startMenuButton.classList.add(UI_STATE.active);
+            windowManager.stack.forEach(w => w.classList.remove(UI_STATE.active));
             taskbarManager.setActiveApp(null);
         }
     },
@@ -492,7 +500,7 @@ const windowManager = {
 
     getFocusedAppId: function () {
         const topWindow = this.stack.findLast(w =>
-            !w.classList.contains('close') && !w.classList.contains('minimized') && w.classList.contains('active')
+            !w.classList.contains(UI_STATE.closed) && !w.classList.contains(UI_STATE.minimized) && w.classList.contains(UI_STATE.active)
         );
         return topWindow ? topWindow.dataset.app : null;
     },
@@ -504,23 +512,23 @@ const windowManager = {
 
         taskbarManager.setActiveApp(appId);
 
-        if (win.classList.contains('active')) return;
+        if (win.classList.contains(UI_STATE.active)) return;
 
         this.stack = this.stack.filter(w => w !== win);
         this.stack.push(win);
-        this.stack.forEach((w, i) => w.classList.remove('active'));
+        this.stack.forEach((w, i) => w.classList.remove(UI_STATE.active));
         zIndexManager.applyWindowStack(this.stack);
-        win.classList.add('active');
-        win.classList.remove('close');
+        win.classList.add(UI_STATE.active);
+        win.classList.remove(UI_STATE.closed);
         win.focus();
 
     },
 
     close: function (win) {
-        win.classList.add('close');
-        win.classList.remove('active');
+        win.classList.add(UI_STATE.closed);
+        win.classList.remove(UI_STATE.active);
         const newWindowFocus = this.stack.findLast(w =>
-            !w.classList.contains('close') && !w.classList.contains('minimized')
+            !w.classList.contains(UI_STATE.closed) && !w.classList.contains(UI_STATE.minimized)
         );
 
         if (newWindowFocus) this.focus(newWindowFocus);
@@ -560,20 +568,20 @@ const appManager = {
         if (!appWindows.length) return;
 
         const lastFocused = windowManager.stack.findLast(w =>
-            w.dataset.app === appId && !w.classList.contains('close'));
+            w.dataset.app === appId && !w.classList.contains(UI_STATE.closed));
 
         const windowToFocus = lastFocused || appWindows.find(w => w.classList.contains('main-window')) || appWindows[0];
 
         if (state.minimized) {
             this.maximize(appId, appWindows, windowToFocus);
         } else {
-            windowToFocus.classList.remove('minimized', 'close');
+            windowToFocus.classList.remove(UI_STATE.minimized, UI_STATE.closed);
         }
 
         state.open = true;
         state.minimized = false;
 
-        taskbarManager.items[appId]?.classList.remove('close');
+        taskbarManager.items[appId]?.classList.remove(UI_STATE.closed);
 
         windowManager.focus(windowToFocus);
         appRegistry.trigger(appId, 'onOpen');
@@ -587,7 +595,7 @@ const appManager = {
         if (taskbarButton) {
             const titleBar = windowToFocus.querySelector('.title-bar');
             windowToFocus.style.visibility = 'hidden';
-            windowToFocus.classList.remove('minimized');
+            windowToFocus.classList.remove(UI_STATE.minimized);
 
             const endRect = titleBar.getBoundingClientRect();
             const startRect = taskbarButton.getBoundingClientRect();
@@ -623,32 +631,32 @@ const appManager = {
                 taskbarButton.style.pointerEvents = '';
                 ghostTitleBar.remove();
                 windowToFocus.style.visibility = '';
-                appWindows.forEach(win => win.classList.remove('minimized'));
+                appWindows.forEach(win => win.classList.remove(UI_STATE.minimized));
             });
         } else {
             // fallback no taskbar-button
-            appWindows.forEach(win => win.classList.remove('minimized'));
+            appWindows.forEach(win => win.classList.remove(UI_STATE.minimized));
         }
     },
 
     minimize: function (appId) {
         const state = this.getState(appId);
-        const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains('close') && !w.classList.contains('minimized'));
+        const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains(UI_STATE.closed) && !w.classList.contains(UI_STATE.minimized));
         if (!visibleWindows.length) return;
 
-        const activeWindow = visibleWindows.find(w => w.classList.contains('active')) || visibleWindows[0];
+        const activeWindow = visibleWindows.find(w => w.classList.contains(UI_STATE.active)) || visibleWindows[0];
         const taskbarButton = taskbarManager.items[appId];
 
         const finalizeMinimize = () => {
             state.minimized = true;
 
             visibleWindows.forEach(win => {
-                win.classList.add('minimized');
-                win.classList.remove('active');
+                win.classList.add(UI_STATE.minimized);
+                win.classList.remove(UI_STATE.active);
             });
 
             const newWindowFocus = windowManager.stack.findLast(w =>
-                !w.classList.contains('close') && !w.classList.contains('minimized')
+                !w.classList.contains(UI_STATE.closed) && !w.classList.contains(UI_STATE.minimized)
             );
             if (newWindowFocus) windowManager.focus(newWindowFocus);
             else taskbarManager.setActiveApp(null);
@@ -699,7 +707,7 @@ const appManager = {
 
     close: function (appId) {
         const state = this.getState(appId);
-        const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains('close'));
+        const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains(UI_STATE.closed));
 
         visibleWindows.forEach(win => windowManager.close(win));
 
@@ -748,15 +756,15 @@ const taskbarManager = {
     setStatus: function (appId, status) {
         const item = this.items[appId];
         if (!item) return;
-        item.classList.remove('active', 'close');
+        item.classList.remove(UI_STATE.active, UI_STATE.closed);
         if (status) item.classList.add(status);
     },
 
     setActiveApp: function (activeAppId) {
         Object.keys(this.items).forEach(id => {
             const item = this.items[id];
-            item.classList.remove('active');
-            if (id === activeAppId) item.classList.add('active');
+            item.classList.remove(UI_STATE.active);
+            if (id === activeAppId) item.classList.add(UI_STATE.active);
         });
     }
 };
@@ -921,7 +929,7 @@ const rpsGame = {
         });
 
         document.addEventListener('keydown', e => {
-            if (!this.ui.gameWindow.classList.contains('active')) return;
+            if (!this.ui.gameWindow.classList.contains(UI_STATE.active)) return;
             const keyMap = {
                 '1': 'rock',
                 '2': 'paper',
@@ -982,8 +990,8 @@ const rpsGame = {
             b.style.cursor = 'wait';
         });
 
-        calcState.classList.remove('hidden');
-        resultState.classList.add('hidden');
+        calcState.classList.remove(UI_STATE.hidden);
+        resultState.classList.add(UI_STATE.hidden);
 
         progressBar.style.transition = 'none';
         progressBar.style.width = '0%';
@@ -1024,8 +1032,8 @@ const rpsGame = {
                 this.ui.roundWindow.style.cursor = '';
                 this.ui.rpsButtons.forEach(b => b.style.cursor = '');
 
-                calcState.classList.add('hidden');
-                resultState.classList.remove('hidden');
+                calcState.classList.add(UI_STATE.hidden);
+                resultState.classList.remove(UI_STATE.hidden);
 
                 const computerChoice = ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
                 const isTie = userChoice === computerChoice;
@@ -1376,7 +1384,7 @@ const systemManager = {
             if (!e.target.closest('.window') &&
                 !e.target.closest('.taskbar-item') &&
                 !e.target.closest('.start-menu-container')) {
-                windowManager.stack.forEach(w => w.classList.remove('active'));
+                windowManager.stack.forEach(w => w.classList.remove(UI_STATE.active));
                 taskbarManager.setActiveApp(null);
             }
         });
@@ -1666,10 +1674,10 @@ const contextMenuManager = {
         this.menuElement.style.top = `${posY}px`;
         this.menuElement.style.transformOrigin = `${originX} ${originY}`;
 
-        setTimeout(() => this.menuElement.classList.add('open'), 150);
+        setTimeout(() => this.menuElement.classList.add(UI_STATE.open), 150);
     },
     closeMenu: function () {
-        this.menuElement.classList.remove('open');
+        this.menuElement.classList.remove(UI_STATE.open);
     },
 };
 
