@@ -126,8 +126,6 @@ const startMenuManager = {
     },
 };
 
-startMenuManager.init();
-
 document.addEventListener('mousemove', () => {
     document.body.classList.add('using-mouse');
 }, { passive: true });
@@ -175,8 +173,6 @@ const clock = {
         if (this.intervalId) clearInterval(this.intervalId);
     }
 }
-
-clock.init();
 
 // desktop-item-logic
 
@@ -299,8 +295,6 @@ const interactionManager = {
         });
     }
 };
-
-interactionManager.init();
 
 const desktopManager = {
     items: [],
@@ -425,8 +419,6 @@ const desktopManager = {
     },
 };
 
-desktopManager.init();
-
 // window-logic
 
 const zIndexManager = {
@@ -462,8 +454,6 @@ const zIndexManager = {
         });
     },
 };
-
-zIndexManager.init();
 
 const windowManager = {
     stack: [],
@@ -561,8 +551,6 @@ const windowManager = {
         else taskbarManager.setActiveApp(null);
     },
 };
-
-windowManager.init();
 
 // application-logic
 
@@ -754,8 +742,6 @@ const appManager = {
     }
 }
 
-appManager.init();
-
 const appRegistry = {
     hooks: {},
     register: function (appId, appHooks) {
@@ -798,8 +784,6 @@ const taskbarManager = {
         });
     }
 };
-
-taskbarManager.init();
 
 // game-logic
 
@@ -1217,8 +1201,6 @@ const rpsGame = {
     },
 };
 
-rpsGame.init();
-
 appRegistry.register('rps', {
     onClose: () => {
         rpsGame.reset();
@@ -1257,8 +1239,6 @@ const aboutApp = {
         }
     },
 };
-
-aboutApp.init();
 
 // auth-app
 
@@ -1362,8 +1342,6 @@ const authApp = {
     },
 };
 
-authApp.init();
-
 const shutdownApp = {
     init: function () {
         const shutdownWindow = document.querySelector('.shutdown-window');
@@ -1391,8 +1369,6 @@ const shutdownApp = {
         systemManager.shutdownSequence();
     },
 };
-
-shutdownApp.init();
 
 // system-manager
 
@@ -1551,8 +1527,6 @@ const systemManager = {
     }
 };
 
-systemManager.init();
-
 const audioManager = {
     sounds: {},
     isActivated: false,
@@ -1615,8 +1589,6 @@ const audioManager = {
         });
     }
 };
-
-audioManager.init();
 
 const contextMenuManager = {
     menuElement: document.querySelector('.context-menu'),
@@ -1708,8 +1680,6 @@ const contextMenuManager = {
     },
 };
 
-contextMenuManager.init();
-
 const selectionManager = {
     box: null,
     startX: 0,
@@ -1794,6 +1764,31 @@ const selectionManager = {
     }
 };
 
-selectionManager.init();
+const OS = {
+    boot: function () {
+        interactionManager.init();
+        zIndexManager.init();
+        audioManager.init();
 
-appManager.open('rps');
+        desktopManager.init();
+        startMenuManager.init();
+        taskbarManager.init();
+        contextMenuManager.init();
+        selectionManager.init();
+        clock.init();
+
+        windowManager.init();
+        appManager.init();
+
+        authApp.init();
+        shutdownApp.init();
+        aboutApp.init();
+        rpsGame.init();
+
+        systemManager.init();
+
+        appManager.open('rps');
+    },
+};
+
+document.addEventListener('DOMContentLoaded', () => OS.boot());
