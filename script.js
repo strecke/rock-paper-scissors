@@ -153,10 +153,6 @@ const clock = {
 
 // desktop-item-logic
 
-const content = document.querySelector('.content');
-const windows = content.querySelectorAll('.window');
-const desktopItems = content.querySelectorAll('.desktop-item');
-
 const interactionManager = {
     contentContainer: null,
 
