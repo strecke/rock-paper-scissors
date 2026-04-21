@@ -717,7 +717,7 @@ const appManager = {
         state.open = false;
         state.minimized = false;
 
-        taskbarManager.setStatus(appId, 'close');
+        taskbarManager.setStatus(appId, UI_STATE.closed);
         appRegistry.trigger(appId, 'onClose');
     },
 
@@ -727,7 +727,7 @@ const appManager = {
         if (isFocused) this.minimize(appId);
         else this.open(appId);
     }
-}
+};
 
 const appRegistry = {
     hooks: {},
