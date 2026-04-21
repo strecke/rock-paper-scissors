@@ -5,6 +5,7 @@ const CONFIG = {
     doubleClickThreshold: 300,
     pauseTimeAfterProgress: 300,
     dragThreshold: 4,
+    maxMinDurationFactor: 1.4,
 };
 
 const UI_STATE = {
@@ -542,15 +543,19 @@ const appManager = {
     states: new Map(),
 
     init: function () {
-        const appIds = [...new Set([...document.querySelectorAll('.window')]
-            .map(win => win.dataset.app))];
+        const allWindows = document.querySelectorAll('.window');
 
-        appIds.forEach(appId => {
-            this.states.set(appId, {
-                appId,
-                open: false,
-                minimized: false,
-            });
+        allWindows.forEach(win => {
+            const appId = win.dataset.app;
+            if (!this.states.has(appId)) {
+                this.states.set(appId, {
+                    appId,
+                    open: false,
+                    minimized: false,
+                    windows: [],
+                });
+            }
+            this.states.get(appId).windows.push(win);
         });
     },
 
@@ -558,22 +563,19 @@ const appManager = {
         return this.states.get(appId);
     },
 
-    getWindows: function (appId) {
-        return [...document.querySelectorAll(`.window[data-app="${appId}"]`)];
-    },
-
     open: function (appId) {
         const state = this.getState(appId);
-        const appWindows = this.getWindows(appId);
-        if (!appWindows.length) return;
+        if (!state) return;
+
+        if (!state.windows.length) return;
 
         const lastFocused = windowManager.stack.findLast(w =>
             w.dataset.app === appId && !w.classList.contains(UI_STATE.closed));
 
-        const windowToFocus = lastFocused || appWindows.find(w => w.classList.contains('main-window')) || appWindows[0];
+        const windowToFocus = lastFocused || state.windows.find(w => w.classList.contains('main-window')) || state.windows[0];
 
         if (state.minimized) {
-            this.maximize(appId, appWindows, windowToFocus);
+            this.maximize(appId, state.windows, windowToFocus);
         } else {
             windowToFocus.classList.remove(UI_STATE.minimized, UI_STATE.closed);
         }
@@ -587,8 +589,6 @@ const appManager = {
         appRegistry.trigger(appId, 'onOpen');
     },
 
-    DURATION_FACTOR: 1.4,
-
     maximize: function (appId, appWindows, windowToFocus) {
         const taskbarButton = taskbarManager.items[appId];
 
@@ -601,7 +601,7 @@ const appManager = {
             const startRect = taskbarButton.getBoundingClientRect();
 
             const distance = Math.hypot(endRect.left - startRect.left, endRect.top - startRect.top);
-            const duration = distance / this.DURATION_FACTOR;
+            const duration = distance / CONFIG.maxMinDurationFactor;
 
             const ghostTitleBar = document.createElement('div');
             ghostTitleBar.className = 'title-bar ghost-title-bar';
@@ -641,7 +641,8 @@ const appManager = {
 
     minimize: function (appId) {
         const state = this.getState(appId);
-        const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains(UI_STATE.closed) && !w.classList.contains(UI_STATE.minimized));
+        if (!state) return;
+        const visibleWindows = state.windows.filter(w => !w.classList.contains(UI_STATE.closed) && !w.classList.contains(UI_STATE.minimized));
         if (!visibleWindows.length) return;
 
         const activeWindow = visibleWindows.find(w => w.classList.contains(UI_STATE.active)) || visibleWindows[0];
@@ -668,7 +669,7 @@ const appManager = {
             const endRect = taskbarButton.getBoundingClientRect();
 
             const distance = Math.hypot(endRect.left - startRect.left, endRect.top - startRect.top);
-            const duration = distance / this.DURATION_FACTOR;
+            const duration = distance / CONFIG.maxMinDurationFactor;
 
             const ghostTitleBar = document.createElement('div');
             ghostTitleBar.className = 'title-bar ghost-title-bar';
@@ -707,7 +708,9 @@ const appManager = {
 
     close: function (appId) {
         const state = this.getState(appId);
-        const visibleWindows = this.getWindows(appId).filter(w => !w.classList.contains(UI_STATE.closed));
+        if (!state) return;
+
+        const visibleWindows = state.windows.filter(w => !w.classList.contains(UI_STATE.closed));
 
         visibleWindows.forEach(win => windowManager.close(win));
 
