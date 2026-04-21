@@ -500,7 +500,9 @@ const windowManager = {
 
     getFocusedAppId: function () {
         const topWindow = this.stack.findLast(w =>
-            !w.classList.contains(UI_STATE.closed) && !w.classList.contains(UI_STATE.minimized) && w.classList.contains(UI_STATE.active)
+            !w.classList.contains(UI_STATE.closed) &&
+            !w.classList.contains(UI_STATE.minimized) &&
+            w.classList.contains(UI_STATE.active)
         );
         return topWindow ? topWindow.dataset.app : null;
     },
@@ -509,7 +511,6 @@ const windowManager = {
         if (!win) return;
 
         const appId = win.dataset.app;
-
         taskbarManager.setActiveApp(appId);
 
         if (win.classList.contains(UI_STATE.active)) return;
@@ -521,7 +522,6 @@ const windowManager = {
         win.classList.add(UI_STATE.active);
         win.classList.remove(UI_STATE.closed);
         win.focus();
-
     },
 
     close: function (win) {
