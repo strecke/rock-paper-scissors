@@ -512,7 +512,10 @@ const windowManager = {
         if (!win) return;
 
         const appId = win.dataset.app;
-        taskbarManager.setActiveApp(appId);
+
+        eventBus.emit('app:focused', appId);
+
+        // taskbarManager.setActiveApp(appId);
 
         if (win.classList.contains(UI_STATE.active)) return;
 
@@ -565,9 +568,7 @@ const appManager = {
 
     open: function (appId) {
         const state = this.getState(appId);
-        if (!state) return;
-
-        if (!state.windows.length) return;
+        if (!state || !state.windows.length) return;
 
         const lastFocused = windowManager.stack.findLast(w =>
             w.dataset.app === appId && !w.classList.contains(UI_STATE.closed));
@@ -583,10 +584,23 @@ const appManager = {
         state.open = true;
         state.minimized = false;
 
-        taskbarManager.items[appId]?.classList.remove(UI_STATE.closed);
-
         windowManager.focus(windowToFocus);
-        appRegistry.trigger(appId, 'onOpen');
+
+        eventBus.emit('app:opened', appId);
+    },
+
+    close: function (appId) {
+        const state = this.getState(appId);
+        if (!state) return;
+
+        const visibleWindows = state.windows.filter(w => !w.classList.contains(UI_STATE.closed));
+
+        visibleWindows.forEach(win => windowManager.close(win));
+
+        state.open = false;
+        state.minimized = false;
+
+        eventBus.emit('app:closed', appId);
     },
 
     maximize: function (appId, appWindows, windowToFocus) {
@@ -656,6 +670,8 @@ const appManager = {
                 win.classList.remove(UI_STATE.active);
             });
 
+            eventBus.emit('app:minimized', appId);
+
             const newWindowFocus = windowManager.stack.findLast(w =>
                 !w.classList.contains(UI_STATE.closed) && !w.classList.contains(UI_STATE.minimized)
             );
@@ -706,21 +722,6 @@ const appManager = {
         }
     },
 
-    close: function (appId) {
-        const state = this.getState(appId);
-        if (!state) return;
-
-        const visibleWindows = state.windows.filter(w => !w.classList.contains(UI_STATE.closed));
-
-        visibleWindows.forEach(win => windowManager.close(win));
-
-        state.open = false;
-        state.minimized = false;
-
-        taskbarManager.setStatus(appId, UI_STATE.closed);
-        appRegistry.trigger(appId, 'onClose');
-    },
-
     toggle: function (appId) {
         const isFocused = windowManager.getFocusedAppId() === appId;
 
@@ -729,14 +730,17 @@ const appManager = {
     }
 };
 
-const appRegistry = {
-    hooks: {},
-    register: function (appId, appHooks) {
-        this.hooks[appId] = appHooks;
+const eventBus = {
+    listeners: {},
+
+    on: function (eventName, callback) {
+        if (!this.listeners[eventName]) this.listeners[eventName] = [];
+        this.listeners[eventName].push(callback);
     },
-    trigger: function (appId, event) {
-        if (this.hooks[appId] && typeof this.hooks[appId][event] === 'function') {
-            this.hooks[appId][event]();
+
+    emit: function (eventName, data) {
+        if (this.listeners[eventName]) {
+            this.listeners[eventName].forEach(callback => callback(data));
         }
     },
 };
@@ -753,6 +757,18 @@ const taskbarManager = {
             item.addEventListener('click', () => {
                 appManager.toggle(appId);
             });
+        });
+
+        eventBus.on('app:opened', appId => {
+            this.items[appId]?.classList.remove(UI_STATE.closed);
+        });
+
+        eventBus.on('app:closed', appId => {
+            this.setStatus(appId, UI_STATE.closed);
+        });
+
+        eventBus.on('app:focused', appId => {
+            this.setActiveApp(appId);
         });
     },
 
@@ -789,10 +805,8 @@ const rpsGame = {
         this.bindEvents();
         this.reset();
 
-        appRegistry.register('rps', {
-            onClose: () => {
-                rpsGame.reset();
-            }
+        eventBus.on('app:closed', closedAppId => {
+            if (closedAppId === 'rps') this.reset();
         });
     },
 
@@ -1249,24 +1263,20 @@ const authApp = {
             this.ui.passwordInput.setSelectionRange(cursorPosition, cursorPosition);
         });
 
-        appRegistry.register('login', {
-            onClose: () => {
-                systemManager.bootSequence();
-            }
-        });
-
         const btnYes = this.ui.logoffWindow.querySelector('button[data-choice="yes"]');
         const btnNo = this.ui.logoffWindow.querySelector('button[data-choice="no"]');
 
-        appRegistry.register('logoff', {
-            onOpen: () => {
+        eventBus.on('app:opened', appId => {
+            if (appId === 'logoff') {
                 btnYes.focus();
                 this.ui.logoffWindow.style.zIndex = zIndexManager.LAYERS.DIALOG;
                 systemManager.showOverlay(this.ui.logoffWindow);
-            },
-            onClose: () => {
-                systemManager.hideOverlay();
             }
+        });
+
+        eventBus.on('app:closed', appId => {
+            if (appId === 'login') systemManager.bootSequence();
+            else if (appId === 'logoff') systemManager.hideOverlay();
         });
 
         btnNo.addEventListener('click', () => {
@@ -1333,14 +1343,16 @@ const shutdownApp = {
     init: function () {
         const shutdownWindow = document.querySelector('.shutdown-window');
 
-        appRegistry.register('shutdown', {
-            onOpen: () => {
+        eventBus.on('app:opened', openedAppId => {
+            if (openedAppId === 'shutdown') {
                 shutdownWindow.querySelector('button[data-choice="yes"]').focus();
                 shutdownWindow.style.zIndex = zIndexManager.LAYERS.DIALOG;
                 systemManager.showOverlay(shutdownWindow);
-            },
+            }
+        });
 
-            onClose: () => systemManager.hideOverlay(),
+        eventBus.on('app:closed', closedAppId => {
+            if (closedAppId === 'shutdown') systemManager.hideOverlay();
         });
 
         shutdownWindow.querySelectorAll('button').forEach(b => {
