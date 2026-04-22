@@ -618,7 +618,7 @@ const appManager = {
     },
 
     maximize: function (appId, appWindows, windowToFocus) {
-        const taskbarButton = taskbarManager.items[appId];
+        const taskbarButton = taskbarManager.ui.items[appId];
 
         if (taskbarButton) {
             const titleBar = windowToFocus.querySelector('.title-bar');
@@ -674,7 +674,7 @@ const appManager = {
         if (!visibleWindows.length) return;
 
         const activeWindow = visibleWindows.find(w => w.classList.contains(UI_STATE.active)) || visibleWindows[0];
-        const taskbarButton = taskbarManager.items[appId];
+        const taskbarButton = taskbarManager.ui.items[appId];
 
         const finalizeMinimize = () => {
             state.minimized = true;
@@ -760,21 +760,32 @@ const eventBus = {
 };
 
 const taskbarManager = {
-    items: {},
+    ui: {
+        items: {},
+    },
 
     init: function () {
+        this.cacheDOM();
+        this.bindEvents();
+    },
+
+    cacheDOM: function () {
         const taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
         taskbarItems.forEach(item => {
             const appId = item.dataset.app;
-            this.items[appId] = item;
+            this.ui.items[appId] = item;
+        });
+    },
 
+    bindEvents: function () {
+        Object.entries(this.ui.items).forEach(([appId, item]) => {
             item.addEventListener('click', () => {
                 appManager.toggle(appId);
             });
         });
 
         eventBus.on('app:opened', appId => {
-            this.items[appId]?.classList.remove(UI_STATE.closed);
+            this.ui.items[appId]?.classList.remove(UI_STATE.closed);
         });
 
         eventBus.on('app:closed', appId => {
@@ -790,17 +801,16 @@ const taskbarManager = {
     },
 
     setStatus: function (appId, status) {
-        const item = this.items[appId];
+        const item = this.ui.items[appId];
         if (!item) return;
         item.classList.remove(UI_STATE.active, UI_STATE.closed);
         if (status) item.classList.add(status);
     },
 
     setActiveApp: function (activeAppId) {
-        Object.keys(this.items).forEach(id => {
-            const item = this.items[id];
+        Object.entries(this.ui.items).forEach(([appId, item]) => {
             item.classList.remove(UI_STATE.active);
-            if (id === activeAppId) item.classList.add(UI_STATE.active);
+            if (appId === activeAppId) item.classList.add(UI_STATE.active);
         });
     }
 };
