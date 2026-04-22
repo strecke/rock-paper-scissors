@@ -440,6 +440,7 @@ const desktopManager = {
 // window-logic
 
 const zIndexManager = {
+    ui: {},
     LAYERS: {
         DESKTOP: 0,
         WINDOW_BASE: 10,
@@ -454,16 +455,25 @@ const zIndexManager = {
     },
 
     init: function () {
-        const taskbar = document.querySelector('.footer');
-        if (taskbar) taskbar.style.zIndex = this.LAYERS.TASKBAR;
-        const startMenu = document.querySelector('.start-menu');
-        if (startMenu) startMenu.style.zIndex = this.LAYERS.START_MENU;
-        document.querySelectorAll('.submenu').forEach(submenu => {
+        this.cacheDOM();
+        this.applyInitLayers();
+    },
+
+    cacheDOM: function () {
+        this.ui.taskbar = document.querySelector('.footer');
+        this.ui.startMenu = document.querySelector('.start-menu');
+        this.ui.submenus = document.querySelectorAll('.submenu');
+        this.ui.contextMenu = document.querySelector('.context-menu');
+    },
+
+    applyInitLayers: function () {
+        if (this.ui.taskbar) this.ui.taskbar.style.zIndex = this.LAYERS.TASKBAR;
+        if (this.ui.startMenu) this.ui.startMenu.style.zIndex = this.LAYERS.START_MENU;
+        if (this.ui.contextMenu) this.ui.contextMenu.style.zIndex = this.LAYERS.CONTEXT_MENU;
+
+        this.ui.submenus.forEach(submenu => {
             submenu.style.zIndex = this.LAYERS.SUBMENU;
         });
-
-        const contextMenu = document.querySelector('.context-menu');
-        if (contextMenu) contextMenu.style.zIndex = this.LAYERS.CONTEXT_MENU;
     },
 
     applyWindowStack: function (stack) {
