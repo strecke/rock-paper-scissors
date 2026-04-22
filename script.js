@@ -172,10 +172,19 @@ const clock = {
 // desktop-item-logic
 
 const interactionManager = {
-    contentContainer: null,
+    ui: {},
 
     init: function () {
-        this.contentContainer = document.querySelector('.content');
+        this.cacheDOM();
+        this.bindEvents();
+    },
+
+    cacheDOM: function () {
+        this.ui.contentContainer = document.querySelector('.content');
+        this.ui.movables = document.querySelectorAll('.window, .desktop-item');
+    },
+
+    bindEvents: function () {
         window.addEventListener('resize', () => this.enforceBoundariesOnResize());
     },
 
@@ -214,7 +223,6 @@ const interactionManager = {
             interaction.offsetY = e.clientY - rect.top;
 
             dragTarget.setPointerCapture(e.pointerId);
-
             if (options.onStart) options.onStart(e, interaction);
         });
 
@@ -238,7 +246,7 @@ const interactionManager = {
             if (options.onMove) {
                 options.onMove(e, interaction, x, y);
             } else {
-                interactionManager.moveElement(moveTarget, x, y, interaction);
+                this.moveElement(moveTarget, x, y, interaction);
             }
         });
 
@@ -256,12 +264,11 @@ const interactionManager = {
         };
 
         dragTarget.addEventListener('pointerup', handleDragEnd);
-        //dragTarget.addEventListener('pointercancel', handleDragEnd);
         dragTarget.addEventListener('lostpointercapture', handleDragEnd);
     },
 
     getPosBoundaryCheck: function (x, y, dimensions) {
-        const contentRect = this.contentContainer.getBoundingClientRect();
+        const contentRect = this.ui.contentContainer.getBoundingClientRect();
         let newPosLeft = x;
         let newPosTop = y;
         newPosLeft = newPosLeft < 0
@@ -275,14 +282,14 @@ const interactionManager = {
     },
 
     enforceBoundariesOnResize: function () {
-        const movableElements = document.querySelectorAll('.window[style*="left"], .desktop-item[style*="left"');
+        this.ui.movables.forEach(el => {
+            if (el.style.left) {
+                const rect = el.getBoundingClientRect();
+                let currentLeft = parseFloat(el.style.left);
+                let currentTop = parseFloat(el.style.top);
 
-        movableElements.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            let currentLeft = parseFloat(el.style.left);
-            let currentTop = parseFloat(el.style.top);
-
-            interactionManager.moveElement(el, currentLeft, currentTop, { dimensions: { x: rect.width, y: rect.height } });
+                this.moveElement(el, currentLeft, currentTop, { dimensions: { x: rect.width, y: rect.height } });
+            }
         });
     }
 };
