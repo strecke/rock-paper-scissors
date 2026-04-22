@@ -1133,8 +1133,10 @@ button.desktop-item[data-app="about"] {
     transform: rotate(90deg);
 }
 
+button.desktop-item:active .desktop-icon-container::after,
 button.desktop-item:focus .desktop-icon-container::after,
-button.desktop-item:focus-visible .desktop-icon-container::after {
+button.desktop-item:focus-visible .desktop-icon-container::after,
+button.desktop-item.selected .desktop-icon-container::after {
     opacity: 1;
 }
 

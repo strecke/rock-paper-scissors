@@ -209,6 +209,7 @@ const interactionManager = {
         const threshold = options.threshold || 0;
 
         dragTarget.addEventListener('pointerdown', e => {
+            if (e.button !== 0) return;
             if (options.ignoreSelectors && e.target.closest(options.ignoreSelectors)) return;
 
             interaction.pointerId = e.pointerId;
@@ -304,7 +305,6 @@ const desktopManager = {
 
     cacheDOM: function () {
         this.ui.items = document.querySelectorAll('.desktop-item');
-
     },
 
     focus: function (activeItem) {
@@ -321,20 +321,29 @@ const desktopManager = {
             let initialTarget = null;
             let initialActiveElement = null;
             let lastTap = 0;
+            let dragContext = null;
 
             dI.addEventListener('contextmenu', e => {
                 e.preventDefault();
                 e.stopPropagation();
 
                 contextMenuManager.closeMenu();
+
+                if (!dI.classList.contains('selected')) {
+                    selectionManager.clearSelection();
+                    dI.classList.add('selected');
+                }
+
+                const currentSelection = Array.from(document.querySelectorAll('.desktop-item.selected'));
+
                 dI.focus();
                 this.focus(dI);
 
                 contextMenuManager.showMenu(e.clientX, e.clientY, [
-                    { label: 'Open', action: () => appManager.open(dI.dataset.app) },
+                    { label: 'Open', action: () => currentSelection.forEach(item => appManager.open(item.dataset.app)) },
                     { divider: true },
                     { label: 'Rename', action: () => this.handleRenameLabel(dI, dI.querySelector('.desktop-item-label'), dI) },
-                    { label: 'Delete', action: () => dI.remove() },
+                    { label: 'Delete', action: () => currentSelection.forEach(item => item.remove()) },
                 ]);
             });
 
@@ -343,37 +352,95 @@ const desktopManager = {
                 ignoreSelectors: '.desktop-item-label-editor',
                 onStart: e => {
                     this.focus(dI);
-                    const rect = dI.getBoundingClientRect();
-                    startPos = { x: rect.left, y: rect.top };
                     initialTarget = e.target;
                     initialActiveElement = document.activeElement;
+
+                    if (!dI.classList.contains('selected')) {
+                        selectionManager.clearSelection();
+                        dI.classList.add('selected');
+                    }
+
+                    const selectedItems = Array.from(document.querySelectorAll('.desktop-item.selected'));
+                    let minX = Infinity;
+                    let minY = Infinity;
+                    let maxX = -Infinity;
+                    let maxY = -Infinity;
+
+                    const itemsData = selectedItems.map(item => {
+                        const left = item.offsetLeft;
+                        const top = item.offsetTop;
+                        const rect = item.getBoundingClientRect();
+
+                        minX = Math.min(minX, left);
+                        minY = Math.min(minY, top);
+                        maxX = Math.max(maxX, left + rect.width);
+                        maxY = Math.max(maxY, top + rect.height);
+
+                        return { item, initialLeft: left, initialTop: top };
+                    });
+
+                    const groupWidth = maxX - minX;
+                    const groupHeight = maxY - minY;
+
+                    const clickedLeft = dI.offsetLeft;
+                    const clickedTop = dI.offsetTop;
+                    const offsetXInGroup = clickedLeft - minX;
+                    const offsetYInGroup = clickedTop - minY;
+
+                    dragContext = { itemsData, minX, minY, groupWidth, groupHeight, offsetXInGroup, offsetYInGroup, ghosts: [] };
                 },
                 onMove: (e, interaction, x, y) => {
-                    if (!interaction.ghost) {
-                        interaction.ghost = dI.cloneNode(true);
-                        interaction.ghost.classList.add('desktop-item-ghost', 'dimmed');
-                        interaction.ghost.style.zIndex = zIndexManager.LAYERS.GHOSTS;
-                        document.body.appendChild(interaction.ghost);
+                    if (!dragContext.ghosts.length) {
+                        dragContext.itemsData.forEach(data => {
+                            const ghost = data.item.cloneNode(true);
+                            ghost.classList.add('desktop-item-ghost', 'dimmed');
+                            ghost.style.zIndex = zIndexManager.LAYERS.GHOSTS;
+                            document.body.appendChild(ghost);
+                            dragContext.ghosts.push({ ghost, data });
+                        });
                     }
-                    interactionManager.moveElement(interaction.ghost, x, y, interaction);
+
+                    const proposedGroupX = x - dragContext.offsetXInGroup;
+                    const proposedGroupY = y - dragContext.offsetYInGroup;
+
+                    const safeGroupPos = interactionManager.getPosBoundaryCheck(
+                        proposedGroupX, proposedGroupY,
+                        { x: dragContext.groupWidth, y: dragContext.groupHeight }
+                    );
+
                     isOverWindow = this.detectDropTargetIsWindow(e, dI);
+
+                    dragContext.ghosts.forEach(({ ghost, data }) => {
+                        const itemOffsetX = data.initialLeft - dragContext.minX;
+                        const itemOffsetY = data.initialTop - dragContext.minY;
+
+                        ghost.style.left = `${safeGroupPos.x + itemOffsetX}px`;
+                        ghost.style.top = `${safeGroupPos.y + itemOffsetY}px`;
+                        ghost.style.cursor = isOverWindow ? 'no-drop' : '';
+                    });
+
                     dI.style.cursor = isOverWindow ? 'no-drop' : '';
                 },
                 onEnd: (e, interaction) => {
                     dI.style.cursor = '';
 
                     if (interaction.moved) {
-                        if (interaction.ghost) {
+                        if (dragContext && dragContext.ghosts.length) {
                             if (!isOverWindow) {
-                                dI.style.left = interaction.ghost.style.left;
-                                dI.style.top = interaction.ghost.style.top;
+                                dragContext.ghosts.forEach(({ ghost, data }) => {
+                                    data.item.style.left = ghost.style.left;
+                                    data.item.style.top = ghost.style.top;
+                                });
                             }
-                            interaction.ghost.remove();
-                            interaction.ghost = undefined;
+                            dragContext.ghosts.forEach(({ ghost }) => ghost.remove());
+                            dragContext.ghosts = [];
                         }
                     } else {
                         const now = Date.now();
                         const timeSinceLastTap = now - lastTap;
+                        selectionManager.clearSelection();
+                        dI.classList.add('selected');
+
                         if (timeSinceLastTap < CONFIG.doubleClickThreshold && timeSinceLastTap > 0) {
                             appManager.open(dI.dataset.app);
                             lastTap = 0;
@@ -382,6 +449,7 @@ const desktopManager = {
                             this.handleRenameLabel(dI, initialTarget, initialActiveElement);
                         }
                     }
+                    dragContext = null;
                 }
             });
         });
