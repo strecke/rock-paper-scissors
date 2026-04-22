@@ -1231,30 +1231,37 @@ const rpsGame = {
 // about-app
 
 const aboutApp = {
+    ui: {},
     init: function () {
-        const aboutWindow = document.querySelector('.about-window');
-        const emojiBtn = aboutWindow.querySelector('.about-content button.emoji-button');
-        const closeBtn = aboutWindow.querySelector('.about-content button[data-action]');
+        this.cacheDOM();
+        this.bindEvents();
+    },
 
+    cacheDOM: function () {
+        this.ui.window = document.querySelector('.about-window');
+        if (!this.ui.window) return;
+        this.ui.emojiBtn = this.ui.window.querySelector('.about-content button.emoji-button');
+        this.ui.emojiIcon = this.ui.window.querySelector('.icon-emoji');
+        this.ui.closeBtn = this.ui.window.querySelector('.about-content button[data-action]');
+    },
 
-        if (emojiBtn) {
-            const emoji = emojiBtn.querySelector('.icon-emoji');
+    bindEvents: function () {
+        if (this.ui.emojiBtn) {
             const states = ['happy', 'sad', 'wink', 'nervous', 'melting', 'mask', 'confetti'];
 
-            emojiBtn.addEventListener('click', () => {
-                const currentState = emoji.dataset.state;
+            this.ui.emojiBtn.addEventListener('click', () => {
+                const currentState = this.ui.emojiIcon.dataset.state || 'happy';
                 const availableStates = states.filter(state => state !== currentState);
                 const newState = availableStates[Math.floor(Math.random() * availableStates.length)];
 
-                emoji.classList.remove(`icon-${currentState}`);
-                emoji.classList.add(`icon-${newState}`);
-
-                emoji.dataset.state = newState;
+                this.ui.emojiIcon.classList.remove(`icon-${currentState}`);
+                this.ui.emojiIcon.classList.add(`icon-${newState}`);
+                this.ui.emojiIcon.dataset.state = newState;
             });
         }
 
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
+        if (this.ui.closeBtn) {
+            this.ui.closeBtn.addEventListener('click', () => {
                 appManager.close('about');
             });
         }
