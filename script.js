@@ -463,6 +463,12 @@ const windowManager = {
         this.stack = [...allWindows];
 
         allWindows.forEach(win => this.register(win));
+
+        eventBus.on('app:focused', appId => {
+            if (appId === null) {
+                this.stack.forEach(w => w.classList.remove(UI_STATE.active));
+            }
+        });
     },
 
     register: function (win) {
@@ -794,9 +800,6 @@ const taskbarManager = {
 
         eventBus.on('app:focused', appId => {
             this.setActiveApp(appId);
-            if (appId === null) {
-                windowManager.stack.forEach(w => w.classList.remove(UI_STATE.active));
-            }
         });
     },
 
