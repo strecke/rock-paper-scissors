@@ -484,14 +484,22 @@ const zIndexManager = {
 };
 
 const windowManager = {
+    ui: {},
     stack: [],
 
     init: function () {
-        const allWindows = document.querySelectorAll('.window');
-        this.stack = [...allWindows];
+        this.cacheDOM();
+        this.bindEvents();
 
-        allWindows.forEach(win => this.register(win));
+        this.stack = [...this.ui.windows];
+        this.ui.windows.forEach(win => this.register(win));
+    },
 
+    cacheDOM: function () {
+        this.ui.windows = document.querySelectorAll('.window');
+    },
+
+    bindEvents: function () {
         eventBus.on('app:focused', appId => {
             if (appId === null) {
                 this.stack.forEach(w => w.classList.remove(UI_STATE.active));
@@ -562,8 +570,6 @@ const windowManager = {
         const appId = win.dataset.app;
 
         eventBus.emit('app:focused', appId);
-
-        // taskbarManager.setActiveApp(appId);
 
         if (win.classList.contains(UI_STATE.active)) return;
 
