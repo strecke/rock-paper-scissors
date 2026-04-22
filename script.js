@@ -17,43 +17,46 @@ const UI_STATE = {
 };
 
 const startMenuManager = {
-    startMenuContainer: null,
-    startMenuButton: null,
-    startMenu: null,
-    topLevelItems: null,
-    submenus: null,
+    ui: {},
     folderTimeout: null,
     isProgrammaticBlur: false,
 
     init: function () {
-        this.startMenuContainer = document.querySelector('.start-menu-container');
-        this.startMenuButton = document.querySelector('.start-menu-container .start-menu-button');
-        this.startMenu = document.querySelector('.start-menu-container .start-menu');
-        this.topLevelItems = document.querySelectorAll('.start-menu > .start-items > li');
-        this.submenus = document.querySelectorAll('.has-submenu');
+        this.cacheDOM();
+        this.bindEvents();
+    },
 
-        this.startMenuButton.addEventListener('click', e => this.toggleStartMenu());
+    cacheDOM: function () {
+        this.ui.container = document.querySelector('.start-menu-container');
+        this.ui.button = this.ui.container.querySelector('.start-menu-button');
+        this.ui.menu = this.ui.container.querySelector('.start-menu');
+        this.ui.topLevelItems = document.querySelectorAll('.start-menu > .start-items > li');
+        this.ui.submenus = document.querySelectorAll('.has-submenu');
+    },
+
+    bindEvents: function () {
+        this.ui.button.addEventListener('click', e => this.toggleStartMenu());
 
         document.addEventListener('pointerdown', e => {
-            if (!this.startMenu.contains(e.target) && !this.startMenuButton.contains(e.target)) {
-                if (this.startMenu.classList.contains(UI_STATE.open)) this.toggleStartMenu(true);
+            if (!this.ui.menu.contains(e.target) && !this.ui.button.contains(e.target)) {
+                if (this.ui.menu.classList.contains(UI_STATE.open)) this.toggleStartMenu(true);
             }
         });
 
-        this.startMenu.addEventListener('click', e => {
+        this.ui.menu.addEventListener('click', e => {
             const targetBtn = e.target.closest('a, button');
             if (!targetBtn) return;
             const parentLi = targetBtn.closest('li');
             if (parentLi && parentLi.classList.contains('has-submenu')) {
                 clearTimeout(this.folderTimeout);
                 const activeEl = document.activeElement;
-                if (activeEl && this.startMenu.contains(activeEl) && !parentLi.contains(activeEl)) {
+                if (activeEl && this.ui.menu.contains(activeEl) && !parentLi.contains(activeEl)) {
                     this.isProgrammaticBlur = true;
                     activeEl.blur();
                     this.isProgrammaticBlur = false;
                 }
 
-                this.topLevelItems.forEach(item => {
+                this.ui.topLevelItems.forEach(item => {
                     if (item !== parentLi) item.classList.remove(UI_STATE.open);
                 });
                 parentLi.classList.add(UI_STATE.open);
@@ -64,25 +67,25 @@ const startMenuManager = {
             if (targetBtn.dataset.app) appManager.open(targetBtn.dataset.app);
         });
 
-        this.startMenu.addEventListener('transitionend', e => {
-            if (e.propertyName === 'max-height' && this.startMenu.classList.contains(UI_STATE.open)) {
-                this.startMenu.style.overflow = 'visible';
+        this.ui.menu.addEventListener('transitionend', e => {
+            if (e.propertyName === 'max-height' && this.ui.menu.classList.contains(UI_STATE.open)) {
+                this.ui.menu.style.overflow = 'visible';
             }
         });
 
-        this.topLevelItems.forEach(li => {
+        this.ui.topLevelItems.forEach(li => {
             li.addEventListener('pointerenter', () => {
                 clearTimeout(this.folderTimeout);
 
                 this.folderTimeout = setTimeout(() => {
                     const activeEl = document.activeElement;
-                    if (activeEl && this.startMenu.contains(activeEl) && !li.contains(activeEl)) {
+                    if (activeEl && this.ui.menu.contains(activeEl) && !li.contains(activeEl)) {
                         this.isProgrammaticBlur = true;
                         activeEl.blur();
                         this.isProgrammaticBlur = false;
                     }
 
-                    this.topLevelItems.forEach(item => {
+                    this.ui.topLevelItems.forEach(item => {
                         if (item !== li) item.classList.remove(UI_STATE.open);
                     });
 
@@ -92,49 +95,41 @@ const startMenuManager = {
                 }, CONFIG.startMenuHoverDelay);
             });
 
-            li.addEventListener('pointerleave', () => {
-                clearTimeout(this.folderTimeout);
-            });
+            li.addEventListener('pointerleave', () => clearTimeout(this.folderTimeout));
 
             li.addEventListener('focusin', () => {
                 clearTimeout(this.folderTimeout);
 
-                this.topLevelItems.forEach(item => {
+                this.ui.topLevelItems.forEach(item => {
                     if (item !== li) item.classList.remove(UI_STATE.open);
                 });
                 if (li.classList.contains('has-submenu')) li.classList.add(UI_STATE.open);
             });
         });
 
-        this.startMenu.addEventListener('focusin', () => {
-            if (!this.startMenu.classList.contains(UI_STATE.open)) {
-                this.toggleStartMenu();
-            }
+        this.ui.menu.addEventListener('focusin', () => {
+            if (!this.ui.menu.classList.contains(UI_STATE.open)) this.toggleStartMenu();
         });
 
-        this.startMenuContainer.addEventListener('focusout', e => {
+        this.ui.container.addEventListener('focusout', e => {
             if (this.isProgrammaticBlur) return;
-            if (!this.startMenuContainer.contains(e.relatedTarget)) {
-                this.toggleStartMenu(true);
-            }
+            if (!this.ui.container.contains(e.relatedTarget)) this.toggleStartMenu(true);
         });
 
-        this.startMenu.addEventListener('scroll', () => {
-            this.startMenu.scrollTop = 0;
-        });
+        this.ui.menu.addEventListener('scroll', () => this.ui.menu.scrollTop = 0);
     },
 
     toggleStartMenu: function (forceClose) {
-        this.startMenu.style.overflow = 'hidden';
-        if (forceClose || this.startMenu.classList.contains(UI_STATE.open)) {
-            this.startMenu.classList.remove(UI_STATE.open);
-            this.startMenuButton.classList.remove(UI_STATE.active);
-            this.submenus.forEach(item => item.classList.remove(UI_STATE.open));
+        this.ui.menu.style.overflow = 'hidden';
+        if (forceClose || this.ui.menu.classList.contains(UI_STATE.open)) {
+            this.ui.menu.classList.remove(UI_STATE.open);
+            this.ui.button.classList.remove(UI_STATE.active);
+            this.ui.submenus.forEach(item => item.classList.remove(UI_STATE.open));
         } else {
-            this.startMenu.classList.add(UI_STATE.open);
-            this.startMenuButton.classList.add(UI_STATE.active);
+            this.ui.menu.classList.add(UI_STATE.open);
+            this.ui.button.classList.add(UI_STATE.active);
             windowManager.stack.forEach(w => w.classList.remove(UI_STATE.active));
-            taskbarManager.setActiveApp(null);
+            eventBus.emit('app:focused', null);
         }
     },
 };
