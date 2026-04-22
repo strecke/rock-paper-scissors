@@ -1420,12 +1420,12 @@ const authApp = {
     currentUser: 'User',
     ui: {},
     init: function () {
-        this.cacheDom();
+        this.cacheDOM();
         this.bindEvents();
         this.updateStartMenuText();
     },
 
-    cacheDom: function () {
+    cacheDOM: function () {
         this.ui.logoffWindow = document.querySelector('.logoff-window');
         this.ui.loginWindow = document.querySelector('.login-window');
 
