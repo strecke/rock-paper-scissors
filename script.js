@@ -1421,16 +1421,28 @@ const systemManager = {
     hide: elements => elements.forEach(e => e.classList.add('boot-hidden')),
 
     init: function () {
-        this.groups.desktopItems = document.querySelectorAll('.desktop-item');
-        this.groups.footer = document.querySelectorAll('.footer');
-        this.groups.clock = document.querySelectorAll('.clock');
-        this.groups.taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
+        this.cacheDOM();
+        this.bindEvents();
+    },
+
+    cacheDOM: function () {
+        this.ui.desktopItems = document.querySelectorAll('.desktop-item');
+        this.ui.footer = document.querySelectorAll('.footer');
+        this.ui.clock = document.querySelectorAll('.clock');
+        this.ui.taskbarItems = document.querySelectorAll('.taskbar-items .taskbar-item');
 
         this.ui.dialogWindow = document.querySelector('.window.dialog-window');
-        this.ui.dialogButtonSection = this.ui.dialogWindow.querySelector('.dialog-content section');
+        if (this.ui.dialogWindow) {
+            this.ui.dialogTitle = this.ui.dialogWindow.querySelector('.title-bar-text');
+            this.ui.dialogMessage = this.ui.dialogWindow.querySelector('.dialog-content p');
+            this.ui.dialogIcon = this.ui.dialogWindow.querySelector('.dialog-content .icon');
+            this.ui.dialogButtonSection = this.ui.dialogWindow.querySelector('.dialog-content section');
+        }
 
+    },
+
+    bindEvents: function () {
         document.addEventListener('mousemove', () => document.body.classList.add('using-mouse'), { passive: true });
-
         document.addEventListener('touchstart', () => document.body.classList.remove('using-mouse'), { passive: true });
 
         document.body.addEventListener('keydown', e => {
@@ -1442,7 +1454,7 @@ const systemManager = {
                 !e.target.closest('.taskbar-item') &&
                 !e.target.closest('.start-menu-container')) {
                 windowManager.stack.forEach(w => w.classList.remove(UI_STATE.active));
-                taskbarManager.setActiveApp(null);
+                eventBus.emit('app:focused', null);
             }
         });
     },
@@ -1484,9 +1496,9 @@ const systemManager = {
         if (dataApp) this.ui.dialogWindow.dataset.app = dataApp;
         else delete this.ui.dialogWindow.dataset.app;
 
-        this.ui.dialogWindow.querySelector('.title-bar-text').textContent = title;
-        this.ui.dialogWindow.querySelector('.dialog-content p').textContent = message;
-        this.ui.dialogWindow.querySelector('.dialog-content .icon').className = `icon icon-emoji icon-${type}`;
+        this.ui.dialogTitle.textContent = title;
+        this.ui.dialogMessage.textContent = message;
+        this.ui.dialogIcon.className = `icon icon-emoji icon-${type}`;
         this.ui.dialogButtonSection.replaceChildren();
 
         const closeDialog = e => {
@@ -1494,7 +1506,7 @@ const systemManager = {
             systemManager.hideOverlay();
             this.ui.dialogWindow.querySelectorAll('button').forEach(btn => btn.removeEventListener('click', closeDialog));
             if (typeof onClick === 'function') onClick(e);
-        }
+        };
 
         dataChoices.forEach(dataChoice => {
             const btn = document.createElement('button');
@@ -1515,33 +1527,38 @@ const systemManager = {
 
     bootSequence: async function () {
         this.lockUI();
-        Object.values(this.groups).forEach(this.hide);
+
+        this.hide(this.ui.desktopItems);
+        this.hide(this.ui.footer);
+        this.hide(this.ui.clock);
+        this.hide(this.ui.taskbarItems);
 
         document.body.classList.remove('is-logged-off');
 
         await this.wait(400);
-        this.show(this.groups.footer);
+        this.show(this.ui.footer);
         audioManager.play('login');
-        for (const item of this.groups.desktopItems) {
+
+        for (const item of this.ui.desktopItems) {
             await this.wait(150);
             this.show([item]);
         }
 
         await this.wait(400);
-        this.show(this.groups.clock);
+        this.show(this.ui.clock);
 
         await this.wait(2000);
         appManager.open('rps');
 
         await this.wait(400);
-        this.show(this.groups.taskbarItems);
+        this.show(this.ui.taskbarItems);
         this.unlockUi();
     },
 
     shutdownSequence: async function () {
         this.lockUI();
         await this.wait(400);
-        this.hide(this.groups.taskbarItems);
+        this.hide(this.ui.taskbarItems);
         audioManager.play('logoff');
 
         await this.wait(400);
@@ -1555,15 +1572,15 @@ const systemManager = {
 
         await this.wait(400);
         clock.stop();
-        this.hide(this.groups.clock);
+        this.hide(this.ui.clock);
 
-        for (const item of this.groups.desktopItems) {
+        for (const item of this.ui.desktopItems) {
             await this.wait(50);
             this.hide([item]);
         }
 
         await this.wait(1000);
-        this.hide(this.groups.footer);
+        this.hide(this.ui.footer);
 
         await this.wait(400);
         document.body.classList.add('is-logged-off');
@@ -1581,7 +1598,7 @@ const systemManager = {
     refresh: async function () {
         await this.wait(100);
         location.reload();
-    }
+    },
 };
 
 const audioManager = {
