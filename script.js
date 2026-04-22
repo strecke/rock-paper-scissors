@@ -1267,11 +1267,27 @@ const authApp = {
     currentUser: 'User',
     ui: {},
     init: function () {
+        this.cacheDom();
+        this.bindEvents();
+        this.updateStartMenuText();
+    },
+
+    cacheDom: function () {
         this.ui.logoffWindow = document.querySelector('.logoff-window');
         this.ui.loginWindow = document.querySelector('.login-window');
+
         this.ui.usernameInput = this.ui.loginWindow.querySelector('#username');
         this.ui.passwordInput = this.ui.loginWindow.querySelector('#password');
 
+        this.ui.btnLogoffYes = this.ui.logoffWindow.querySelector('button[data-choice="yes"]');
+        this.ui.btnLogoffNo = this.ui.logoffWindow.querySelector('button[data-choice="no"]');
+        this.ui.btnLoginOk = this.ui.loginWindow.querySelector('button[data-choice="ok"]');
+        this.ui.btnLoginCancel = this.ui.loginWindow.querySelector('button[data-choice="cancel"]');
+
+        this.ui.startMenuLogoffText = document.querySelector('button[data-app="logoff"] .logoff-text');
+    },
+
+    bindEvents: function () {
         this.ui.usernameInput.addEventListener('input', e => {
             e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
         });
@@ -1283,12 +1299,9 @@ const authApp = {
             this.ui.passwordInput.setSelectionRange(cursorPosition, cursorPosition);
         });
 
-        const btnYes = this.ui.logoffWindow.querySelector('button[data-choice="yes"]');
-        const btnNo = this.ui.logoffWindow.querySelector('button[data-choice="no"]');
-
         eventBus.on('app:opened', appId => {
             if (appId === 'logoff') {
-                btnYes.focus();
+                this.ui.btnLogoffYes.focus();
                 this.ui.logoffWindow.style.zIndex = zIndexManager.LAYERS.DIALOG;
                 systemManager.showOverlay(this.ui.logoffWindow);
             }
@@ -1299,11 +1312,11 @@ const authApp = {
             else if (appId === 'logoff') systemManager.hideOverlay();
         });
 
-        btnNo.addEventListener('click', () => {
+        this.ui.btnLogoffNo.addEventListener('click', () => {
             appManager.close('logoff');
         });
 
-        btnYes.addEventListener('click', () => {
+        this.ui.btnLogoffYes.addEventListener('click', () => {
             appManager.states.forEach(state => {
                 if (state.open) {
                     appManager.close(state.appId);
@@ -1312,14 +1325,11 @@ const authApp = {
             this.renderLogin();
         });
 
-        const btnOk = this.ui.loginWindow.querySelector('button[data-choice="ok"]');
-        const btnCancel = this.ui.loginWindow.querySelector('button[data-choice="cancel"]');
-
-        btnCancel.addEventListener('click', () => {
+        this.ui.btnLoginCancel.addEventListener('click', () => {
             this.cancelLogin();
         });
 
-        btnOk.addEventListener('click', () => {
+        this.ui.btnLoginOk.addEventListener('click', () => {
             let newName = this.ui.usernameInput.value.trim();
             const isValidName = /^[a-zA-Z0-9]+$/.test(newName) && newName.length > 0 && newName.length <= 10;
 
@@ -1331,16 +1341,13 @@ const authApp = {
 
         [this.ui.usernameInput, this.ui.passwordInput].forEach(input => {
             input.addEventListener('keydown', e => {
-                if (e.key === 'Enter') btnOk.click();
+                if (e.key === 'Enter') this.ui.btnLoginOk.click();
             });
         });
-
-        this.updateStartMenuText();
     },
 
     renderLogin: function () {
         document.body.classList.add('is-logged-off');
-
         this.ui.usernameInput.value = this.currentUser;
         this.ui.passwordInput.value = '';
         appManager.open('login');
@@ -1352,9 +1359,8 @@ const authApp = {
     },
 
     updateStartMenuText: function () {
-        const textSpan = document.querySelector('button[data-app="logoff"] .logoff-text');
-        if (textSpan) {
-            textSpan.textContent = `Log Off ${this.currentUser}...`;
+        if (this.ui.startMenuLogoffText) {
+            this.ui.startMenuLogoffText.textContent = `Log Off ${this.currentUser}...`;
         }
     },
 };
