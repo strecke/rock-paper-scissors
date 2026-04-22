@@ -128,7 +128,6 @@ const startMenuManager = {
         } else {
             this.ui.menu.classList.add(UI_STATE.open);
             this.ui.button.classList.add(UI_STATE.active);
-            windowManager.stack.forEach(w => w.classList.remove(UI_STATE.active));
             eventBus.emit('app:focused', null);
         }
     },
@@ -764,6 +763,9 @@ const taskbarManager = {
 
         eventBus.on('app:focused', appId => {
             this.setActiveApp(appId);
+            if (appId === null) {
+                windowManager.stack.forEach(w => w.classList.remove(UI_STATE.active));
+            }
         });
     },
 
@@ -1453,7 +1455,6 @@ const systemManager = {
             if (!e.target.closest('.window') &&
                 !e.target.closest('.taskbar-item') &&
                 !e.target.closest('.start-menu-container')) {
-                windowManager.stack.forEach(w => w.classList.remove(UI_STATE.active));
                 eventBus.emit('app:focused', null);
             }
         });
