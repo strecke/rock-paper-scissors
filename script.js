@@ -277,22 +277,20 @@ const interactionManager = {
 };
 
 const desktopManager = {
-    items: [],
+    ui: {},
 
     init: function () {
-        this.items = document.querySelectorAll('.desktop-item');
+        this.cacheDOM();
         this.bindEvents();
     },
 
-    detectDropTargetIsWindow: function (e, dI) {
-        dI.style.pointerEvents = 'none';
-        const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
-        dI.style.pointerEvents = '';
-        return !!elementBelow?.closest('.window');
+    cacheDOM: function () {
+        this.ui.items = document.querySelectorAll('.desktop-item');
+
     },
 
     bindEvents: function () {
-        this.items.forEach(dI => {
+        this.ui.items.forEach(dI => {
             let startPos = { x: 0, y: 0 };
             let isOverWindow = false;
             let initialTarget = null;
@@ -360,6 +358,13 @@ const desktopManager = {
                 }
             });
         });
+    },
+
+    detectDropTargetIsWindow: function (e, dI) {
+        dI.style.pointerEvents = 'none';
+        const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+        dI.style.pointerEvents = '';
+        return !!elementBelow?.closest('.window');
     },
 
     handleRenameLabel: function (dI, target, element) {
