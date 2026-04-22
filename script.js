@@ -299,6 +299,21 @@ const desktopManager = {
             let initialActiveElement = null;
             let lastTap = 0;
 
+            dI.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                contextMenuManager.closeMenu();
+                dI.focus();
+
+                contextMenuManager.showMenu(e.clientX, e.clientY, [
+                    { label: 'Open', action: () => appManager.open(dI.dataset.app) },
+                    { divider: true },
+                    { label: 'Rename', action: () => this.handleRenameLabel(dI, dI.querySelector('.desktop-item-label'), dI) },
+                    { label: 'Delete', action: () => dI.remove() },
+                ]);
+            });
+
             interactionManager.makeDraggable(dI, dI, {
                 threshold: CONFIG.dragThreshold,
                 ignoreSelectors: '.desktop-item-label-editor',
@@ -1458,6 +1473,21 @@ const systemManager = {
                 eventBus.emit('app:focused', null);
             }
         });
+
+        document.addEventListener('contextmenu', e => {
+            e.preventDefault();
+
+            contextMenuManager.closeMenu();
+
+            if (e.target.classList.contains('content')) {
+                contextMenuManager.showMenu(e.clientX, e.clientY, [
+                    { label: 'Refresh', action: () => systemManager.refresh() },
+                    { divider: true },
+                    { label: 'Properties', action: () => appManager.open('about') },
+                ]);
+
+            }
+        });
     },
 
     showOverlay: function (targetWindow) {
@@ -1666,40 +1696,21 @@ const audioManager = {
 };
 
 const contextMenuManager = {
+    ui: {},
     menuElement: null,
 
     init: function () {
-        this.menuElement = document.querySelector('.context-menu');
-        document.addEventListener('contextmenu', e => {
-            e.preventDefault();
-            if (!e.target.closest('.content') && !e.target.closest('.desktop-item') || e.target.closest('.window')) return;
+        this.cacheDOM();
+        this.bindEvents();
+    },
 
-            this.closeMenu();
+    cacheDOM: function () {
+        this.ui.menuElement = document.querySelector('.context-menu');
+    },
 
-            const targetDesktopItem = e.target.closest('.desktop-item');
-            let menuItems = [];
-
-            if (targetDesktopItem) {
-                targetDesktopItem.focus();
-                menuItems = [
-                    { label: 'Open', action: () => appManager.open(targetDesktopItem.dataset.app) },
-                    { divider: true },
-                    { label: 'Rename', action: () => desktopManager.handleRenameLabel(targetDesktopItem, targetDesktopItem.querySelector('.desktop-item-label'), targetDesktopItem) },
-                    { label: 'Delete', action: () => targetDesktopItem.remove() },
-                ];
-            } else {
-                menuItems = [
-                    { label: 'Refresh', action: () => systemManager.refresh() },
-                    { divider: true },
-                    { label: 'Properties', action: () => appManager.open('about') },
-                ];
-            }
-
-            this.showMenu(e.clientX, e.clientY, menuItems);
-        });
-
+    bindEvents: function () {
         document.addEventListener('pointerdown', e => {
-            if (this.menuElement && !this.menuElement.contains(e.target)) {
+            if (this.ui.menuElement && !this.ui.menuElement.contains(e.target)) {
                 this.closeMenu();
             }
         });
@@ -1708,13 +1719,13 @@ const contextMenuManager = {
     },
 
     showMenu: function (x, y, items) {
-        this.menuElement.replaceChildren();
+        this.ui.menuElement.replaceChildren();
 
         items.forEach(item => {
             if (item.divider) {
                 const div = document.createElement('div');
                 div.className = 'divider';
-                this.menuElement.appendChild(div);
+                this.ui.menuElement.appendChild(div);
             } else {
                 const btn = document.createElement('button');
                 btn.className = 'context-menu-item';
@@ -1723,12 +1734,12 @@ const contextMenuManager = {
                     item.action();
                     this.closeMenu();
                 });
-                this.menuElement.appendChild(btn);
+                this.ui.menuElement.appendChild(btn);
             }
         });
 
-        const menuWidth = this.menuElement.offsetWidth;
-        const menuHeight = this.menuElement.offsetHeight;
+        const menuWidth = this.ui.menuElement.offsetWidth || 140;
+        const menuHeight = this.ui.menuElement.offsetHeight || (items.length * 21);
 
         let posX = x;
         let posY = y;
@@ -1745,14 +1756,14 @@ const contextMenuManager = {
             originY = 'bottom';
         }
 
-        this.menuElement.style.left = `${posX}px`;
-        this.menuElement.style.top = `${posY}px`;
-        this.menuElement.style.transformOrigin = `${originX} ${originY}`;
+        this.ui.menuElement.style.left = `${posX}px`;
+        this.ui.menuElement.style.top = `${posY}px`;
+        this.ui.menuElement.style.transformOrigin = `${originX} ${originY}`;
 
-        setTimeout(() => this.menuElement.classList.add(UI_STATE.open), 150);
+        setTimeout(() => this.ui.menuElement.classList.add(UI_STATE.open), 150);
     },
     closeMenu: function () {
-        this.menuElement.classList.remove(UI_STATE.open);
+        if (this.ui.menuElement) this.ui.menuElement.classList.remove(UI_STATE.open);
     },
 };
 
