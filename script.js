@@ -134,15 +134,20 @@ const startMenuManager = {
 };
 
 const clock = {
+    ui: {},
     timeoutId: null,
     intervalId: null,
 
-    update: function () {
-        const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        document.querySelector('.clock').textContent = timeStr;
+    init: function () {
+        this.cacheDOM();
+        this.start();
     },
 
-    init: function () {
+    cacheDOM: function () {
+        this.ui.clockElement = document.querySelector('.clock');
+    },
+
+    start: function () {
         this.update();
         const currentSeconds = new Date().getSeconds();
         const delay = (60 - currentSeconds) * 1000;
@@ -150,6 +155,12 @@ const clock = {
             this.update();
             this.intervalId = setInterval(() => this.update(), 60000);
         }, delay);
+    },
+
+    update: function () {
+        if (!this.ui.clockElement) return;
+        const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        this.ui.clockElement.textContent = timeStr;
     },
 
     stop: function () {
