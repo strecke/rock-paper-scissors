@@ -1692,7 +1692,13 @@ const systemManager = {
 const audioManager = {
     sounds: {},
     isActivated: false,
+
     init: async function () {
+        await this.loadSounds();
+        this.bindEvents();
+    },
+
+    loadSounds: async function () {
         const soundFiles = {
             click: 'sounds/click.mp3',
             warning: 'sounds/warning.wav',
@@ -1712,7 +1718,9 @@ const audioManager = {
                 console.warn(`Sound ${name} not found.`, e);
             }
         }
+    },
 
+    bindEvents: function () {
         const activateAudio = () => {
             if (this.isActivated) return;
             this.isActivated = true;
