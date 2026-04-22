@@ -797,6 +797,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 body.using-mouse .start-items li:hover .icon.icon-github,
 body.using-mouse .start-items li:hover .icon.icon-copy,
+body.using-mouse .start-items .submenu li:hover .icon.icon-rps,
 body.using-mouse .start-items .submenu li:hover .icon.icon-ph,
 body.using-mouse .start-items .submenu li:hover .icon.icon-font,
 body.using-mouse .start-items .submenu li:hover .icon.icon-pb,
@@ -806,6 +807,7 @@ body.using-mouse .start-items li.has-submenu:hover .icon.icon-folder,
 
 .start-items li:focus-within .icon.icon-github,
 .start-items li:focus-within .icon.icon-copy,
+.start-items .submenu li:focus-within .icon.icon-rps,
 .start-items .submenu li:focus-within .icon.icon-ph,
 .start-items .submenu li:focus-within .icon.icon-font,
 .start-items .submenu li:focus-within .icon.icon-pb,
