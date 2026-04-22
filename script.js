@@ -1368,14 +1368,26 @@ const authApp = {
 };
 
 const shutdownApp = {
-    init: function () {
-        const shutdownWindow = document.querySelector('.shutdown-window');
+    ui: {},
 
+    init: function () {
+        this.cacheDOM();
+        this.bindEvents();
+    },
+
+    cacheDOM: function () {
+        this.ui.window = document.querySelector('.shutdown-window');
+        if (!this.ui.window) return;
+        this.ui.btnYes = this.ui.window.querySelector('button[data-choice="yes"]');
+        this.ui.buttons = this.ui.window.querySelectorAll('button');
+    },
+
+    bindEvents: function () {
         eventBus.on('app:opened', openedAppId => {
-            if (openedAppId === 'shutdown') {
-                shutdownWindow.querySelector('button[data-choice="yes"]').focus();
-                shutdownWindow.style.zIndex = zIndexManager.LAYERS.DIALOG;
-                systemManager.showOverlay(shutdownWindow);
+            if (openedAppId === 'shutdown' && this.ui.window) {
+                this.ui.btnYes.focus();
+                this.ui.window.style.zIndex = zIndexManager.LAYERS.DIALOG;
+                systemManager.showOverlay(this.ui.window);
             }
         });
 
@@ -1383,12 +1395,14 @@ const shutdownApp = {
             if (closedAppId === 'shutdown') systemManager.hideOverlay();
         });
 
-        shutdownWindow.querySelectorAll('button').forEach(b => {
-            b.addEventListener('click', () => {
-                appManager.close('shutdown');
-                if (b.dataset.choice === 'yes') this.shutdown();
+        if (this.ui.buttons) {
+            this.ui.buttons.forEach(b => {
+                b.addEventListener('click', () => {
+                    appManager.close('shutdown');
+                    if (b.dataset.choice === 'yes') this.shutdown();
+                });
             });
-        });
+        }
     },
 
     shutdown: function () {
