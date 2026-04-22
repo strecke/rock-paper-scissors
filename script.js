@@ -307,11 +307,20 @@ const desktopManager = {
         this.ui.items = document.querySelectorAll('.desktop-item');
     },
 
-    focus: function (activeItem) {
+    focus: function (item) {
+        if (!item.classList.contains('selected')) {
+            selectionManager.clearSelection();
+            item.classList.add('selected');
+        }
         this.ui.items.forEach(item => {
             item.style.zIndex = zIndexManager.LAYERS.DESKTOP;
         });
-        activeItem.style.zIndex = zIndexManager.LAYERS.DESKTOP + 1;
+        item.style.zIndex = zIndexManager.LAYERS.DESKTOP + 1;
+        item.focus();
+    },
+
+    getSelectedItems: function () {
+        return Array.from(this.ui.items).filter(item => item.classList.contains('selected'));
     },
 
     bindEvents: function () {
@@ -329,15 +338,9 @@ const desktopManager = {
 
                 contextMenuManager.closeMenu();
 
-                if (!dI.classList.contains('selected')) {
-                    selectionManager.clearSelection();
-                    dI.classList.add('selected');
-                }
-
-                const currentSelection = Array.from(this.ui.items).filter(item => item.classList.contains('selected'));
-
-                dI.focus();
                 this.focus(dI);
+
+                const currentSelection = this.getSelectedItems();
 
                 contextMenuManager.showMenu(e.clientX, e.clientY, [
                     { label: 'Open', action: () => currentSelection.forEach(item => appManager.open(item.dataset.app)) },
@@ -354,11 +357,6 @@ const desktopManager = {
                     this.focus(dI);
                     initialTarget = e.target;
                     initialActiveElement = document.activeElement;
-
-                    if (!dI.classList.contains('selected')) {
-                        selectionManager.clearSelection();
-                        dI.classList.add('selected');
-                    }
 
                     const selectedItems = Array.from(this.ui.items).filter(item => item.classList.contains('selected'));
                     let minX = Infinity;
