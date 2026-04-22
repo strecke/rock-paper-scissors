@@ -597,12 +597,13 @@ const windowManager = {
 // application-logic
 
 const appManager = {
+    ui: {},
     states: new Map(),
 
     init: function () {
-        const allWindows = document.querySelectorAll('.window');
+        this.cacheDOM();
 
-        allWindows.forEach(win => {
+        this.ui.windows.forEach(win => {
             const appId = win.dataset.app;
             if (!this.states.has(appId)) {
                 this.states.set(appId, {
@@ -614,6 +615,10 @@ const appManager = {
             }
             this.states.get(appId).windows.push(win);
         });
+    },
+
+    cacheDOM: function () {
+        this.ui.windows = document.querySelectorAll('.window');
     },
 
     getState: function (appId) {
