@@ -1768,13 +1768,23 @@ const contextMenuManager = {
 };
 
 const selectionManager = {
+    ui: {},
     box: null,
     startX: 0,
     startY: 0,
 
     init: function () {
-        const content = document.querySelector('.content');
-        content.addEventListener('pointerdown', e => {
+        this.cacheDOM();
+        this.bindEvents();
+    },
+
+    cacheDOM: function () {
+        this.ui.content = document.querySelector('.content');
+        this.ui.desktopItems = document.querySelectorAll('.desktop-item');
+    },
+
+    bindEvents: function () {
+        this.ui.content.addEventListener('pointerdown', e => {
             if (e.target.closest('.desktop-item') || e.target.closest('.window')) {
                 if (!e.target.closest('.desktop-item')) this.clearSelection();
                 return;
@@ -1831,7 +1841,7 @@ const selectionManager = {
         const boxRight = boxLeft + boxWidth;
         const boxBottom = boxTop + boxHeight;
 
-        document.querySelectorAll('.desktop-item').forEach(item => {
+        this.ui.desktopItems.forEach(item => {
             const rect = item.getBoundingClientRect();
             const isOverlapping = !(
                 rect.right < boxLeft ||
@@ -1845,7 +1855,7 @@ const selectionManager = {
     },
 
     clearSelection: function () {
-        document.querySelectorAll('.desktop-item').forEach(item => {
+        this.ui.desktopItems.forEach(item => {
             item.classList.remove('selected');
         });
     }
