@@ -334,7 +334,7 @@ const desktopManager = {
                     dI.classList.add('selected');
                 }
 
-                const currentSelection = Array.from(document.querySelectorAll('.desktop-item.selected'));
+                const currentSelection = Array.from(this.ui.items).filter(item => item.classList.contains('selected'));
 
                 dI.focus();
                 this.focus(dI);
@@ -360,7 +360,7 @@ const desktopManager = {
                         dI.classList.add('selected');
                     }
 
-                    const selectedItems = Array.from(document.querySelectorAll('.desktop-item.selected'));
+                    const selectedItems = Array.from(this.ui.items).filter(item => item.classList.contains('selected'));
                     let minX = Infinity;
                     let minY = Infinity;
                     let maxX = -Infinity;
