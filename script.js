@@ -307,6 +307,13 @@ const desktopManager = {
 
     },
 
+    focus: function (activeItem) {
+        this.ui.items.forEach(item => {
+            item.style.zIndex = zIndexManager.LAYERS.DESKTOP;
+        });
+        activeItem.style.zIndex = zIndexManager.LAYERS.DESKTOP + 1;
+    },
+
     bindEvents: function () {
         this.ui.items.forEach(dI => {
             let startPos = { x: 0, y: 0 };
@@ -321,6 +328,7 @@ const desktopManager = {
 
                 contextMenuManager.closeMenu();
                 dI.focus();
+                this.focus(dI);
 
                 contextMenuManager.showMenu(e.clientX, e.clientY, [
                     { label: 'Open', action: () => appManager.open(dI.dataset.app) },
@@ -334,6 +342,7 @@ const desktopManager = {
                 threshold: CONFIG.dragThreshold,
                 ignoreSelectors: '.desktop-item-label-editor',
                 onStart: e => {
+                    this.focus(dI);
                     const rect = dI.getBoundingClientRect();
                     startPos = { x: rect.left, y: rect.top };
                     initialTarget = e.target;
