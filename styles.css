@@ -109,7 +109,7 @@ body.is-turned-off::before {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(0, 128, 128, 0.602), #000 120%);
+    background-image: radial-gradient(rgba(0, 128, 128, 0.602), var(--black) 120%);
     opacity: 0;
     animation: fadeIn 3s ease-in-out forwards;
     z-index: 9999;
