@@ -1,7 +1,44 @@
+:root {
+    --bg: #008080;
+    --silver: silver;
+    --navy: navy;
+    --white: #fff;
+    --black: #000;
+    --dark-grey: grey;
+    --light-grey: #dfdfdf;
+    --border-dark: #0a0a0a;
+    --title-bar-active-bg: linear-gradient(90deg, var(--navy), #1084d0);
+    --title-bar-inactive-bg: linear-gradient(90deg, var(--dark-grey), #b5b5b5);
+    --shadow-outset:
+        inset -1px -1px var(--border-dark),
+        inset 1px 1px var(--white),
+        inset -2px -2px var(--dark-grey),
+        inset 2px 2px var(--light-grey);
+    --shadow-outset-window:
+        inset -1px -1px var(--border-dark),
+        inset 1px 1px var(--light-grey),
+        inset -2px -2px var(--dark-grey),
+        inset 2px 2px var(--white);
+    --shadow-inset:
+        inset -1px -1px var(--white),
+        inset 1px 1px var(--border-dark),
+        inset -2px -2px var(--light-grey),
+        inset 2px 2px var(--dark-grey);
+    --shadow-inset-deep:
+        inset -1px -1px var(--white),
+        inset 1px 1px var(--dark-grey),
+        inset -2px -2px var(--light-grey),
+        inset 2px 2px var(--border-dark);
+}
+
 .close,
 .minimized,
 .hidden {
     display: none;
+}
+
+.boot-hidden {
+    visibility: hidden;
 }
 
 @font-face {
@@ -24,7 +61,7 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    background-color: #008080;
+    background-color: var(--bg);
     height: 100vh;
     height: 100dvh;
 }
@@ -48,6 +85,11 @@ body::after {
     background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.03) 2px, transparent 2px, transparent 4px);
 }
 
+body.is-lassoing * {
+    user-select: none;
+}
+
+/* system states styles */
 body.is-logged-off .desktop-item,
 body.is-logged-off .footer,
 body.is-logged-off .window:not(.login-window) {
@@ -55,11 +97,9 @@ body.is-logged-off .window:not(.login-window) {
 }
 
 body.is-turned-off {
-    background-color: black;
+    background-color: var(--black);
     text-align: center;
-    height: 100vh;
-    height: 100dvh;
-    color: #fff;
+    color: var(--white);
     font-size: 20px;
     text-shadow: 0 0 5px #C8C8C8;
     overflow: hidden;
@@ -80,20 +120,15 @@ body.is-turned-off p {
     position: relative;
     top: 50%;
     transform: translateY(-50%);
-    z-index: 1;
     opacity: 0;
     animation: fadeIn 2s ease-in-out forwards 1.5s;
-    z-index: 9999;
+    z-index: 10000;
 }
 
 body.is-turned-off::after {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
+    inset: 0;
     background: repeating-linear-gradient(0deg,
             rgba(0, 0, 0, 0.2),
             rgba(0, 0, 0, 0.2) 3px,
@@ -109,20 +144,9 @@ body.is-turned-off::after {
     }
 }
 
-body.is-lassoing * {
-    user-select: none;
-}
-
-.boot-hidden {
-    visibility: hidden;
-}
-
 .shutdown-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='2' height='2' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M1 0H0v1h1v1h1V1H1V0z' fill='%23000'/%3E%3C/svg%3E");
     background-repeat: repeat;
     cursor: default;
@@ -144,13 +168,13 @@ body.is-lassoing * {
 
 .window button,
 .footer button {
-    background: silver;
+    background: var(--silver);
     border: none;
     border-radius: 0;
-    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
+    box-shadow: var(--shadow-outset);
     box-sizing: border-box;
     color: transparent;
-    text-shadow: 0 0 black;
+    text-shadow: 0 0 var(--black);
     min-height: 23px;
     min-width: 75px;
     padding: 0 12px;
@@ -160,34 +184,32 @@ body.is-lassoing * {
 .window button:active,
 .footer button:active,
 .start-menu-button.active {
-    box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px grey;
-    text-shadow: 1px 1px black;
+    box-shadow: var(--shadow-inset);
+    text-shadow: 1px 1px var(--black);
 }
 
 .window button:focus,
 .footer button:focus {
-    outline: 1px dotted black;
+    outline: 1px dotted var(--black);
     outline-offset: -4px;
 }
 
 .window button:disabled,
 .footer button:disabled {
-    text-shadow: 1px 1px 0 white;
-    color: grey;
+    text-shadow: 1px 1px 0 var(--white);
+    color: var(--dark-grey);
     pointer-events: none;
 }
 
 /* window styles */
 .window {
-    width: 250px;
-    background-color: silver;
-    /* margin: auto;
-    margin-top: 25vh; */
+    background-color: var(--silver);
     position: absolute;
+    width: 250px;
     top: 50%;
     left: 50%;
     padding: 3px;
-    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px grey, inset 2px 2px #fff;
+    box-shadow: var(--shadow-outset-window);
     cursor: default;
 }
 
@@ -244,37 +266,31 @@ body.is-lassoing * {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(90deg, grey, #b5b5b5);
+    background: var(--title-bar-inactive-bg);
     padding: 3px 2px 3px 3px;
     cursor: move;
     user-select: none;
     touch-action: none;
 }
 
+.window.active .title-bar {
+    background: var(--title-bar-active-bg);
+}
+
 .ghost-title-bar {
     position: fixed;
     box-sizing: border-box;
     margin: 0;
-    padding: 0;
+    padding: 0 2px 0 3px;
     pointer-events: none;
     cursor: auto;
-    background: linear-gradient(90deg, navy, #1084d0);
+    background: var(--title-bar-active-bg);
     /* will-change: transform, opacity; */
 }
 
-.ghost-title-bar {
-    padding: 0 2px 0 3px;
-}
-
-.window.active .title-bar {
-    background: linear-gradient(90deg, navy, #1084d0);
-}
-
 .title-bar-text {
-    color: white;
+    color: var(--white);
     font-weight: 700;
-    letter-spacing: 0;
-    /* margin-right: 24px; */
     letter-spacing: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -294,7 +310,7 @@ body.is-lassoing * {
 
 .title-bar-controls button:active {
     padding: 0;
-    text-shadow: 0 -1px black;
+    text-shadow: 0 -1px var(--black);
     min-height: 17px;
 }
 
@@ -304,48 +320,6 @@ body.is-lassoing * {
 
 .title-bar-controls button:last-child {
     margin-left: 2px;
-}
-
-/* field-row specific */
-.window-content .field-row {
-    display: flex;
-    align-items: center;
-    margin-block-end: 13px;
-}
-
-.window-content .field-row label {
-    display: inline-flex;
-    align-items: center;
-    user-select: none;
-    font-size: 14px;
-    width: 55px;
-}
-
-.window-content .field-row input {
-    line-height: 2;
-    height: 21px;
-    background-color: white;
-    box-shadow: inset -1px -1px white, inset 1px 1px grey, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a;
-    box-sizing: border-box;
-    padding: 3px 4px;
-    border: none;
-    border-radius: 0;
-    appearance: none;
-    outline: none;
-    flex: 1;
-}
-
-.window-content .field-row input:focus {
-    outline: none;
-}
-
-body:not(.using-mouse) .window-content .field-row input:focus {
-    outline: 1px dotted black;
-    outline-offset: -4px;
-}
-
-.window-content .field-row > * + * {
-    margin-left: 6px;
 }
 
 /* content specific */
@@ -382,6 +356,48 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     -webkit-font-smoothing: none;
 }
 
+/* fieldset specific */
+.window-content .field-row {
+    display: flex;
+    align-items: center;
+    margin-block-end: 13px;
+}
+
+.window-content .field-row label {
+    display: inline-flex;
+    align-items: center;
+    user-select: none;
+    font-size: 14px;
+    width: 55px;
+}
+
+.window-content .field-row input {
+    line-height: 2;
+    height: 21px;
+    background-color: var(--white);
+    box-shadow: var(--shadow-inset-deep);
+    box-sizing: border-box;
+    padding: 3px 4px;
+    border: none;
+    border-radius: 0;
+    appearance: none;
+    outline: none;
+    flex: 1;
+}
+
+.window-content .field-row input:focus {
+    outline: none;
+}
+
+body:not(.using-mouse) .window-content .field-row input:focus {
+    outline: 1px dotted var(--black);
+    outline-offset: -4px;
+}
+
+.window-content .field-row > * + * {
+    margin-left: 6px;
+}
+
 .window-content fieldset {
     border: 2px solid;
     border-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='5' height='5' fill='gray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h5v5H0V2h2v1h1V2H0' fill='%23fff'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h4v4H0V1h1v2h2V1H0'/%3E%3C/svg%3E") 2;
@@ -396,7 +412,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .window-content fieldset legend {
     padding: 0 4px;
-    background: silver;
+    background: var(--silver);
     display: flex;
     align-items: center;
     gap: 3px;
@@ -479,7 +495,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .window-content.final-content > .flex-container {
     flex-direction: column;
-    box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px grey;
+    box-shadow: var(--shadow-inset);
     box-sizing: border-box;
     user-select: none;
     padding: 10px 0;
@@ -551,7 +567,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     appearance: none;
     border: none;
     border-radius: 0;
-    box-shadow: inset -2px -2px #dfdfdf, inset 2px 2px grey;
+    box-shadow: inset -2px -2px var(--light-grey), inset 2px 2px var(--dark-grey);
     box-sizing: border-box;
     height: 32px;
     padding: 4px;
@@ -560,14 +576,14 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .window-content .progress-indicator .progress-indicator-bar {
     width: 0%;
-    background-color: navy;
+    background-color: var(--navy);
     display: block;
     height: 100%;
     transition: width 0.6s ease-in-out;
 }
 
 .window-content .progress-indicator .progress-indicator-bar.step-progress-bar {
-    background-image: linear-gradient(90deg, navy 16px, transparent 0 2px);
+    background-image: linear-gradient(90deg, var(--navy) 16px, transparent 0 2px);
     background-repeat: repeat;
     background-size: 18px 100%;
     background-color: transparent;
@@ -588,7 +604,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 }
 
 .status-bar .status-bar-field {
-    box-shadow: inset -1px -1px #dfdfdf, inset 1px 1px grey;
+    box-shadow: inset -1px -1px var(--light-grey), inset 1px 1px var(--light-grey);
     flex-grow: 1;
     margin: 0;
     padding: 2px 3px;
@@ -618,13 +634,13 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     position: relative;
     text-align: left;
     white-space: nowrap;
-    background-color: white;
+    background-color: var(--white);
     width: 100%;
 }
 
 .table table thead tr th {
-    background: silver;
-    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
+    background: var(--silver);
+    box-shadow: var(--shadow-outset);
     box-sizing: border-box;
     font-weight: 400;
     height: 17px;
@@ -644,17 +660,17 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 }
 
 .table table tbody tr.highlighted {
-    background-color: navy;
-    color: white;
+    background-color: var(--navy);
+    color: var(--white);
 }
 
 /* footer syles */
 .footer {
     display: flex;
     height: 28px;
-    background-color: silver;
-    border-top: 1px solid white;
-    border-bottom: 1px solid black;
+    background-color: var(--silver);
+    border-top: 1px solid var(--white);
+    border-bottom: 1px solid var(--black);
     box-sizing: border-box;
     justify-content: space-between;
     align-items: center;
@@ -670,7 +686,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     width: 2px;
     border: none;
     margin: 0 2px;
-    box-shadow: inset -1px -1px grey, inset 1px 1px #dfdfdf;
+    box-shadow: inset -1px -1px var(--dark-grey), inset 1px 1px var(--light-grey);
 }
 
 .footer .taskbar-items button {
@@ -703,16 +719,13 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 }
 
 .footer .taskbar-items .taskbar-item.active {
-    box-shadow:
-        inset -1px -1px #fff,
-        inset 1px 1px #0a0a0a,
-        inset -2px -2px #dfdfdf,
-        inset 2px 2px grey,
-        inset 0 3px #fff;
+    box-shadow: 
+        var(--shadow-inset),
+        inset 0 3px var(--white);
     font-weight: 700;
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='2' height='2' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M1 0H0v1h1v1h1V1H1V0z' fill='silver'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M2 0H1v1H0v1h1V1h1V0z' fill='%23fff'/%3E%3C/svg%3E");
     background-position-y: 1px;
-    text-shadow: 1px 1px black;
+    text-shadow: 1px 1px var(--black);
 }
 
 .footer .taskbar-items .taskbar-item.active .icon,
@@ -728,7 +741,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     appearance: none;
     border: none;
     border-radius: 0;
-    box-shadow: inset -1px -1px #dfdfdf, inset 1px 1px grey;
+    box-shadow: inset -1px -1px var(--light-grey), inset 1px 1px var(--dark-grey);
     box-sizing: border-box;
     padding: 4px 0;
     width: 70px;
@@ -746,9 +759,9 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     position: absolute;
     bottom: 100%;
     width: 200px;
-    background: silver;
+    background: var(--silver);
     padding: 3px;
-    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px grey, inset 2px 2px #fff;
+    box-shadow: var(--shadow-outset-window);
     pointer-events: none;
     max-height: 0;
     opacity: 0;
@@ -769,7 +782,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
             #000080 70%,
             #1084d0 80%,
             #000080 100%);
-    color: white;
+    color: var(--white);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -848,7 +861,7 @@ body.using-mouse .start-items li.has-submenu:hover .icon.icon-folder,
 .start-menu-container .start-items li.has-submenu.open > button,
 body.using-mouse .start-menu-container .start-items li a:hover,
 body.using-mouse .start-menu-container .start-items li button:hover {
-    background: navy;
+    background: var(--navy);
     color: white;
     outline: none;
 }
@@ -863,7 +876,7 @@ body.using-mouse .start-menu-container .start-items li button:hover {
     box-sizing: border-box;
     height: 2px;
     margin: 4px 2px;
-    box-shadow: inset 0 -1px #dfdfdf, inset 0 1px grey;
+    box-shadow: inset 0 -1px var(--light-grey), inset 0 1px var(--dark-grey);
 }
 
 /* submenu-logic */
@@ -879,15 +892,11 @@ body.using-mouse .start-menu-container .start-items li button:hover {
 
 .start-menu-container .start-items ul.submenu {
     position: absolute;
-    background: silver;
+    background: var(--silver);
     left: calc(100% - 4px);
     top: -5px;
     padding: 3px;
-    box-shadow:
-        inset -1px -1px #0a0a0a,
-        inset 1px 1px #dfdfdf,
-        inset -2px -2px grey,
-        inset 2px 2px #fff;
+    box-shadow: var(--shadow-outset-window);
     list-style: none;
     margin: 0;
     width: 0;
@@ -909,8 +918,8 @@ body.using-mouse .start-menu-container .start-items li button:hover {
 /* context-menu */
 .context-menu {
     position: fixed;
-    background: silver;
-    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf, inset -2px -2px grey, inset 2px 2px #fff;
+    background: var(--silver);
+    box-shadow: var(--shadow-outset-window);
     padding: 3px;
     min-width: 140px;
     display: flex;
@@ -935,7 +944,7 @@ body.using-mouse .start-menu-container .start-items li button:hover {
     border: none;
     box-shadow: none;
     padding: 3px 15px 3px 20px;
-    color: #000;
+    color: var(--black);
     text-shadow: none;
     min-width: 0;
     min-height: 0;
@@ -943,8 +952,8 @@ body.using-mouse .start-menu-container .start-items li button:hover {
 
 .context-menu button.context-menu-item:hover,
 .context-menu button.context-menu-item:focus {
-    background: navy;
-    color: white;
+    background: var(--navy);
+    color: var(--white);
     outline: none;
 }
 
@@ -1097,14 +1106,14 @@ button.desktop-item {
     background: transparent;
     border: 1px solid transparent;
     box-shadow: none;
-    color: white;
+    color: var(--white);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
     min-width: 0;
     cursor: default;
-    text-shadow: 1px 1px 0px black;
+    text-shadow: 1px 1px 0px var(--black);
     box-sizing: border-box;
     touch-action: none;
     outline: none;
@@ -1151,7 +1160,7 @@ button.desktop-item.selected .desktop-icon-container::after {
     width: 48px;
     height: 48px;
     image-rendering: pixelated;
-    background-color: white;
+    background-color: var(--white);
     background-size: cover;
     background-repeat: no-repeat;
     pointer-events: none;
@@ -1164,11 +1173,11 @@ button.desktop-item.selected .desktop-icon-container::after {
     width: 13px;
     height: 13px;
     padding: 1px;
-    background-color: white;
+    background-color: var(--white);
     background-size: 11px;
     background-position: center;
     background-repeat: no-repeat;
-    box-shadow: inset -1px -1px black, inset 1px 1px #86878e;
+    box-shadow: inset -1px -1px var(--black), inset 1px 1px #86878e;
     image-rendering: pixelated;
     box-sizing: border-box;
     z-index: 1;
@@ -1198,22 +1207,22 @@ button.desktop-item.selected .desktop-icon-container::after {
 }
 
 button.desktop-item:hover:not(:focus, :focus-visible) .desktop-item-label::after {
-    outline: 1px dotted #fff;
+    outline: 1px dotted var(--white);
 }
 
 .desktop-item:active .desktop-item-label,
 .desktop-item:focus-visible .desktop-item-label,
 .desktop-item:focus .desktop-item-label,
 .desktop-item.selected .desktop-item-label {
-    background: navy;
-    color: white;
+    background: var(--navy);
+    color: var(--white);
 }
 
 .desktop-item:active .desktop-item-label::after,
 .desktop-item:focus-visible .desktop-item-label::after,
 .desktop-item:focus .desktop-item-label::after,
 .desktop-item.selected .desktop-item-label::after {
-    outline: 1px dotted #fff;
+    outline: 1px dotted var(--white);
 }
 
 .desktop-item-label-editor {
@@ -1222,9 +1231,9 @@ button.desktop-item:hover:not(:focus, :focus-visible) .desktop-item-label::after
     font-size: 12px;
     line-height: 1.05;
     box-sizing: border-box;
-    background: white;
-    color: black;
-    border: 1px solid navy;
+    background: var(--white);
+    color: var(--black);
+    border: 1px solid var(--navy);
     padding: 0 2px;
     text-align: center;
     outline: none;
@@ -1248,8 +1257,7 @@ button.desktop-item-ghost .desktop-icon-container::after {
 }
 
 button.desktop-item-ghost .desktop-item-label {
-    /* background: transparent; */
-    color: black;
+    color: var(--black);
     outline: none;
 }
 
@@ -1260,7 +1268,7 @@ button.desktop-item-ghost .desktop-item-label::after {
 /* selection-lasso */
 .selection-lasso {
     position: fixed;
-    border: 1px dotted white;
+    border: 1px dotted var(--white);
     mix-blend-mode: difference;
     pointer-events: none;
 }
@@ -1272,7 +1280,7 @@ button.desktop-item-ghost .desktop-item-label::after {
 }
 
 ::-webkit-scrollbar-corner {
-    background: #dfdfdf;
+    background: var(--light-grey);
 }
 
 ::-webkit-scrollbar-track {
@@ -1280,8 +1288,8 @@ button.desktop-item-ghost .desktop-item-label::after {
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #dfdfdf;
-    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
+    background-color: var(--light-grey);
+    box-shadow: var(--shadow-outset);
 }
 
 ::-webkit-scrollbar-button {
