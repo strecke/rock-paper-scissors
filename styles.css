@@ -5,6 +5,7 @@
     --white: #fff;
     --black: #000;
     --dark-grey: grey;
+    --bluish-grey: #86878e;
     --light-grey: #dfdfdf;
     --border-dark: #0a0a0a;
     --blue-dark: #000080;
@@ -490,7 +491,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     text-align: center;
     letter-spacing: 8px;
     font-weight: 700;
-    text-shadow: 1px 1px 0px #86878e;
+    text-shadow: 1px 1px 0px var(--bluish-grey);
     line-height: 1;
     font-size: 15px;
 }
@@ -524,7 +525,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 .window-content.final-content > .flex-container > div.winner-text .icon {
     height: 18px;
     width: 18px;
-    filter: drop-shadow(1px 1px 0px #86878e);
+    filter: drop-shadow(1px 1px 0px var(--bluish-grey));
 }
 
 .window-content.final-content > fieldset.stats-box {
@@ -658,7 +659,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .table table tbody tr.dimmed {
     opacity: 1;
-    color: #86878e;
+    color: var(--bluish-grey);
 }
 
 .table table tbody tr.highlighted {
@@ -1070,7 +1071,7 @@ body.using-mouse .start-menu-container .start-items li button:hover {
 .icon-emoji {
     width: 48px;
     height: 48px;
-    filter: drop-shadow(2px 2px 0px #86878e);
+    filter: drop-shadow(2px 2px 0px var(--bluish-grey));
 }
 
 .icon-happy {
@@ -1179,7 +1180,7 @@ button.desktop-item.selected .desktop-icon-container::after {
     background-size: 11px;
     background-position: center;
     background-repeat: no-repeat;
-    box-shadow: inset -1px -1px var(--black), inset 1px 1px #86878e;
+    box-shadow: inset -1px -1px var(--black), inset 1px 1px var(--bluish-grey);
     image-rendering: pixelated;
     box-sizing: border-box;
     z-index: 1;
