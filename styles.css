@@ -7,7 +7,9 @@
     --dark-grey: grey;
     --light-grey: #dfdfdf;
     --border-dark: #0a0a0a;
-    --title-bar-active-bg: linear-gradient(90deg, var(--navy), #1084d0);
+    --blue-dark: #000080;
+    --blue-light: #1084d0;
+    --title-bar-active-bg: linear-gradient(90deg, var(--navy), var(--blue-light));
     --title-bar-inactive-bg: linear-gradient(90deg, var(--dark-grey), #b5b5b5);
     --shadow-outset:
         inset -1px -1px var(--border-dark),
@@ -779,9 +781,9 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     width: 23px;
     box-sizing: border-box;
     background: linear-gradient(to bottom,
-            #000080 70%,
-            #1084d0 80%,
-            #000080 100%);
+            var(--blue-dark) 70%,
+            var(--blue-light) 80%,
+            var(--blue-dark) 100%);
     color: var(--white);
     display: flex;
     align-items: flex-end;
