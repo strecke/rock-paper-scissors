@@ -811,25 +811,11 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     position: relative;
 }
 
-body.using-mouse .start-items li:hover .icon.icon-github,
-body.using-mouse .start-items li:hover .icon.icon-copy,
-body.using-mouse .start-items .submenu li:hover .icon.icon-rps,
-body.using-mouse .start-items .submenu li:hover .icon.icon-ph,
-body.using-mouse .start-items .submenu li:hover .icon.icon-font,
-body.using-mouse .start-items .submenu li:hover .icon.icon-pb,
-body.using-mouse .start-items .submenu li:hover .icon.icon-fl,
-body.using-mouse .start-items li:hover .icon.icon-about,
-body.using-mouse .start-items li:hover .icon.icon-computer,
+body.using-mouse .start-items li:not(.has-submenu):hover .icon.invert,
+.start-items li:not(.has-submenu):focus-within .icon.invert,
+body.using-mouse .start-items .submenu li:hover .icon.invert,
+.start-items .submenu li:focus-within .icon.invert,
 body.using-mouse .start-items li.has-submenu:hover .icon.icon-folder,
-.start-items li:focus-within .icon.icon-github,
-.start-items li:focus-within .icon.icon-copy,
-.start-items .submenu li:focus-within .icon.icon-rps,
-.start-items .submenu li:focus-within .icon.icon-ph,
-.start-items .submenu li:focus-within .icon.icon-font,
-.start-items .submenu li:focus-within .icon.icon-pb,
-.start-items .submenu li:focus-within .icon.icon-fl,
-.start-items li:focus-within .icon.icon-about,
-.start-items li:focus-within .icon.icon-computer,
 .start-items li.has-submenu:focus-within .icon.icon-folder,
 .start-items li.has-submenu.open > button .icon.icon-folder {
     filter: invert(1);
@@ -865,7 +851,7 @@ body.using-mouse .start-items li.has-submenu:hover .icon.icon-folder,
 body.using-mouse .start-menu-container .start-items li a:hover,
 body.using-mouse .start-menu-container .start-items li button:hover {
     background: var(--navy);
-    color: white;
+    color: var(--white);
     outline: none;
 }
 
