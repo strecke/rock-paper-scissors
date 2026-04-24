@@ -331,6 +331,7 @@ const desktopManager = {
             let initialActiveElement = null;
             let lastTap = 0;
             let dragContext = null;
+            let wasSelected = false;
 
             dI.addEventListener('contextmenu', e => {
                 e.preventDefault();
@@ -354,6 +355,7 @@ const desktopManager = {
                 threshold: CONFIG.dragThreshold,
                 ignoreSelectors: '.desktop-item-label-editor',
                 onStart: e => {
+                    wasSelected = dI.classList.contains('selected');
                     this.focus(dI);
                     initialTarget = e.target;
                     initialActiveElement = document.activeElement;
@@ -436,6 +438,7 @@ const desktopManager = {
                     } else {
                         const now = Date.now();
                         const timeSinceLastTap = now - lastTap;
+
                         selectionManager.clearSelection();
                         dI.classList.add('selected');
 
@@ -444,7 +447,7 @@ const desktopManager = {
                             lastTap = 0;
                         } else {
                             lastTap = now;
-                            this.handleRenameLabel(dI, initialTarget, initialActiveElement);
+                            if (wasSelected) this.handleRenameLabel(dI, initialTarget, initialActiveElement);
                         }
                     }
                     dragContext = null;
