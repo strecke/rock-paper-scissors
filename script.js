@@ -1009,12 +1009,12 @@ const rpsGame = {
     renderEmptyHistory: function (tBody) {
         tBody.replaceChildren();
         const tr = document.createElement('tr');
-        const th = document.createElement('th');
-        th.colSpan = 4;
-        th.style.textAlign = 'center';
-        th.classList.add('dimmed');
-        th.textContent = 'No games played yet.';
-        tr.append(th); tBody.append(tr);
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.style.textAlign = 'center';
+        td.classList.add('dimmed');
+        td.textContent = 'No games played yet.';
+        tr.append(td); tBody.append(tr);
     },
 
     initStorage: function () {
@@ -1165,12 +1165,12 @@ const rpsGame = {
             if (game.winner === authApp.currentUser && game.isUserWinner) tr.classList.add('highlighted');
             if (!game.isUserWinner) tr.classList.add('dimmed');
 
-            const dateTh = document.createElement('th'); dateTh.textContent = game.date;
-            const winnerTh = document.createElement('th'); winnerTh.textContent = game.winner;
-            const scoreTh = document.createElement('th'); scoreTh.textContent = game.score;
-            const roundsTh = document.createElement('th'); roundsTh.textContent = game.totalRounds;
+            const dateTd = document.createElement('td'); dateTd.textContent = game.date;
+            const winnerTd = document.createElement('td'); winnerTd.textContent = game.winner;
+            const scoreTd = document.createElement('td'); scoreTd.textContent = game.score;
+            const roundsTd = document.createElement('td'); roundsTd.textContent = game.totalRounds;
 
-            tr.append(dateTh, winnerTh, scoreTh, roundsTh);
+            tr.append(dateTd, winnerTd, scoreTd, roundsTd);
             this.ui.historyTableBody.appendChild(tr);
         });
     },

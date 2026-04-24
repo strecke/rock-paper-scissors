@@ -722,7 +722,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 }
 
 .footer .taskbar-items .taskbar-item.active {
-    box-shadow: 
+    box-shadow:
         var(--shadow-inset),
         inset 0 3px var(--white);
     font-weight: 700;
