@@ -9,7 +9,6 @@
     --bluish-grey: #86878e;
     --light-grey: #dfdfdf;
     --border-dark: #0a0a0a;
-    --title-bar-active-bg: linear-gradient(90deg, var(--navy), var(--navy-light));
     --title-bar-inactive-bg: linear-gradient(90deg, var(--dark-grey), #b5b5b5);
     --shadow-outset:
         inset -1px -1px var(--border-dark),
@@ -38,21 +37,18 @@ body.theme-funky-yellow {
     --bg: 251, 245, 52;
     --navy: #4B0082;
     --navy-light: #be8bee;
-    --title-bar-active-bg: linear-gradient(90deg, var(--navy), var(--navy-light));
 }
 
 body.theme-poison-green {
     --bg: 50, 205, 50;
     --navy: #004d00;
     --navy-light: #578557;
-    --title-bar-active-bg: linear-gradient(90deg, var(--navy), var(--navy-light));
 }
 
 body.theme-hot-pink {
     --bg: 255, 105, 180;
     --navy: #8B008B;
     --navy-light: #FF1493;
-    --title-bar-active-bg: linear-gradient(90deg, var(--navy), var(--navy-light));
 }
 
 .close,
@@ -303,7 +299,7 @@ body.is-turned-off::after {
 }
 
 .window.active .title-bar {
-    background: var(--title-bar-active-bg);
+    background: linear-gradient(90deg, var(--navy), var(--navy-light));
 }
 
 .ghost-title-bar {
@@ -313,7 +309,7 @@ body.is-turned-off::after {
     padding: 0 2px 0 3px;
     pointer-events: none;
     cursor: auto;
-    background: var(--title-bar-active-bg);
+    background: linear-gradient(90deg, var(--navy), var(--navy-light));
     /* will-change: transform, opacity; */
 }
 
