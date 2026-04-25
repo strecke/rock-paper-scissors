@@ -239,7 +239,7 @@ body.is-turned-off::after {
 }
 
 .window.about-window {
-    transform: translate(-70%, -70%);
+    transform: translate(-70%, -60%);
 }
 
 .window.login-window,
@@ -605,6 +605,15 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     height: 48px;
 }
 
+.window-content.about-content .divider {
+    margin: 10px 0;
+}
+
+.window-content.about-content strong {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
 /* status-bar */
 .status-bar {
     display: flex;
@@ -866,8 +875,10 @@ body.using-mouse .start-menu-container .start-items li button:hover {
     outline: none;
 }
 
+.about-content .divider,
 .start-items .divider,
 .context-menu .divider {
+    display: block;
     box-sizing: border-box;
     height: 2px;
     margin: 4px 2px;
