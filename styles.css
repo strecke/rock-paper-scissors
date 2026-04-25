@@ -796,7 +796,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     align-items: flex-end;
     justify-content: center;
     padding: 6px;
-    padding-bottom: 8px;
+    padding-bottom: 30px;
 }
 
 .start-menu-container .start-header span {
