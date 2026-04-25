@@ -6,6 +6,7 @@ const CONFIG = {
     pauseTimeAfterProgress: 300,
     dragThreshold: 4,
     maxMinDurationFactor: 1.4,
+    maxDesktopLabelLength: 32,
 };
 
 const UI_STATE = {
@@ -316,7 +317,7 @@ const desktopManager = {
             item.style.zIndex = zIndexManager.LAYERS.DESKTOP;
         });
         item.style.zIndex = zIndexManager.LAYERS.DESKTOP + 1;
-        item.focus();
+        if (document.activeElement !== item) item.focus();
     },
 
     getSelectedItems: function () {
@@ -332,6 +333,10 @@ const desktopManager = {
             let lastTap = 0;
             let dragContext = null;
             let wasSelected = false;
+
+            dI.addEventListener('focus', () => {
+                this.focus(dI);
+            });
 
             dI.addEventListener('contextmenu', e => {
                 e.preventDefault();
@@ -471,20 +476,39 @@ const desktopManager = {
         const editor = document.createElement('textarea');
         editor.className = 'desktop-item-label-editor';
         editor.value = oldText;
-        editor.maxLength = 32;
+        editor.maxLength = CONFIG.maxDesktopLabelLength;
 
         const newDILabel = document.createElement('span');
         newDILabel.className = 'desktop-item-label';
 
         let finished = false;
 
-        const finishRename = commit => {
+        const finishRename = (commit, keepFocus = false) => {
             if (finished) return;
             finished = true;
-            newDILabel.textContent = commit && editor.value.length > 0 ? editor.value : oldText;
+            document.removeEventListener('pointerdown', handleOutsideClick, { capture: true });
+
+            const newText = editor.value.trim();
+            newDILabel.textContent = commit && newText.length > 0 ? newText : oldText;
             editor.replaceWith(newDILabel);
-            dI.focus();
+
+            if (keepFocus) setTimeout(() => this.focus(dI), 0);
         };
+
+        const handleOutsideClick = e => {
+            const clickedSameItem = e.target.closest('.desktop-item') === dI;
+            const clickedOtherItem = e.target.closest('.desktop-item') && !clickedSameItem;
+            const clickedWindow = e.target.closest('.window');
+            const clickedTaskBar = e.target.closest('.footer');
+            const clickedBackground = !clickedOtherItem && !clickedWindow && !clickedTaskBar;
+            const keepFocus = clickedSameItem || (!clickedWindow && !clickedTaskBar);
+            if (!editor.contains(e.target)) {
+                // if (clickedBackground) e.stopPropagation();
+                finishRename(true, keepFocus);
+            };
+        };
+
+        document.addEventListener('pointerdown', handleOutsideClick, { capture: true });
 
         dILabel.replaceWith(editor);
         editor.focus();
@@ -494,14 +518,18 @@ const desktopManager = {
         editor.addEventListener('keydown', e => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                finishRename(true);
+                finishRename(true, true);
+                this.focus(dI);
             } else if (e.key === 'Escape') {
                 e.preventDefault();
-                finishRename(false);
+                finishRename(false, true);
+                this.focus(dI);
             }
         });
 
-        editor.addEventListener('blur', () => finishRename(true));
+        editor.addEventListener('blur', e => {
+            if (!finished) finishRename(true, false);
+        });
 
         editor.addEventListener('pointerdown', e => e.stopPropagation());
         editor.addEventListener('dblclick', e => e.stopPropagation());
@@ -1915,6 +1943,7 @@ const selectionManager = {
     box: null,
     startX: 0,
     startY: 0,
+    isLassoActive: false,
 
     init: function () {
         this.cacheDOM();
@@ -1923,26 +1952,24 @@ const selectionManager = {
 
     cacheDOM: function () {
         this.ui.content = document.querySelector('.content');
+        this.ui.footer = document.querySelector('.footer');
         this.ui.desktopItems = document.querySelectorAll('.desktop-item');
     },
 
     bindEvents: function () {
+        this.ui.footer.addEventListener('pointerdown', e => {
+            this.clearSelection();
+        });
+
         this.ui.content.addEventListener('pointerdown', e => {
             if (e.target.closest('.desktop-item') || e.target.closest('.window')) {
                 if (!e.target.closest('.desktop-item')) this.clearSelection();
                 return;
             }
-            document.body.classList.add('is-lassoing');
             this.clearSelection();
             this.startX = e.clientX;
             this.startY = e.clientY;
-
-            this.box = document.createElement('div');
-            this.box.className = 'selection-lasso';
-            this.box.style.zIndex = zIndexManager.LAYERS.LASSO;
-            this.box.style.left = `${this.startX}px`;
-            this.box.style.top = `${this.startY}px`;
-            document.body.appendChild(this.box);
+            this.isLassoActive = false;
 
             this._onMove = this.handleMove.bind(this);
             this._onUp = this.handleUp.bind(this);
@@ -1958,6 +1985,17 @@ const selectionManager = {
         const currentY = e.clientY;
         const width = Math.abs(currentX - this.startX);
         const height = Math.abs(currentY - this.startY);
+
+        if (!this.isLassoActive) {
+            if (width < CONFIG.dragThreshold && height < CONFIG.dragThreshold) return;
+            this.isLassoActive = true;
+            document.body.classList.add('is-lassoing');
+
+            this.box = document.createElement('div');
+            this.box.className = 'selection-lasso';
+            this.box.style.zIndex = zIndexManager.LAYERS.LASSO;
+            document.body.appendChild(this.box);
+        }
         const left = Math.min(currentX, this.startX);
         const top = Math.min(currentY, this.startY);
 
@@ -1974,6 +2012,7 @@ const selectionManager = {
             this.box.remove();
             this.box = null;
         }
+        this.isLassoActive = false;
         document.body.classList.remove('is-lassoing');
         document.removeEventListener('pointermove', this._onMove);
         document.removeEventListener('pointerup', this._onUp);
@@ -1993,13 +2032,17 @@ const selectionManager = {
                 rect.top > boxBottom
             );
             if (isOverlapping) item.classList.add('selected');
-            else item.classList.remove('selected');
+            else {
+                item.classList.remove('selected');
+                if (document.activeElement === item) item.blur();
+            };
         });
     },
 
     clearSelection: function () {
         this.ui.desktopItems.forEach(item => {
             item.classList.remove('selected');
+            item.blur();
         });
     }
 };
