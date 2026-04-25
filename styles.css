@@ -1,16 +1,15 @@
 :root {
-    --bg: #008080;
+    --bg: 0, 128, 128;
     --silver: silver;
     --navy: navy;
+    --navy-light: #1084d0;
     --white: #fff;
     --black: #000;
     --dark-grey: grey;
     --bluish-grey: #86878e;
     --light-grey: #dfdfdf;
     --border-dark: #0a0a0a;
-    --blue-dark: #000080;
-    --blue-light: #1084d0;
-    --title-bar-active-bg: linear-gradient(90deg, var(--navy), var(--blue-light));
+    --title-bar-active-bg: linear-gradient(90deg, var(--navy), var(--navy-light));
     --title-bar-inactive-bg: linear-gradient(90deg, var(--dark-grey), #b5b5b5);
     --shadow-outset:
         inset -1px -1px var(--border-dark),
@@ -32,6 +31,28 @@
         inset 1px 1px var(--dark-grey),
         inset -2px -2px var(--light-grey),
         inset 2px 2px var(--border-dark);
+}
+
+body.theme-funky-yellow {
+    --white: #3edbf8;
+    --bg: 251, 245, 52;
+    --navy: #4B0082;
+    --navy-light: #be8bee;
+    --title-bar-active-bg: linear-gradient(90deg, var(--navy), var(--navy-light));
+}
+
+body.theme-poison-green {
+    --bg: 50, 205, 50;
+    --navy: #004d00;
+    --navy-light: #578557;
+    --title-bar-active-bg: linear-gradient(90deg, var(--navy), var(--navy-light));
+}
+
+body.theme-hot-pink {
+    --bg: 255, 105, 180;
+    --navy: #8B008B;
+    --navy-light: #FF1493;
+    --title-bar-active-bg: linear-gradient(90deg, var(--navy), var(--navy-light));
 }
 
 .close,
@@ -64,7 +85,7 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    background-color: var(--bg);
+    background-color: rgb(var(--bg));
     height: 100vh;
     height: 100dvh;
 }
@@ -114,7 +135,7 @@ body.is-turned-off::before {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(0, 128, 128, 0.602), var(--black) 120%);
+    background-image: radial-gradient(rgba(var(--bg), 0.602), var(--black) 120%);
     opacity: 0;
     animation: fadeIn 3s ease-in-out forwards;
     z-index: 9999;
@@ -245,7 +266,8 @@ body.is-turned-off::after {
 .window.login-window,
 .window.logoff-window,
 .window.shutdown-window,
-.window.dialog-window {
+.window.dialog-window,
+.window.preferences-window {
     transform: translate(-50%, -50%);
 }
 
@@ -364,48 +386,6 @@ body.is-turned-off::after {
 }
 
 /* fieldset specific */
-.window-content .field-row {
-    display: flex;
-    align-items: center;
-    margin-block-end: 13px;
-}
-
-.window-content .field-row label {
-    display: inline-flex;
-    align-items: center;
-    -webkit-user-select: none;
-    user-select: none;
-    font-size: 14px;
-    width: 55px;
-}
-
-.window-content .field-row input {
-    line-height: 2;
-    height: 21px;
-    background-color: var(--white);
-    box-shadow: var(--shadow-inset-deep);
-    box-sizing: border-box;
-    padding: 3px 4px;
-    border: none;
-    border-radius: 0;
-    appearance: none;
-    outline: none;
-    flex: 1;
-}
-
-.window-content .field-row input:focus {
-    outline: none;
-}
-
-body:not(.using-mouse) .window-content .field-row input:focus {
-    outline: 1px dotted var(--black);
-    outline-offset: -4px;
-}
-
-.window-content .field-row > * + * {
-    margin-left: 6px;
-}
-
 .window-content fieldset {
     border: 2px solid;
     border-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='5' height='5' fill='gray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h5v5H0V2h2v1h1V2H0' fill='%23fff'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h4v4H0V1h1v2h2V1H0'/%3E%3C/svg%3E") 2;
@@ -416,6 +396,10 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     flex-direction: column;
     align-items: center;
     gap: 9px;
+}
+
+.window-content fieldset:has(input[type=radio]) {
+    align-items: flex-start;
 }
 
 .window-content fieldset legend {
@@ -433,6 +417,101 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 
 .window-content .dimmed {
     opacity: 0.47;
+}
+
+.window-content .field-row {
+    display: flex;
+    align-items: center;
+    margin-block-end: 13px;
+}
+
+.window-content .field-row label {
+    display: inline-flex;
+    align-items: center;
+    -webkit-user-select: none;
+    user-select: none;
+    font-size: 14px;
+    width: 55px;
+}
+
+.window-content fieldset:has(input[type=radio]) .field-row label {
+    width: auto;
+    -webkit-font-smoothing: none;
+}
+
+.window-content .field-row input {
+    line-height: 2;
+    height: 21px;
+    background-color: var(--white);
+    box-shadow: var(--shadow-inset-deep);
+    box-sizing: border-box;
+    padding: 3px 4px;
+    border: none;
+    border-radius: 0;
+    appearance: none;
+    outline: none;
+    flex: 1;
+}
+
+.window-content .field-row input[type=checkbox],
+.window-content .field-row input[type=radio] {
+    appearance: none;
+    background: 0;
+    border: none;
+    margin: 0;
+    opacity: 0;
+    position: fixed;
+}
+
+.window-content .field-row input[type=radio] + label {
+    margin-left: 18px;
+    position: relative;
+}
+
+.window-content .field-row input[type=checkbox] + label,
+.window-content .field-row input[type=radio] + label {
+    line-height: 13px;
+}
+
+.window-content .field-row input[type=checkbox]:focus + label,
+input[type=radio]:focus + label {
+    outline: 1px dotted var(--black);
+}
+
+.window-content .field-row input[type=radio] + label:before {
+    content: "";
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg width='12' height='12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M8 0H4v1H2v1H1v2H0v4h1v2h1V8H1V4h1V2h2V1h4v1h2V1H8V0z' fill='gray'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M8 1H4v1H2v2H1v4h1v1h1V8H2V4h1V3h1V2h4v1h2V2H8V1z' fill='%23000'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M9 3h1v1H9V3zm1 5V4h1v4h-1zm-2 2V9h1V8h1v2H8zm-4 0v1h4v-1H4zm0 0V9H2v1h2z' fill='%23DFDFDF'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M11 2h-1v2h1v4h-1v2H8v1H4v-1H2v1h2v1h4v-1h2v-1h1V8h1V4h-1V2z' fill='%23fff'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M4 2h4v1h1v1h1v4H9v1H8v1H4V9H3V8H2V4h1V3h1V2z' fill='%23fff'/%3E%3C/svg%3E");
+    display: inline-block;
+    height: 12px;
+    left: -18px;
+    margin-right: 6px;
+    position: absolute;
+    top: 0;
+    width: 12px;
+}
+
+.window-content .field-row input[type=radio]:checked + label:after {
+    content: "";
+    background: url("data:image/svg+xml;charset=utf-8,%3Csvg width='4' height='4' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M3 0H1v1H0v2h1v1h2V3h1V1H3V0z' fill='%23000'/%3E%3C/svg%3E");
+    display: block;
+    height: 4px;
+    left: -14px;
+    position: absolute;
+    top: 4px;
+    width: 4px;
+}
+
+.window-content .field-row input:focus {
+    outline: none;
+}
+
+body:not(.using-mouse) .window-content .field-row input:focus {
+    outline: 1px dotted var(--black);
+    outline-offset: -4px;
+}
+
+.window-content .field-row > * + * {
+    margin-left: 6px;
 }
 
 /* content app specific */
@@ -612,6 +691,14 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 .window-content.about-content strong {
     font-weight: 700;
     letter-spacing: 0.3px;
+}
+
+.window-content.preferences-content fieldset {
+    margin-bottom: inherit;
+}
+
+.window-content.preferences-content section {
+    justify-content: space-between;
 }
 
 /* status-bar */
@@ -797,9 +884,9 @@ body:not(.using-mouse) .window-content .field-row input:focus {
     width: 23px;
     box-sizing: border-box;
     background: linear-gradient(to bottom,
-            var(--blue-dark) 70%,
-            var(--blue-light) 80%,
-            var(--blue-dark) 100%);
+            var(--navy) 70%,
+            var(--navy-light) 80%,
+            var(--navy) 100%);
     color: var(--white);
     display: flex;
     align-items: flex-end;
@@ -980,6 +1067,10 @@ body.using-mouse .start-menu-container .start-items li button:hover {
 
 .icon-github {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1024' height='1024' viewBox='0 0 1024 1024' fill='none'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z' transform='scale(64)' fill='%231B1F23'/%3E%3C/svg%3E");
+}
+
+.icon-settings {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cdesc%3EInterface Essential Cog Double Streamline Icon: https://streamlinehq.com%3C/desc%3E%3Cpath d='M29 7.6v1.5h1.5v1.6H29v1.5h3V7.6zM29 13.7h1.5v1.5H29ZM29 4.6h1.5V6H29ZM27.4 15.2H29v1.6h-1.6ZM27.4 12.2H29v1.5h-1.6ZM27.4 6H29v1.6h-1.6ZM27.4 3H29v1.6h-1.6ZM26 16.8h1.4v1.5H26ZM26 1.5h1.4v1.6H26ZM24.4 15.2h1.5v1.6h-1.5ZM24.4 3h1.5v1.6h-1.5ZM19.8 0v3h1.5V1.5H23V3h1.5V0zM21.3 25.9H23v1.5h-1.6ZM19.8 16.8v1.5h3v3h-3V23h4.6v-6.1zM19.8 27.4h1.5V29h-1.5ZM19.8 24.4h1.5v1.5h-1.5ZM19.8 13.7h1.5v1.5h-1.5ZM19.8 12.2h1.5v1.5h3v-1.5H26V7.6h-1.5v1.5h-1.5V7.6h1.5V6.1h-4.6v1.5h-1.5v3h1.5zM18.3 29h1.5v1.5h-1.5ZM18.3 22.9h1.5v1.5h-1.5ZM18.3 15.2h1.5v1.6h-1.5ZM18.3 3h1.5v1.6h-1.5ZM16.8 27.4h1.5V29h-1.5ZM16.8 10.7h1.5v1.5h-1.5ZM16.8 1.5h1.5v1.6h-1.5ZM15.2 25.9h1.6v1.5h-1.6ZM15.2 18.3h1.6v3h-1.6ZM15.2 12.2h1.6v1.5h-1.6ZM15.2 3h1.6v1.6h-1.6ZM13.7 30.5h-3v-3H9.2V32h6v-4.6h-1.5zM13.7 21.3h1.5V23h-1.5ZM13.7 16.8h1.5v1.5h-1.5ZM13.7 4.6h1.5V6h-1.5ZM10.7 15.2h3v1.6h-3ZM10.7 22.9h3v1.5h-3ZM9.2 21.3h1.5V23H9.2ZM9.2 16.8h1.5v1.5H9.2ZM10.7 9.1h3v3h1.5V7.7h-6v4.6h1.5zM7.6 25.9h1.6v1.5H7.6ZM7.6 18.3h1.6v3H7.6ZM7.6 12.2h1.6v1.5H7.6ZM6.1 27.4h1.5V29H6.1ZM6.1 10.7h1.5v1.5H6.1ZM4.6 29H6v1.5H4.6ZM4.6 22.9H6v1.5H4.6ZM4.6 15.2H6v1.6H4.6ZM4.6 9.1H6v1.6H4.6ZM3 27.4h1.6V29H3ZM3 24.4h1.6v1.5H3ZM1.5 21.3v-3h3v-1.5H0v6h4.6v-1.5zM3 13.7h1.6v1.5H3ZM3 10.7h1.6v1.5H3ZM1.5 25.9h1.6v1.5H1.4ZM1.5 12.2h1.6v1.5H1.4Z'/%3E%3C/svg%3E");
 }
 
 .icon-top {

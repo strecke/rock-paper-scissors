@@ -1183,7 +1183,6 @@ const rpsGame = {
                     this.ui.confirmBtn.click();
                 }
             }
-
         });
     },
 
@@ -1448,6 +1447,106 @@ const aboutApp = {
     },
 };
 
+// preferences-app
+
+const preferencesApp = {
+    ui: {},
+    savedTheme: 'default',
+    isLocalStorageEnabled: null,
+
+    init: function () {
+        this.cacheDOM();
+        this.initStorage();
+        this.bindEvents();
+    },
+
+    cacheDOM: function () {
+        this.ui.window = document.querySelector('.window[data-app="preferences"]');
+        if (!this.ui.window) return;
+        this.ui.btnOk = this.ui.window.querySelector('.btn-ok');
+        this.ui.btnCancel = this.ui.window.querySelector('.btn-cancel');
+        this.ui.btnApply = this.ui.window.querySelector('.btn-apply');
+    },
+
+    initStorage: function () {
+        const saved = localStorage.getItem('os_theme');
+        if (saved) {
+            this.savedTheme = saved;
+            this.isLocalStorageEnabled = true;
+            this.applyThemeToBody(this.savedTheme);
+            this.updateRadioSelection(this.savedTheme);
+        }
+    },
+
+    bindEvents: function () {
+        if (!this.ui.window) return;
+        eventBus.on('app:closed', appId => {
+            if (appId === 'preferences') {
+                this.applyThemeToBody(this.savedTheme);
+                this.updateRadioSelection(this.savedTheme);
+            }
+        });
+
+        this.ui.btnCancel.addEventListener('click', () => {
+            appManager.close('preferences');
+        });
+
+        this.ui.btnApply.addEventListener('click', e => {
+            this.commitTheme(e);
+        });
+
+        this.ui.btnOk.addEventListener('click', e => {
+            this.commitTheme(e);
+        });
+    },
+
+    commitTheme: function (event) {
+        const selectedTheme = this.ui.window.querySelector('input[name="os-theme"]:checked').value;
+
+        const finalize = theme => {
+            this.applyThemeToBody(theme);
+            this.saveThemeState(theme);
+            if (event.target === this.ui.btnOk) appManager.close('preferences');
+        };
+
+        if (this.isLocalStorageEnabled === null && selectedTheme !== 'default') {
+            event.stopPropagation();
+
+            const storageDialog = {
+                title: 'Local Storage Warning',
+                message: 'Do you want to save your theme preferences on your local machine?',
+                type: 'warning',
+                onClick: e => {
+                    e.stopPropagation();
+                    this.isLocalStorageEnabled = e.target.dataset.choice === 'yes';
+                    finalize(selectedTheme);
+                },
+                dataChoices: ['yes', 'no'],
+                dataApp: 'preferences',
+            };
+            systemManager.showDialog(storageDialog);
+        } else {
+            finalize(selectedTheme);
+        }
+    },
+
+    saveThemeState: function (themeName) {
+        this.savedTheme = themeName;
+        if (themeName === 'default') localStorage.removeItem('os_theme');
+        else if (this.isLocalStorageEnabled) localStorage.setItem('os_theme', themeName);
+    },
+
+    applyThemeToBody: function (themeName) {
+        document.body.className = document.body.className.replace(/\btheme-\S+/g, '');
+        if (themeName !== 'default') document.body.classList.add(`theme-${themeName}`);
+    },
+
+    updateRadioSelection: function (themeName) {
+        const targetRadio = this.ui.window.querySelector(`input[value="${themeName}"]`);
+        if (targetRadio) targetRadio.checked = true;
+    }
+};
+
 // auth-app
 
 const authApp = {
@@ -1651,7 +1750,8 @@ const systemManager = {
                 contextMenuManager.showMenu(e.clientX, e.clientY, [
                     { label: 'Refresh', action: () => systemManager.refresh() },
                     { divider: true },
-                    { label: 'Properties', action: () => appManager.open('about') },
+                    { label: 'Display Properties', action: () => appManager.open('preferences') },
+                    { label: 'About', action: () => appManager.open('about') },
                 ]);
 
             }
@@ -2072,6 +2172,7 @@ const OS = {
         shutdownApp.init();
         aboutApp.init();
         rpsGame.init();
+        preferencesApp.init();
 
         systemManager.init();
 

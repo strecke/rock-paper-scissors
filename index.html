@@ -72,6 +72,44 @@
             </div>
         </div>
 
+        <div class="window preferences-window main-window close" data-app="preferences">
+            <div class="title-bar">
+                <div class="title-bar-text">Display Properties</div>
+                <div class="title-bar-controls">
+                    <button data-action="minimize" aria-label="Minimize">_</button>
+                    <button data-action="close" aria-label="Close">x</button>
+                </div>
+            </div>
+            <div class="window-content preferences-content">
+                <fieldset>
+                    <legend>Appearance</legend>
+                    <p>Select a color scheme for your desktop:</p>
+                    <div class="field-row">
+                        <input type="radio" id="theme-default" name="os-theme" value="default" checked>
+                        <label for="theme-default">Standard</label>
+                    </div>
+                    <div class="field-row">
+                        <input type="radio" id="theme-funky-yellow" name="os-theme" value="funky-yellow">
+                        <label for="theme-funky-yellow">Funky Yellow</label>
+                    </div>
+                    <div class="field-row">
+                        <input type="radio" id="theme-poison-green" name="os-theme" value="poison-green">
+                        <label for="theme-poison-green">Toxic Green</label>
+                    </div>
+                    <div class="field-row">
+                        <input type="radio" id="theme-hot-pink" name="os-theme" value="hot-pink">
+                        <label for="theme-hot-pink">Vaporwave Pink</label>
+                    </div>
+                </fieldset>
+
+                <section>
+                    <button class="btn-ok">OK</button>
+                    <button class="btn-cancel">Cancel</button>
+                    <button class="btn-apply">Apply</button>
+                </section>
+            </div>
+        </div>
+
         <div class="window game-window main-window" data-app="rps">
             <div class="title-bar">
                 <div class="title-bar-text">Rock, Paper, Scissors</div>
@@ -327,6 +365,12 @@
                             </a>
                         </li>
                         <li class="divider"></li>
+                        <li>
+                            <button data-app="preferences">
+                                <span class="icon icon-settings invert"></span>
+                                <span>Settings</span>
+                            </button>
+                        </li>
                         <li class="has-submenu">
                             <button>
                                 <span class="icon icon-folder"></span>
@@ -482,6 +526,10 @@
             <button class="taskbar-item close" data-app="about">
                 <span class="icon icon-about"></span>
                 About
+            </button>
+            <button class="taskbar-item close" data-app="preferences">
+                <span class="icon icon-settings"></span>
+                Settings
             </button>
         </div>
         <!-- <p>Copyright c current year strecke</p> -->
