@@ -1166,21 +1166,24 @@ const rpsGame = {
         });
 
         document.addEventListener('keydown', e => {
-            if (!this.ui.gameWindow.classList.contains(UI_STATE.active)) return;
-            const keyMap = {
-                '1': 'rock',
-                '2': 'paper',
-                '3': 'scissors',
-            };
+            if (this.ui.gameWindow.classList.contains(UI_STATE.active)) {
+                const keyMap = { '1': 'rock', '2': 'paper', '3': 'scissors', };
 
-            const choice = keyMap[e.key];
-            if (!choice) return;
+                const choice = keyMap[e.key];
+                if (!choice) return;
 
-            const btn = this.ui.gameWindow.querySelector(`button[data-choice="${choice}"]`);
-            if (btn && !btn.disabled) {
-                btn.focus();
-                btn.click();
+                const btn = this.ui.gameWindow.querySelector(`button[data-choice="${choice}"]`);
+                if (btn && !btn.disabled) {
+                    btn.focus();
+                    btn.click();
+                }
+            } else if (this.ui.roundWindow.classList.contains(UI_STATE.active)) {
+                if (e.key === 'Enter' && !this.ui.resultState.classList.contains(UI_STATE.hidden)) {
+                    e.preventDefault();
+                    this.ui.confirmBtn.click();
+                }
             }
+
         });
     },
 
