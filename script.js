@@ -238,6 +238,7 @@ const interactionManager = {
             if (!interaction.active && distance >= threshold) {
                 interaction.active = true;
                 interaction.moved = true;
+                document.body.classList.add('is-interacting');
             }
 
             if (!interaction.active) return;
@@ -255,6 +256,7 @@ const interactionManager = {
         const handleDragEnd = e => {
             if (interaction.pointerId !== e.pointerId) return;
             if (interaction.moved) {
+                document.body.classList.remove('is-interacting');
                 dragTarget.setAttribute('data-just-dragged', 'true');
                 setTimeout(() => dragTarget.removeAttribute('data-just-dragged'), CONFIG.dragSoundPreventionMs);
             }
@@ -424,10 +426,10 @@ const desktopManager = {
                         ghost.style.cursor = isOverWindow ? 'no-drop' : '';
                     });
 
-                    dI.style.cursor = isOverWindow ? 'no-drop' : '';
+                    document.body.style.cursor = isOverWindow ? 'no-drop' : 'default';
                 },
                 onEnd: (e, interaction) => {
-                    dI.style.cursor = '';
+                    document.body.style.cursor = '';
 
                     if (interaction.moved) {
                         if (dragContext && dragContext.ghosts.length) {
@@ -1989,7 +1991,7 @@ const selectionManager = {
         if (!this.isLassoActive) {
             if (width < CONFIG.dragThreshold && height < CONFIG.dragThreshold) return;
             this.isLassoActive = true;
-            document.body.classList.add('is-lassoing');
+            document.body.classList.add('is-interacting');
 
             this.box = document.createElement('div');
             this.box.className = 'selection-lasso';
@@ -2013,7 +2015,7 @@ const selectionManager = {
             this.box = null;
         }
         this.isLassoActive = false;
-        document.body.classList.remove('is-lassoing');
+        document.body.classList.remove('is-interacting');
         document.removeEventListener('pointermove', this._onMove);
         document.removeEventListener('pointerup', this._onUp);
         document.removeEventListener('lostpointercapture', this._onUp);
