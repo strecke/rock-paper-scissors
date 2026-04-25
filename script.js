@@ -1809,7 +1809,7 @@ const audioManager = {
             click: 'sounds/click.mp3',
             warning: 'sounds/warning.wav',
             login: 'sounds/intro.mp3',
-            logoff: 'sounds/outro_3.mp3',
+            logoff: 'sounds/outro.mp3',
             explosion: 'sounds/explosion.mp3',
             levelup: 'sounds/levelup.mp3',
         };
