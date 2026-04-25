@@ -785,6 +785,7 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 .footer .taskbar-items {
     display: flex;
     flex: 1;
+    min-width: 0;
 }
 
 .footer .taskbar-items .spacing {
@@ -803,14 +804,14 @@ body:not(.using-mouse) .window-content .field-row input:focus {
 .footer .taskbar-items .start-menu-button {
     margin: 0 3px 0 0;
     font-weight: 700;
+    flex-shrink: 0;
 }
 
 .footer .taskbar-items .taskbar-item {
     margin: 0 3px;
     font-weight: 400;
-    flex: 0 1 160px;
+    flex: 1;
     max-width: 160px;
-    min-width: 0;
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
